@@ -1,73 +1,9 @@
-# React + TypeScript + Vite
+# Vision Statement:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CareLink is a website that coordinates caregivers and their home-care routines for their clients. CareLink is task-focused and optimized for home environments where caregivers work rotating shifts, manage multiple patients, and rely on clear communication to ensure patient safety. Caregivers often use paper notes, memory and text messages to track patient care. We think that a coordinated caregiver application will help caregivers be much more organized, as all the resources they need to manage patient care will be in one place. CareLink helps keep caregivers organized by providing a centralized, caregiver‑specific system built around everyday care workflows.
 
-Currently, two official plugins are available:
+Our potential customers are home-care nurses, Personal Support Workers, professional caregiving agencies, family members, home-care supervisors, nurse managers and small to mid-sized home-care organizations. The core features of the app are a shared task list for each patient, role-based access control, medication tracking with reminders, appointment and visit scheduling, shift handoff notes and activity logs, and a central dashboard. In the future, we want to add SMS or push notifications, emergency contact quick-dial, care analytics dashboard and exportable care logs. We intentionally designed our user stories to support professional caregivers and family members who act as caregivers. Early iterations focus on shared caregiver workflows, while later iterations introduce role-based permissions and reassurance features specific to family caregivers.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+There will be a task list for each patient shared by all their caregivers. Each caregiver can select their tasks from the list. There will be role-based access control, so that supervisors, caregivers and patients have different permissions. There will be a section for medication tracking, which has basic medication information and reminders for the caregiver and patient. There is a calendar which schedules appointments and visits. There is a central dashboard that includes today’s tasks, the medication status summary, upcoming appointments, recent caregiver notes and a calendar view.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+This project is valuable as it is different from Electronic Health Records systems because it is patient and task-focused and is a centralized system to help caregivers organize their tasks. The goal of CareLink is to reduce missed care actions, improve continuity between shifts, and provide a reliable “single source of truth” for patient care information. The project will be considered successful if it becomes a trusted primary single source to use for patient care and decreases reliance on paper notes, memory and text messages.
