@@ -1,6 +1,7 @@
 /*
     This is the SideBar component for the CareLink application. 
     It provides navigation links to different sections of the app.
+    
     Props:
     - username: The name of the logged-in user, displayed in the dropdown menu.
 */

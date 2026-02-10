@@ -1,9 +1,15 @@
 /*
     This component is a reusable customizable section, can be used across the application
+    
     Props:
     - title: the title of the section
     - subheader: a brief description, or subheader, or current time
     - children (optional): any element can be passed here, it will be rendered inside the section
+
+    Syntax:
+    <CustomSection title="Section Title" subheader="This is a subheader">
+      <p>This is the content of the section.</p>
+    </CustomSection>
 */
 
 import type { ReactNode } from "react";

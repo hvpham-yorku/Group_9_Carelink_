@@ -1,11 +1,17 @@
 /*
     This component is a reusable customizable button, can be used across the application
+    
     Props:
     - color: defines the color of the button, can be one of the following values:
         - primary, secondary, success, danger, outline-primary, outline-success, outline-secondary, outline-danger
     - children: any element can be passed here
     - onClick (optional): a function to be called when the button is clicked
     - onSubmit (optional): a function to be called when the button is submitted
+
+    Syntax:
+    <Button color="primary" onClick={handleClick} OR onSubmit={handleSubmit}>
+      Click Me
+    </Button>
 */
 import type { ReactNode } from "react";
 
