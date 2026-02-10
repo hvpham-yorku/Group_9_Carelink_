@@ -13,9 +13,11 @@ import { useState } from "react";
 interface TaskCardProps {
   title: string;
   description: string;
+  category: string;
+  time?: string;
 }
 
-const TaskCard = ({ title, description }: TaskCardProps) => {
+const TaskCard = ({ title, description, category, time }: TaskCardProps) => {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleCheckboxChange = () => {
@@ -53,6 +55,11 @@ const TaskCard = ({ title, description }: TaskCardProps) => {
               <p className="card-text">{description}</p>
             </div>
           }
+
+          <div className="text-end">
+            <span className="text-muted">{time}</span> <br />
+            <span>{category}</span>
+          </div>
         </div>
       </div>
     </>

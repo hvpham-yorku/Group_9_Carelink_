@@ -6,30 +6,27 @@
 */
 import TaskCard from "./TaskCard";
 
-const TaskList = () => {
-  const tasks = [
-    {
-      title: "Task 1",
-      description: "This is the first task.",
-    },
-    {
-      title: "Task 2",
-      description: "This is the second task.",
-    },
-    {
-      title: "Task 3",
-      description: "This is the third task.",
-    },
-  ];
+interface TaskListProps {
+  tasks: {
+    id: number;
+    title: string;
+    description: string;
+    category: string;
+    time?: string;
+  }[];
+}
 
+const TaskList = ({ tasks }: TaskListProps) => {
   return (
     <>
       <div>
-        {tasks.map((task, index) => (
+        {tasks.map((task) => (
           <TaskCard
-            key={index}
+            key={task.id}
             title={task.title}
             description={task.description}
+            category={task.category}
+            time={task.time}
           />
         ))}
       </div>
