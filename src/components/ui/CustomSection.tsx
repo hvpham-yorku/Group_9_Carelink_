@@ -18,7 +18,7 @@ interface CustomSectionProps {
 const CustomSection = ({ title, subheader, children }: CustomSectionProps) => {
   return (
     <>
-      <section className="rounded bg-info ">
+      <section className="rounded bg-white shadow-sm mb-4">
         <div className="container">
           <div className="pt-3">
             <h3>{title}</h3>

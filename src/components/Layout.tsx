@@ -15,7 +15,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <>
-      <div className="d-flex">
+      <div className="d-flex" style={{ backgroundColor: "#F2F7FF" }}>
         <SideBar username="Jose" />
         <div className="container mt-4" style={{ marginLeft: "280px" }}>
           {children}
