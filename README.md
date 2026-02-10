@@ -1,9 +1,21 @@
-# Vision Statement:
+# Carelink
 
-CareLink is a website that coordinates caregivers and their home-care routines for their clients. CareLink is task-focused and optimized for home environments where caregivers work rotating shifts, manage multiple patients, and rely on clear communication to ensure patient safety. Caregivers often use paper notes, memory and text messages to track patient care. We think that a coordinated caregiver application will help caregivers be much more organized, as all the resources they need to manage patient care will be in one place. CareLink helps keep caregivers organized by providing a centralized, caregiver‑specific system built around everyday care workflows.
+Carelink is a caretaker website designed to organize all resources needed to ensure client safety.
 
-Our potential customers are home-care nurses, Personal Support Workers, professional caregiving agencies, family members, home-care supervisors, nurse managers and small to mid-sized home-care organizations. The core features of the app are a shared task list for each patient, role-based access control, medication tracking with reminders, appointment and visit scheduling, shift handoff notes and activity logs, and a central dashboard. In the future, we want to add SMS or push notifications, emergency contact quick-dial, care analytics dashboard and exportable care logs. We intentionally designed our user stories to support professional caregivers and family members who act as caregivers. Early iterations focus on shared caregiver workflows, while later iterations introduce role-based permissions and reassurance features specific to family caregivers.
+## Installation
 
-There will be a task list for each patient shared by all their caregivers. Each caregiver can select their tasks from the list. There will be role-based access control, so that supervisors, caregivers and patients have different permissions. There will be a section for medication tracking, which has basic medication information and reminders for the caregiver and patient. There is a calendar which schedules appointments and visits. There is a central dashboard that includes today’s tasks, the medication status summary, upcoming appointments, recent caregiver notes and a calendar view.
+Carelink requires [Node.js](https://nodejs.org/) v24+ to run.
 
-This project is valuable as it is different from Electronic Health Records systems because it is patient and task-focused and is a centralized system to help caregivers organize their tasks. The goal of CareLink is to reduce missed care actions, improve continuity between shifts, and provide a reliable “single source of truth” for patient care information. The project will be considered successful if it becomes a trusted primary single source to use for patient care and decreases reliance on paper notes, memory and text messages.
+Install the dependencies:
+
+```sh
+npm i
+npm i bootstrap@5.3.8
+npm i react-router-dom
+```
+
+To start the server:
+
+```sh
+npm run dev
+```
