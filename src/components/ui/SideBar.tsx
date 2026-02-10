@@ -19,7 +19,7 @@ const SideBar = ({ username }: SideBarProps) => {
         style={{ width: "280px" }}
       >
         <NavLink
-          to="/"
+          to="/dashboard"
           end
           className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none"
         >
@@ -28,7 +28,7 @@ const SideBar = ({ username }: SideBarProps) => {
         <hr />
         <ul className="nav nav-pills flex-column mb-auto">
           <li className="nav-item">
-            <NavLink to="/" end className="nav-link ">
+            <NavLink to="/dashboard" end className="nav-link ">
               Dashboard
             </NavLink>
           </li>
@@ -69,9 +69,9 @@ const SideBar = ({ username }: SideBarProps) => {
               <hr className="dropdown-divider" />
             </li>
             <li>
-              <a className="dropdown-item" href="#">
+              <NavLink className="dropdown-item" to="/login">
                 Sign out
-              </a>
+              </NavLink>
             </li>
           </ul>
         </div>

@@ -5,20 +5,16 @@
     - children: The main content to be displayed in the layout.
 */
 
-import type { ReactNode } from "react";
+import { Outlet } from "react-router-dom";
 import SideBar from "./ui/SideBar";
 
-interface LayoutProps {
-  children?: ReactNode;
-}
-
-const Layout = ({ children }: LayoutProps) => {
+const Layout = () => {
   return (
     <>
       <div className="d-flex" style={{ backgroundColor: "#F2F7FF" }}>
-        <SideBar username="Jose" />
+        <SideBar username="username" />
         <div className="container mt-4" style={{ marginLeft: "280px" }}>
-          {children}
+          <Outlet />
         </div>
       </div>
     </>

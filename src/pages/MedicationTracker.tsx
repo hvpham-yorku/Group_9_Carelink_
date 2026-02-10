@@ -1,5 +1,11 @@
 const MedicationTracker = () => {
-  return <div>MedicationTracker</div>;
+  return (
+    <>
+      <div className="container">
+        <h1>Medication Tracker</h1>
+      </div>
+    </>
+  );
 };
 
 export default MedicationTracker;
