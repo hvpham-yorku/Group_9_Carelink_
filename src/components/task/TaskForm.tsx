@@ -52,7 +52,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
 
   return (
     <>
-      <div className="mb-3">
+      <form className="mb-3" action={handleAddClick}>
         <label htmlFor="task-title" className="form-label">
           Task Title:
         </label>
@@ -62,6 +62,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           id="task-title"
           value={title}
           onChange={titleChange}
+          required
         />
 
         <label htmlFor="task-description" className="form-label mt-3">
@@ -73,6 +74,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           rows={2}
           value={description}
           onChange={descriptionChange}
+          required
         />
 
         <label htmlFor="task-time" className="form-label mt-3">
@@ -84,6 +86,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           id="task-time"
           value={time}
           onChange={timeChange}
+          required
         />
 
         <label htmlFor="task-category" className="form-label mt-3">
@@ -94,6 +97,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           id="task-category"
           value={category}
           onChange={categoryChange}
+          required
         >
           <option value="None">None</option>
           <option value="Vitals">Vitals</option>
@@ -104,10 +108,10 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           <option value="Activity">Activity</option>
         </select>
 
-        <button className="btn btn-primary mt-3" onClick={handleAddClick}>
+        <button className="btn btn-primary mt-3" type="submit">
           Add Task
         </button>
-      </div>
+      </form>
     </>
   );
 };
