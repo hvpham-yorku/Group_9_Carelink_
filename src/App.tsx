@@ -4,7 +4,7 @@ import TaskManager from "./pages/TaskManager";
 import MedicationTracker from "./pages/MedicationTracker";
 import PatientProfile from "./pages/PatientProfile";
 import Login from "./pages/Login";
-import Layout from "./components/layout";
+import Layout from "./components/Layout";
 
 function App() {
   return (
