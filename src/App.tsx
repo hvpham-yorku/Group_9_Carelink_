@@ -1,39 +1,21 @@
-// import { Route, Routes } from "react-router-dom";
-import Button from "./components/ui/Button";
-import TaskCard from "./components/ui/TaskCard";
-import CustomSection from "./components/ui/CustomSection";
+import { Route, Routes } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import TaskManager from "./pages/TaskManager";
+import MedicationTracker from "./pages/MedicationTracker";
+import PatientProfile from "./pages/PatientProfile";
+import Layout from "./components/layout";
 
 function App() {
   return (
     <>
-      <div className="container mt-4">
-        <h1>Im working</h1>
-        <Button
-          color="outline-primary"
-          onClick={() => alert("Button clicked!")}
-        >
-          Click Me
-        </Button>
-
-        <TaskCard
-          title="Task Title Example"
-          description="This is an example task description."
-        />
-
-        <hr />
-
-        <CustomSection title="Section Title" subheader="Section Subheader">
-          <TaskCard
-            title="Task Title Example"
-            description="This is an example task description."
-          />
-
-          <TaskCard
-            title="Task Title Example"
-            description="This is an example task description."
-          />
-        </CustomSection>
-      </div>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/task-manager" element={<TaskManager />} />
+          <Route path="/medication-tracker" element={<MedicationTracker />} />
+          <Route path="/patient-profile" element={<PatientProfile />} />
+        </Routes>
+      </Layout>
     </>
   );
 }

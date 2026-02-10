@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 
 interface CustomSectionProps {
   title: string;
-  subheader: string;
+  subheader?: string;
 
   children?: ReactNode;
 }
@@ -22,7 +22,7 @@ const CustomSection = ({ title, subheader, children }: CustomSectionProps) => {
         <div className="container">
           <div className="pt-3">
             <h3>{title}</h3>
-            <p>{subheader}</p>
+            {subheader && <p>{subheader}</p>}
 
             <hr />
           </div>
