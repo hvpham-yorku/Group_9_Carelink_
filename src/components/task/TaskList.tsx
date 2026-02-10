@@ -19,17 +19,18 @@ interface TaskListProps {
 const TaskList = ({ tasks }: TaskListProps) => {
   return (
     <>
-      <div>
+      <ul className="list-unstyled">
         {tasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            title={task.title}
-            description={task.description}
-            category={task.category}
-            time={task.time}
-          />
+          <li key={task.id}>
+            <TaskCard
+              title={task.title}
+              description={task.description}
+              category={task.category}
+              time={task.time}
+            />
+          </li>
         ))}
-      </div>
+      </ul>
     </>
   );
 };

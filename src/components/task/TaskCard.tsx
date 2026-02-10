@@ -22,9 +22,6 @@ const TaskCard = ({ title, description, category, time }: TaskCardProps) => {
 
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
-    console.log(
-      `Task "${title}" marked as ${!isChecked ? "completed" : "incomplete"}`,
-    );
   };
 
   return (
