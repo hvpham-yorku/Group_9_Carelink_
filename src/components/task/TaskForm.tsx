@@ -15,11 +15,13 @@ interface TaskFormProps {
 }
 
 const TaskForm = ({ onAddTask }: TaskFormProps) => {
+  // State variables to hold the values of the form inputs
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [time, setTime] = useState("");
   const [category, setCategory] = useState("None");
 
+  // Event handlers to update the state variables when the user types in the form inputs
   const titleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);
   };
@@ -34,6 +36,18 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
 
   const categoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setCategory(event.target.value);
+  };
+
+  /*
+    Calls onAddTask prop function with the current values from the inputs.
+    Resets the inputs after adding a task. 
+  */
+  const handleAddClick = () => {
+    onAddTask(title, description, time, category);
+    setTitle("");
+    setDescription("");
+    setTime("");
+    setCategory("None");
   };
 
   return (
@@ -90,10 +104,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           <option value="Activity">Activity</option>
         </select>
 
-        <button
-          className="btn btn-primary mt-3"
-          onClick={() => onAddTask(title, description, time, category)}
-        >
+        <button className="btn btn-primary mt-3" onClick={handleAddClick}>
           Add Task
         </button>
       </div>

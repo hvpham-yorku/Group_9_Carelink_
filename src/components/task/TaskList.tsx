@@ -13,10 +13,12 @@ interface TaskListProps {
     description: string;
     category: string;
     time?: string;
+    completed?: boolean;
   }[];
+  onToggleTask: (id: number) => void;
 }
 
-const TaskList = ({ tasks }: TaskListProps) => {
+const TaskList = ({ tasks, onToggleTask }: TaskListProps) => {
   return (
     <>
       <ul className="list-unstyled">
@@ -27,6 +29,8 @@ const TaskList = ({ tasks }: TaskListProps) => {
               description={task.description}
               category={task.category}
               time={task.time}
+              completed={task.completed ?? false}
+              onToggle={() => onToggleTask(task.id)}
             />
           </li>
         ))}

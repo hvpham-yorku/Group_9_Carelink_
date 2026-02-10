@@ -8,22 +8,23 @@
   Syntax:
   <TaskCard title="Task Title" description="This is a description of the task." />
 */
-import { useState } from "react";
-
 interface TaskCardProps {
   title: string;
   description: string;
   category: string;
   time?: string;
+  completed: boolean;
+  onToggle: () => void;
 }
 
-const TaskCard = ({ title, description, category, time }: TaskCardProps) => {
-  const [isChecked, setIsChecked] = useState(false);
-
-  const handleCheckboxChange = () => {
-    setIsChecked(!isChecked);
-  };
-
+const TaskCard = ({
+  title,
+  description,
+  category,
+  time,
+  completed,
+  onToggle,
+}: TaskCardProps) => {
   return (
     <>
       <div className="card mb-3">
@@ -35,8 +36,8 @@ const TaskCard = ({ title, description, category, time }: TaskCardProps) => {
               name="taskCheck"
               value=""
               id="taskCheck"
-              checked={isChecked}
-              onChange={handleCheckboxChange}
+              checked={completed}
+              onChange={onToggle}
             />
           </div>
 
@@ -45,7 +46,7 @@ const TaskCard = ({ title, description, category, time }: TaskCardProps) => {
             // if checked, the title will have a line through them to indicate completion
             <div className="flex-grow-1">
               <h5
-                className={`card-title ${isChecked ? "text-decoration-line-through" : ""}`}
+                className={`card-title ${completed ? "text-decoration-line-through" : ""}`}
               >
                 {title}
               </h5>
