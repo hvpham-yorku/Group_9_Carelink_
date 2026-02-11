@@ -6,7 +6,7 @@
   - description: a brief description of the task
 
   Syntax:
-  <TaskCard title="Task Title" description="This is a description of the task." />
+  <TaskCard title description category time completed onToggle />
 */
 interface TaskCardProps {
   title: string;
