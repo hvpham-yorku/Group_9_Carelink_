@@ -34,8 +34,6 @@ const TaskCard = ({
               className="form-check-input"
               type="checkbox"
               name="taskCheck"
-              value=""
-              id="taskCheck"
               checked={completed}
               onChange={onToggle}
             />
