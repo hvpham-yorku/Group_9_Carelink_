@@ -5,6 +5,7 @@ import MedicationTracker from "./pages/MedicationTracker";
 import PatientProfile from "./pages/PatientProfile";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
+import Notes from "./pages/Notes";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/task-manager" element={<TaskManager />} />
           <Route path="/medication-tracker" element={<MedicationTracker />} />
           <Route path="/patient-profile" element={<PatientProfile />} />
+          <Route path="/Notes" element={<Notes />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />

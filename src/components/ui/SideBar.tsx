@@ -43,6 +43,21 @@ const SideBar = ({ username }: SideBarProps) => {
               Medication Tracker
             </NavLink>
           </li>
+
+
+
+
+
+          <li>
+            <NavLink to="/notes" className="nav-link">
+               Notes
+            </NavLink>
+          </li>
+
+
+
+
+
           <li>
             <NavLink to="/patient-profile" className="nav-link">
               Patient Profile
