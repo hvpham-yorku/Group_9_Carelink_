@@ -9,10 +9,10 @@ const Login = () => {
     <>
       <div className="container vh-100 d-flex justify-content-center align-items-center">
 
-        <div className="col-md-6 col-lg-4" >
+      <div className="col-md-6 col-lg-4 d-flex flex-column gap-3 p-4 shadow rounded">
           <LoginText />
           <LoginTextBox name="username" id="username" />
-          <LoginTextBox name="password" id="password" />
+          <LoginTextBox name="password" id="password" /> 
           <button
           className="btn btn-primary mt-5"
           onClick={() => navigate("/dashboard")}
