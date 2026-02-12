@@ -18,7 +18,7 @@ function App() {
           <Route path="/task-manager" element={<TaskManager />} />
           <Route path="/medication-tracker" element={<MedicationTracker />} />
           <Route path="/patient-profile" element={<PatientProfile />} />
-          <Route path="/Notes" element={<Notes />} />
+          <Route path="/notes" element={<Notes />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />

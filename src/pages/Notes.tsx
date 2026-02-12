@@ -12,7 +12,7 @@ type Note = {
   updatedAt: number;
 };
 
-const STORAGE_KEY = "carelink_notes_v2"; // bump version since we added tag
+const STORAGE_KEY = "carelink_notes_v2"; // keep v2 since tag exists
 
 const TAGS: Tag[] = ["Medical", "Vitals", "Mood", "Nutrition", "Activity", "General"];
 
@@ -72,7 +72,12 @@ function formatDayLabel(key: string) {
   // key: YYYY-MM-DD
   const [y, m, d] = key.split("-").map(Number);
   const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 export default function Notes() {
@@ -85,10 +90,6 @@ export default function Notes() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tag, setTag] = useState<Tag>("General");
-
-  // filters
-  const [searchTerm, setSearchTerm] = useState("");
-  const [tagFilter, setTagFilter] = useState<Tag | "All">("All");
 
   // UI states
   const [savedFlash, setSavedFlash] = useState(false);
@@ -126,44 +127,31 @@ export default function Notes() {
     };
   }, []);
 
-  // derived counts (summary cards)
+  // summary cards
   const todayKey = dayKey(Date.now());
   const totalNotes = notes.length;
-  const todaysNotes = useMemo(() => notes.filter((n) => dayKey(n.updatedAt) === todayKey).length, [notes, todayKey]);
+  const todaysNotes = useMemo(
+    () => notes.filter((n) => dayKey(n.updatedAt) === todayKey).length,
+    [notes, todayKey]
+  );
   const urgentNotes = useMemo(() => notes.filter((n) => isUrgent(n.tag)).length, [notes]);
 
-  const filteredNotes = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-
-    return notes.filter((n) => {
-      const matchesTag = tagFilter === "All" ? true : n.tag === tagFilter;
-      const matchesSearch =
-        term.length === 0
-          ? true
-          : (n.title ?? "").toLowerCase().includes(term) ||
-            (n.content ?? "").toLowerCase().includes(term);
-
-      return matchesTag && matchesSearch;
-    });
-  }, [notes, searchTerm, tagFilter]);
-
+  // timeline groups (ALL notes, no filters)
   const timelineGroups = useMemo(() => {
-    // group by dayKey
     const map = new Map<string, Note[]>();
-    for (const n of filteredNotes) {
+    for (const n of notes) {
       const k = dayKey(n.updatedAt);
       const arr = map.get(k) ?? [];
       arr.push(n);
       map.set(k, arr);
     }
 
-    // sort keys desc by date, and notes desc by updatedAt
     const keys = Array.from(map.keys()).sort((a, b) => (a > b ? -1 : a < b ? 1 : 0));
     return keys.map((k) => ({
       day: k,
       items: (map.get(k) ?? []).sort((a, b) => b.updatedAt - a.updatedAt),
     }));
-  }, [filteredNotes]);
+  }, [notes]);
 
   const urgentList = useMemo(() => {
     return notes
@@ -242,9 +230,7 @@ export default function Notes() {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          {savedFlash && (
-            <span className="badge text-bg-success px-3 py-2">Saved ✅</span>
-          )}
+          {savedFlash && <span className="badge text-bg-success px-3 py-2">Saved ✅</span>}
 
           <Button color="outline-secondary" onClick={handleNew}>
             + New
@@ -294,48 +280,11 @@ export default function Notes() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="row g-3 mb-3">
-        <div className="col-12 col-lg-8">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <label className="form-label mb-1">Search</label>
-              <input
-                className="form-control"
-                placeholder="Search notes by title or content..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="col-12 col-lg-4">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <label className="form-label mb-1">Tag filter</label>
-              <select
-                className="form-select"
-                value={tagFilter}
-                onChange={(e) => setTagFilter(e.target.value as Tag | "All")}
-              >
-                <option value="All">All Tags</option>
-                {TAGS.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main content */}
       <div className="row g-3">
         {/* Left: Timeline */}
         <div className="col-12 col-lg-5">
-          <CustomSection title="Care Timeline" subheader={`Showing ${filteredNotes.length} note(s)`}>
+          <CustomSection title="Care Timeline" subheader={`Showing ${notes.length} note(s)`}>
             {showUrgentPanel && (
               <div className="card border-warning mb-3">
                 <div className="card-header d-flex justify-content-between align-items-center">
@@ -376,9 +325,9 @@ export default function Notes() {
               </div>
             )}
 
-            {filteredNotes.length === 0 ? (
+            {notes.length === 0 ? (
               <div className="text-muted">
-                No notes match your search/filter. Try clearing filters or click <strong>New</strong>.
+                No notes yet. Click <strong>New</strong> and write something.
               </div>
             ) : (
               <div>
@@ -449,11 +398,7 @@ export default function Notes() {
 
               <div className="col-12 col-md-4">
                 <label className="form-label">Tag</label>
-                <select
-                  className="form-select"
-                  value={tag}
-                  onChange={(e) => setTag(e.target.value as Tag)}
-                >
+                <select className="form-select" value={tag} onChange={(e) => setTag(e.target.value as Tag)}>
                   {TAGS.map((t) => (
                     <option key={t} value={t}>
                       {t}
@@ -481,9 +426,7 @@ export default function Notes() {
             </div>
 
             <div className="d-flex justify-content-between align-items-center mt-3">
-              <div className="text-muted small">
-                Notes are stored locally in your browser (localStorage).
-              </div>
+              <div className="text-muted small">Notes are stored locally in your browser (localStorage).</div>
 
               <div className="d-flex gap-2">
                 {selectedNote && (
