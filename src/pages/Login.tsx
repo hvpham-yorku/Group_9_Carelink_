@@ -11,8 +11,8 @@ const Login = () => {
 
       <div className="col-md-6 col-lg-4 d-flex flex-column gap-3 p-4 shadow rounded">
           <LoginText />
-          <LoginTextBox name="username" id="username" />
-          <LoginTextBox name="password" id="password" /> 
+          <LoginTextBox name="username" id="username" placeholder="Enter username"/>
+          <LoginTextBox name="password" id="password" placeholder="Enter password" />
           <button
           className="btn btn-primary mt-5"
           onClick={() => navigate("/dashboard")}
