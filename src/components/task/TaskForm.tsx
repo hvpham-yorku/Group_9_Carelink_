@@ -51,7 +51,13 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
 
   return (
     <>
-      <form className="mb-3" action={handleAddClick}>
+      <form
+        className="mb-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleAddClick();
+        }}
+      >
         <label htmlFor="task-title" className="form-label">
           Task Title:
         </label>
