@@ -1,224 +1,153 @@
+/**
+ * CareLink - Notes Page (ITR1)
+ * - Create/Edit/Delete & save notes
+ * - Notes stay in localStorage
+ * - Tagging (for categorizing notes)
+ * - Timeline grouping by day
+ * - "Saved" badge shows for 5 seconds after saving
+ * UI: Bootstrap + existing CustomSection + Button components.
+ */
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import CustomSection from "../components/ui/CustomSection";
 import Button from "../components/ui/Button";
 
 type Tag = "Medical" | "Vitals" | "Mood" | "Nutrition" | "Activity" | "General";
+type Note = { id: string; title: string; content: string; tag: Tag; updatedAt: number };
 
-type Note = {
-  id: string;
-  title: string;
-  content: string;
-  tag: Tag;
-  updatedAt: number;
-};
-
-const STORAGE_KEY = "carelink_notes_v2"; // keep v2 since tag exists
-
+const STORAGE_KEY = "carelink_notes_v2";
 const TAGS: Tag[] = ["Medical", "Vitals", "Mood", "Nutrition", "Activity", "General"];
 
-function isUrgent(tag: Tag) {
-  return tag === "Medical" || tag === "Vitals";
-}
-
-function tagBadgeClass(tag: Tag) {
-  // red: urgent, green: nutrition/activity, blue: mood/general
-  if (tag === "Medical" || tag === "Vitals") return "bg-danger";
-  if (tag === "Nutrition" || tag === "Activity") return "bg-success";
-  return "bg-primary";
-}
+const utils = {
+  id: () => `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+  badge: (t: Tag) =>
+    t === "Medical" || t === "Vitals"
+      ? "bg-danger"
+      : t === "Nutrition" || t === "Activity"
+      ? "bg-success"
+      : "bg-primary",
+  dayKey: (ts: number) => {
+    const d = new Date(ts);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  },
+  dayLabel: (key: string) => {
+    const [y, m, d] = key.split("-").map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  },
+  dt: (ts: number) => new Date(ts).toLocaleString(),
+};
 
 function loadNotes(): Note[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as Note[];
-    if (!Array.isArray(parsed)) return [];
-
-    // defensive: if older notes exist without tag, default them to General
-    return parsed.map((n: any) => ({
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr.map((n: any) => ({
       id: String(n.id),
       title: String(n.title ?? "(Untitled)"),
       content: String(n.content ?? ""),
       tag: (n.tag as Tag) ?? "General",
       updatedAt: Number(n.updatedAt ?? Date.now()),
-    }));
+    })) as Note[];
   } catch {
     return [];
   }
 }
 
-function saveNotes(notes: Note[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-}
-
-function makeId() {
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function formatDateTime(ts: number) {
-  return new Date(ts).toLocaleString();
-}
-
-function dayKey(ts: number) {
-  // YYYY-MM-DD local
-  const d = new Date(ts);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function formatDayLabel(key: string) {
-  // key: YYYY-MM-DD
-  const [y, m, d] = key.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
 export default function Notes() {
-  const [notes, setNotes] = useState<Note[]>(() =>
-    loadNotes().sort((a, b) => b.updatedAt - a.updatedAt)
-  );
+  const [notes, setNotes] = useState<Note[]>(() => loadNotes().sort((a, b) => b.updatedAt - a.updatedAt));
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // editor fields
+  // editor
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tag, setTag] = useState<Tag>("General");
 
-  // UI states
-  const [savedFlash, setSavedFlash] = useState(false);
-  const [showUrgentPanel, setShowUrgentPanel] = useState(false);
+  // UI
+  const [saved, setSaved] = useState(false);
+  const timerRef = useRef<number | null>(null);
 
-  const saveTimerRef = useRef<number | null>(null);
+  const selected = useMemo(() => notes.find((n) => n.id === selectedId) ?? null, [notes, selectedId]);
 
-  const selectedNote = useMemo(
-    () => notes.find((n) => n.id === selectedId) ?? null,
-    [notes, selectedId]
-  );
-
-  // persist notes on any change
   useEffect(() => {
-    saveNotes(notes);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
   }, [notes]);
 
-  // load selected note into editor
   useEffect(() => {
-    if (!selectedNote) {
+    if (!selected) {
       setTitle("");
       setContent("");
       setTag("General");
       return;
     }
-    setTitle(selectedNote.title);
-    setContent(selectedNote.content);
-    setTag(selectedNote.tag ?? "General");
-  }, [selectedNote]);
+    setTitle(selected.title);
+    setContent(selected.content);
+    setTag(selected.tag);
+  }, [selected]);
 
-  // cleanup timer
   useEffect(() => {
     return () => {
-      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+      if (timerRef.current) window.clearTimeout(timerRef.current);
     };
   }, []);
 
-  // summary cards
-  const todayKey = dayKey(Date.now());
-  const totalNotes = notes.length;
-  const todaysNotes = useMemo(
-    () => notes.filter((n) => dayKey(n.updatedAt) === todayKey).length,
-    [notes, todayKey]
-  );
-  const urgentNotes = useMemo(() => notes.filter((n) => isUrgent(n.tag)).length, [notes]);
-
-  // timeline groups (ALL notes, no filters)
-  const timelineGroups = useMemo(() => {
+  const timeline = useMemo(() => {
     const map = new Map<string, Note[]>();
     for (const n of notes) {
-      const k = dayKey(n.updatedAt);
-      const arr = map.get(k) ?? [];
-      arr.push(n);
-      map.set(k, arr);
+      const k = utils.dayKey(n.updatedAt);
+      (map.get(k) ?? map.set(k, []).get(k)!).push(n);
     }
-
-    const keys = Array.from(map.keys()).sort((a, b) => (a > b ? -1 : a < b ? 1 : 0));
-    return keys.map((k) => ({
-      day: k,
-      items: (map.get(k) ?? []).sort((a, b) => b.updatedAt - a.updatedAt),
-    }));
+    return Array.from(map.entries())
+      .sort(([a], [b]) => (a > b ? -1 : a < b ? 1 : 0))
+      .map(([day, items]) => ({ day, items: items.sort((a, b) => b.updatedAt - a.updatedAt) }));
   }, [notes]);
 
-  const urgentList = useMemo(() => {
-    return notes
-      .filter((n) => isUrgent(n.tag))
-      .sort((a, b) => b.updatedAt - a.updatedAt);
-  }, [notes]);
+  const flashSaved = () => {
+    setSaved(true);
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setSaved(false), 5000);
+  };
 
-  function flashSaved() {
-    setSavedFlash(true);
-    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = window.setTimeout(() => setSavedFlash(false), 1800);
-  }
-
-  function handleNew() {
+  const handleNew = () => {
     setSelectedId(null);
     setTitle("");
     setContent("");
     setTag("General");
-  }
+  };
 
-  function handleSave() {
-    const trimmedTitle = title.trim();
-    const trimmedContent = content.trim();
+  const handleSave = () => {
+    const t = title.trim();
+    const c = content.trim();
+    if (!t && !c) return;
 
-    if (!trimmedTitle && !trimmedContent) return;
+    const now = Date.now();
 
-    if (selectedNote) {
-      const updated: Note = {
-        ...selectedNote,
-        title: trimmedTitle || "(Untitled)",
-        content: trimmedContent,
-        tag,
-        updatedAt: Date.now(),
-      };
+    setNotes((prev) => {
+      const sorted = (arr: Note[]) => arr.sort((a, b) => b.updatedAt - a.updatedAt);
 
-      setNotes((prev) =>
-        prev
-          .map((n) => (n.id === selectedNote.id ? updated : n))
-          .sort((a, b) => b.updatedAt - a.updatedAt)
-      );
+      if (selected) {
+        const updated: Note = { ...selected, title: t || "(Untitled)", content: c, tag, updatedAt: now };
+        return sorted(prev.map((n) => (n.id === selected.id ? updated : n)));
+      }
 
-      flashSaved();
-    } else {
-      const created: Note = {
-        id: makeId(),
-        title: trimmedTitle || "(Untitled)",
-        content: trimmedContent,
-        tag,
-        updatedAt: Date.now(),
-      };
-
-      setNotes((prev) => [created, ...prev].sort((a, b) => b.updatedAt - a.updatedAt));
+      const created: Note = { id: utils.id(), title: t || "(Untitled)", content: c, tag, updatedAt: now };
       setSelectedId(created.id);
+      return sorted([created, ...prev]);
+    });
 
-      flashSaved();
-    }
-  }
+    flashSaved();
+  };
 
-  function handleDelete(id: string) {
+  const handleDelete = (id: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
     if (selectedId === id) handleNew();
-  }
-
-  function handleSelectUrgent(id: string) {
-    setSelectedId(id);
-    setShowUrgentPanel(false);
-  }
+  };
 
   return (
     <div className="py-3">
@@ -230,160 +159,72 @@ export default function Notes() {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          {savedFlash && <span className="badge text-bg-success px-3 py-2">Saved ✅</span>}
-
+          {saved && <span className="badge text-bg-success px-3 py-2">Saved</span>}
           <Button color="outline-secondary" onClick={handleNew}>
             + New
           </Button>
         </div>
       </div>
 
-      {/* Summary cards */}
-      <div className="row g-3 mb-3">
-        <div className="col-12 col-md-4">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <div className="text-muted small">Total Notes</div>
-              <div className="fs-3 fw-semibold">{totalNotes}</div>
-              <div className="text-muted small">All time</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-12 col-md-4">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <div className="text-muted small">Today’s Notes</div>
-              <div className="fs-3 fw-semibold">{todaysNotes}</div>
-              <div className="text-muted small">Current day</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-12 col-md-4">
-          <div className="card shadow-sm border-warning">
-            <div className="card-body d-flex justify-content-between align-items-center">
-              <div>
-                <div className="text-muted small">Urgent Notes</div>
-                <div className="fs-3 fw-semibold">{urgentNotes}</div>
-                <button
-                  type="button"
-                  className="btn btn-link p-0 text-warning fw-semibold"
-                  onClick={() => setShowUrgentPanel((v) => !v)}
-                >
-                  Needs review
-                </button>
-              </div>
-              <span className="badge text-bg-warning px-3 py-2">!</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
+      {/* Main */}
       <div className="row g-3">
-        {/* Left: Timeline */}
+        {/* Timeline */}
         <div className="col-12 col-lg-5">
           <CustomSection title="Care Timeline" subheader={`Showing ${notes.length} note(s)`}>
-            {showUrgentPanel && (
-              <div className="card border-warning mb-3">
-                <div className="card-header d-flex justify-content-between align-items-center">
-                  <div className="fw-semibold text-warning">Urgent notes (Needs review)</div>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-secondary"
-                    onClick={() => setShowUrgentPanel(false)}
-                  >
-                    Close
-                  </button>
-                </div>
-
-                <div className="card-body p-2" style={{ maxHeight: 260, overflowY: "auto" }}>
-                  {urgentList.length === 0 ? (
-                    <div className="text-muted p-2">No urgent notes right now.</div>
-                  ) : (
-                    <div className="list-group">
-                      {urgentList.map((n) => (
-                        <button
-                          key={n.id}
-                          type="button"
-                          className="list-group-item list-group-item-action"
-                          onClick={() => handleSelectUrgent(n.id)}
-                        >
-                          <div className="d-flex justify-content-between align-items-start">
-                            <div className="me-2">
-                              <div className="fw-semibold">{n.title}</div>
-                              <div className="text-muted small">{formatDateTime(n.updatedAt)}</div>
-                            </div>
-                            <span className={`badge ${tagBadgeClass(n.tag)}`}>{n.tag}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
             {notes.length === 0 ? (
               <div className="text-muted">
                 No notes yet. Click <strong>New</strong> and write something.
               </div>
             ) : (
-              <div>
-                {timelineGroups.map((group) => (
-                  <div key={group.day} className="mb-3">
-                    <div className="text-muted small fw-semibold mb-2">{formatDayLabel(group.day)}</div>
-
-                    <div className="list-group">
-                      {group.items.map((n) => {
-                        const active = n.id === selectedId;
-                        return (
-                          <button
-                            key={n.id}
-                            type="button"
-                            className={
-                              "list-group-item list-group-item-action d-flex justify-content-between align-items-start " +
-                              (active ? "active" : "")
-                            }
-                            onClick={() => setSelectedId(n.id)}
-                          >
-                            <div className="me-2">
-                              <div className="fw-semibold d-flex align-items-center gap-2">
-                                {n.title}
-                                <span className={`badge ${tagBadgeClass(n.tag)}`}>{n.tag}</span>
-                              </div>
-                              <div className={active ? "text-white-50 small" : "text-muted small"}>
-                                {formatDateTime(n.updatedAt)}
-                              </div>
+              timeline.map((g) => (
+                <div key={g.day} className="mb-3">
+                  <div className="text-muted small fw-semibold mb-2">{utils.dayLabel(g.day)}</div>
+                  <div className="list-group">
+                    {g.items.map((n) => {
+                      const active = n.id === selectedId;
+                      return (
+                        <button
+                          key={n.id}
+                          type="button"
+                          className={
+                            "list-group-item list-group-item-action d-flex justify-content-between align-items-start " +
+                            (active ? "active" : "")
+                          }
+                          onClick={() => setSelectedId(n.id)}
+                        >
+                          <div className="me-2">
+                            <div className="fw-semibold d-flex align-items-center gap-2">
+                              {n.title}
+                              <span className={`badge ${utils.badge(n.tag)}`}>{n.tag}</span>
                             </div>
+                            <div className={active ? "text-white-50 small" : "text-muted small"}>{utils.dt(n.updatedAt)}</div>
+                          </div>
 
-                            <button
-                              type="button"
-                              className={"btn btn-sm " + (active ? "btn-light" : "btn-outline-danger")}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(n.id);
-                              }}
-                            >
-                              Delete
-                            </button>
+                          <button
+                            type="button"
+                            className={"btn btn-sm " + (active ? "btn-light" : "btn-outline-danger")}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(n.id);
+                            }}
+                          >
+                            Delete
                           </button>
-                        );
-                      })}
-                    </div>
+                        </button>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))
             )}
           </CustomSection>
         </div>
 
-        {/* Right: Editor */}
+        {/* Editor */}
         <div className="col-12 col-lg-7">
           <CustomSection
-            title={selectedNote ? "Edit Note" : "New Note"}
-            subheader={selectedNote ? `Last updated: ${formatDateTime(selectedNote.updatedAt)}` : "Not saved yet"}
+            title={selected ? "Edit Note" : "New Note"}
+            subheader={selected ? `Last updated: ${utils.dt(selected.updatedAt)}` : "Not saved yet"}
           >
             <div className="row g-3">
               <div className="col-12 col-md-8">
@@ -407,9 +248,7 @@ export default function Notes() {
                 </select>
 
                 <div className="mt-2">
-                  <span className={`badge ${tagBadgeClass(tag)}`}>
-                    {tag} {isUrgent(tag) ? "• Urgent" : ""}
-                  </span>
+                  <span className={`badge ${utils.badge(tag)}`}>{tag}</span>
                 </div>
               </div>
             </div>
@@ -425,12 +264,10 @@ export default function Notes() {
               />
             </div>
 
-            <div className="d-flex justify-content-between align-items-center mt-3">
-              <div className="text-muted small">Notes are stored locally in your browser (localStorage).</div>
-
+            <div className="d-flex justify-content-end align-items-center mt-3">
               <div className="d-flex gap-2">
-                {selectedNote && (
-                  <Button color="outline-danger" onClick={() => handleDelete(selectedNote.id)}>
+                {selected && (
+                  <Button color="outline-danger" onClick={() => handleDelete(selected.id)}>
                     Delete
                   </Button>
                 )}
