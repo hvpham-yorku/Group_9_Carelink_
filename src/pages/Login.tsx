@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import LoginText from "/Users/aa/Desktop/Git Repos/CareLink_Adeena/src/components/login/LoginText.tsx";
-import LoginTextBox from "/Users/aa/Desktop/Git Repos/CareLink_Adeena/src/components/login/LoginTextBox.tsx";
+import LoginText from "../components/login/LoginText";
+import LoginTextBox from "../components/login/LoginTextBox";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -8,18 +8,25 @@ const Login = () => {
   return (
     <>
       <div className="container vh-100 d-flex justify-content-center align-items-center">
-
-      <div className="col-md-6 col-lg-4 d-flex flex-column gap-3 p-4 shadow rounded">
+        <div className="col-md-6 col-lg-4 d-flex flex-column gap-3 p-4 shadow rounded">
           <LoginText />
-          <LoginTextBox name="username" id="username" placeholder="Enter username"/>
-          <LoginTextBox name="password" id="password" placeholder="Enter password" />
+          <LoginTextBox
+            name="username"
+            id="username"
+            placeholder="Enter username"
+          />
+          <LoginTextBox
+            name="password"
+            id="password"
+            placeholder="Enter password"
+          />
           <button
-          className="btn btn-primary mt-5"
-          onClick={() => navigate("/dashboard")}
+            className="btn btn-primary mt-5"
+            onClick={() => navigate("/dashboard")}
           >
-          Login
+            Login
           </button>
-      </div>
+        </div>
       </div>
     </>
   );
