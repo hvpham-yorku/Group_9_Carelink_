@@ -44,6 +44,11 @@ const SideBar = ({ username }: SideBarProps) => {
             </NavLink>
           </li>
           <li>
+            <NavLink to="/notes" className="nav-link">
+               Notes
+            </NavLink>
+          </li>
+          <li>
             <NavLink to="/patient-profile" className="nav-link">
               Patient Profile
             </NavLink>
