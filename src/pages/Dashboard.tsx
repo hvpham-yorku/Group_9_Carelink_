@@ -12,12 +12,11 @@
  * - Provides navigation to other pages using React Router
  *
  * IMPORTANT NOTES FOR TEAM:
- * - This file contains NO shared logic
- * - All data here is temporary and local
- * - Safe to modify visuals without affecting other pages
- * - Tailwind classes are used for styling (Bootstrap still supported globally)
- * 
- * 
+ * - This file contains NO shared logic and does not affect other pages.
+ * - All data here is mock data (temporary) for Iteration 1.
+ * - In Iteration 2, mock data can move to /data and later be replaced by backend.
+ * - Styling in THIS version is Bootstrap-only (no Tailwind required).
+ *
  * ============================================================
  */
 
@@ -27,8 +26,6 @@ import { useNavigate } from "react-router-dom";
 /* ============================================================
    TYPE DEFINITIONS
    These define the structure of our mock data.
-   Keeping them explicit makes the file easier to understand
-   and safer to extend later.
    ============================================================ */
 
 type StatCard = {
@@ -57,23 +54,42 @@ type AppointmentItem = {
 };
 
 /* ============================================================
-   SHARED STYLING CONSTANTS
-   These keep the UI consistent and close to Figma.
-   If Tailwind is disabled, the page still renders correctly.
+   SMALL STYLE HELPERS (Bootstrap-safe)
+   - We keep Bootstrap as the main styling system.
+   - We use minimal inline styles ONLY for Figma-like details
+     (gradient banner + larger rounded corners + soft shadows).
    ============================================================ */
 
-const pageBg = "min-h-screen w-full bg-slate-50";
-const container = "mx-auto max-w-6xl px-6 py-8";
-const sectionGap = "space-y-8";
+const styles = {
+  pageBg: {
+    backgroundColor: "#F8FAFC", // similar to slate-50
+    minHeight: "100vh",
+    width: "100%",
+  } as React.CSSProperties,
 
-const card =
-  "w-full rounded-2xl border border-slate-200 bg-white shadow-sm";
-const cardPad = "p-6";
+  containerMax: {
+    maxWidth: "1100px",
+  } as React.CSSProperties,
 
-const titleXL = "text-5xl font-extrabold tracking-tight text-slate-900";
-const titleLG = "text-3xl font-bold text-slate-900";
-const titleMD = "text-xl font-semibold text-slate-900";
-const bodyText = "text-slate-700";
+  cardLike: {
+    borderRadius: "18px",
+    border: "1px solid #E5E7EB",
+    boxShadow: "0 2px 10px rgba(15, 23, 42, 0.06)",
+  } as React.CSSProperties,
+
+  banner: {
+    borderRadius: "18px",
+    color: "#fff",
+    background: "linear-gradient(90deg, #2F6FED 0%, #2D62F0 100%)",
+    boxShadow: "0 2px 10px rgba(15, 23, 42, 0.10)",
+  } as React.CSSProperties,
+
+  pill: {
+    backgroundColor: "rgba(255,255,255,0.18)",
+    border: "1px solid rgba(255,255,255,0.15)",
+    color: "rgba(255,255,255,0.95)",
+  } as React.CSSProperties,
+};
 
 /* ============================================================
    DASHBOARD COMPONENT
@@ -83,8 +99,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   /* ============================================================
-     MOCK DATA
-     NOTE: This will be replaced by backend data in later iterations.
+     MOCK DATA (Iteration 1)
+     NOTE: Replace with real data / API in later iterations.
      ============================================================ */
 
   const caregiver = {
@@ -146,205 +162,294 @@ export default function Dashboard() {
   ];
 
   /* ============================================================
+     UI ACTIONS (Routing)
+     - These buttons connect to other routes in the app.
+     - No backend saving in Iteration 1.
+     ============================================================ */
+
+  const goTasks = () => navigate("/task-manager");
+  const goMeds = () => navigate("/medication-tracker");
+  const goProfile = () => navigate("/patient-profile");
+
+  /* ============================================================
      RENDER
      ============================================================ */
 
   return (
-    <div className={pageBg}>
-      <div className={container}>
-        <div className={sectionGap}>
-          {/* ======================================================
-              COMPONENT 1: PAGE TITLE
-              ====================================================== */}
-          <div>
-            <h1 className={titleXL}>CareLink</h1>
-            <p className={bodyText}>Home Care Dashboard</p>
+    <div style={styles.pageBg}>
+      <div className="container py-4" style={styles.containerMax}>
+        {/* ======================================================
+            COMPONENT 1: PAGE TITLE
+           ====================================================== */}
+        <div className="mb-4">
+          <h1 className="fw-bold" style={{ fontSize: "3rem", lineHeight: 1.05 }}>
+            CareLink
+          </h1>
+          <div className="text-muted" style={{ fontSize: "1.1rem" }}>
+            Home Care Dashboard
+          </div>
+        </div>
+
+        {/* ======================================================
+            COMPONENT 2: CAREGIVER HEADER CARD
+           ====================================================== */}
+        <div className="bg-white p-4 mb-4" style={styles.cardLike}>
+          <div className="mb-3">
+            <div className="fw-semibold" style={{ fontSize: "1.15rem" }}>
+              {caregiver.name}
+            </div>
+            <div className="text-muted">{caregiver.role}</div>
           </div>
 
-          {/* ======================================================
-              COMPONENT 2: CAREGIVER HEADER CARD
-              ====================================================== */}
-          <div className={`${card} ${cardPad}`}>
-            <div className="space-y-3">
-              <div className={titleMD}>{caregiver.name}</div>
-              <div className={bodyText}>{caregiver.role}</div>
+          {/* Primary navigation buttons */}
+          <div className="d-flex flex-wrap gap-2">
+            <button type="button" className="btn btn-light border" onClick={goTasks}>
+              Tasks
+            </button>
 
-              {/* Primary navigation buttons */}
-              <div className="flex flex-wrap gap-2 pt-2">
-                <button onClick={() => navigate("/task-manager")} className="btn">
-                  Tasks
-                </button>
-                <button
-                  onClick={() => navigate("/medication-tracker")}
-                  className="btn"
-                >
-                  Medications
-                </button>
-                <button
-                  onClick={() => navigate("/patient-profile")}
-                  className="btn"
-                >
-                  Patient Profile
-                </button>
+            <button type="button" className="btn btn-light border" onClick={goMeds}>
+              Medications
+            </button>
+
+            <button type="button" className="btn btn-light border" onClick={goProfile}>
+              Patient Profile
+            </button>
+          </div>
+        </div>
+
+        {/* ======================================================
+            COMPONENT 3: PATIENT INFO BANNER (Figma-like)
+           ====================================================== */}
+        <div className="p-4 mb-4" style={styles.banner}>
+          <div className="d-flex flex-column flex-md-row justify-content-between gap-3">
+            <div>
+              <div className="fw-bold" style={{ fontSize: "2.6rem", lineHeight: 1.1 }}>
+                {patient.name}
+              </div>
+              <div style={{ color: "rgba(255,255,255,0.85)" }}>{patient.meta}</div>
+
+              {/* Condition pills */}
+              <div className="mt-3 d-flex flex-wrap gap-2">
+                {patient.conditions.map((c) => (
+                  <span
+                    key={c}
+                    className="px-3 py-1 rounded-pill"
+                    style={styles.pill}
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Emergency contact (right side card) */}
+            <div
+              className="p-3"
+              style={{
+                borderRadius: "14px",
+                backgroundColor: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                minWidth: "240px",
+                alignSelf: "flex-start",
+              }}
+            >
+              <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.9rem" }}>
+                Emergency Contact
+              </div>
+              <div className="fw-semibold mt-1">{patient.emergencyContact}</div>
+              <div className="mt-1" style={{ color: "rgba(255,255,255,0.9)" }}>
+                {patient.emergencyPhone}
               </div>
             </div>
           </div>
+        </div>
 
-          {/* ======================================================
-              COMPONENT 3: PATIENT INFO BANNER (FIGMA STYLE)
-              ====================================================== */}
-          <div className="rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 p-8 text-white shadow-sm">
-            <div className="text-4xl font-extrabold">{patient.name}</div>
-            <div className="mt-1 text-blue-100">{patient.meta}</div>
-
-            {/* Condition pills */}
-            <div className="mt-4 flex gap-2">
-              {patient.conditions.map((c) => (
-                <span
-                  key={c}
-                  className="rounded-full bg-white/20 px-3 py-1 text-sm"
+        {/* ======================================================
+            COMPONENT 4: STAT CARDS (4 across on large screens)
+           ====================================================== */}
+        <div className="row g-3 mb-4">
+          {stats.map((s) => {
+            const clickable = Boolean(s.route);
+            return (
+              <div className="col-12 col-md-6 col-lg-3" key={s.title}>
+                <div
+                  role={clickable ? "button" : undefined}
+                  onClick={() => (s.route ? navigate(s.route) : null)}
+                  className="bg-white p-4 h-100"
+                  style={{
+                    ...styles.cardLike,
+                    cursor: clickable ? "pointer" : "default",
+                    transition: "transform 120ms ease, box-shadow 120ms ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!clickable) return;
+                    (e.currentTarget as HTMLDivElement).style.boxShadow =
+                      "0 6px 18px rgba(15, 23, 42, 0.10)";
+                    (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLDivElement).style.boxShadow =
+                      "0 2px 10px rgba(15, 23, 42, 0.06)";
+                    (e.currentTarget as HTMLDivElement).style.transform = "translateY(0px)";
+                  }}
                 >
-                  {c}
-                </span>
-              ))}
-            </div>
+                  <div className="fw-semibold" style={{ fontSize: "1.15rem" }}>
+                    {s.title}
+                  </div>
 
-            {/* Emergency contact */}
-            <div className="mt-6 text-sm text-blue-100">
-              Emergency Contact
-            </div>
-            <div className="font-semibold">{patient.emergencyContact}</div>
-            <div>{patient.emergencyPhone}</div>
+                  <div className="fw-bold mt-3" style={{ fontSize: "2.1rem" }}>
+                    {s.primary}
+                  </div>
+
+                  <div className="text-muted mt-1">{s.secondary}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ======================================================
+            COMPONENT 5: QUICK ACTIONS
+           ====================================================== */}
+        <div className="bg-white p-4 mb-4" style={styles.cardLike}>
+          <div className="fw-bold" style={{ fontSize: "2rem" }}>
+            Quick Actions
+          </div>
+          <div className="text-muted mt-1">
+            Use these shortcuts to navigate through the app (Iteration 1 demo flow).
           </div>
 
-          {/* ======================================================
-              COMPONENT 4: STAT CARDS
-              ====================================================== */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {stats.map((s) => (
-              <div
-                key={s.title}
-                onClick={() => s.route && navigate(s.route)}
-                className={`${card} ${cardPad} ${s.route ? "cursor-pointer hover:shadow-md" : ""
-                  }`}
-              >
-                <div className={titleMD}>{s.title}</div>
-                <div className="mt-3 text-2xl font-bold">{s.primary}</div>
-                <div className="mt-1 text-slate-600">{s.secondary}</div>
-              </div>
+          <div className="d-flex flex-wrap gap-2 mt-3">
+            <button type="button" className="btn btn-light border" onClick={goTasks}>
+              Go to Task Manager
+            </button>
+            <button type="button" className="btn btn-light border" onClick={goMeds}>
+              Go to Medication Tracker
+            </button>
+            <button type="button" className="btn btn-light border" onClick={goProfile}>
+              Go to Patient Profile
+            </button>
+          </div>
+        </div>
+
+        {/* ======================================================
+            COMPONENT 6: RECENT ACTIVITY
+           ====================================================== */}
+        <div className="bg-white p-4 mb-4" style={styles.cardLike}>
+          <div className="fw-bold" style={{ fontSize: "2rem" }}>
+            Recent Activity
+          </div>
+
+          <ul className="list-unstyled mt-3 mb-0 d-grid gap-3">
+            {recentActivity.map((a, i) => (
+              <li key={i} className="d-flex align-items-start gap-3">
+                <span style={{ fontSize: "1.25rem" }}>{a.icon}</span>
+                <span style={{ fontSize: "1.05rem" }}>{a.text}</span>
+              </li>
             ))}
-          </div>
+          </ul>
+        </div>
 
-          {/* ======================================================
-              COMPONENT 5: QUICK ACTIONS
-              ====================================================== */}
-          <div className={`${card} ${cardPad}`}>
-            <div className={titleLG}>Quick Actions</div>
-            <p className={bodyText}>
-              Use these shortcuts to navigate through the app.
-            </p>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button onClick={() => navigate("/task-manager")} className="btn">
-                Go to Task Manager
-              </button>
-              <button
-                onClick={() => navigate("/medication-tracker")}
-                className="btn"
-              >
-                Go to Medication Tracker
-              </button>
-              <button
-                onClick={() => navigate("/patient-profile")}
-                className="btn"
-              >
-                Go to Patient Profile
-              </button>
-            </div>
-          </div>
-
-          {/* ======================================================
-              COMPONENT 6: Notes
-              ====================================================== */}
-          <div className={`${card} ${cardPad}`}>
-            <div className={titleLG}>Notes</div>
-
-            <ul className="mt-4 space-y-3">
-              {recentActivity.map((a, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="text-xl">{a.icon}</span>
-                  <span>{a.text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* ======================================================
-              COMPONENT 7: TODAY'S PLAN
-              ====================================================== */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Medication Schedule */}
-            <div className={`${card} ${cardPad}`}>
-              <div className={titleLG}>Today’s Med Schedule</div>
-              <p className={bodyText}>
+        {/* ======================================================
+            COMPONENT 7: TODAY'S PLAN (2-column)
+           ====================================================== */}
+        <div className="row g-3 mb-4">
+          {/* Left: Med schedule */}
+          <div className="col-12 col-md-6">
+            <div className="bg-white p-4 h-100" style={styles.cardLike}>
+              <div className="fw-bold" style={{ fontSize: "1.75rem" }}>
+                Today’s Med Schedule
+              </div>
+              <div className="text-muted mt-1">
                 (Mock checklist — no data saving yet)
-              </p>
+              </div>
 
-              <div className="mt-4 space-y-3">
+              <div className="d-grid gap-3 mt-3">
                 {todaysMeds.map((m, i) => (
                   <label
                     key={i}
-                    className="flex items-center gap-3 rounded-lg border p-3"
+                    className="d-flex gap-3 align-items-start p-3"
+                    style={{
+                      borderRadius: "14px",
+                      border: "1px solid #E5E7EB",
+                      backgroundColor: "#fff",
+                      cursor: "pointer",
+                    }}
                   >
                     <input
+                      className="form-check-input mt-1"
                       type="checkbox"
                       defaultChecked={m.taken}
-                      className="h-4 w-4"
                     />
-                    <div>
-                      <div className="font-semibold">
+                    <div className="flex-grow-1">
+                      <div className="fw-semibold">
                         {m.time} — {m.name} ({m.dose})
                       </div>
-                      <div className="text-sm text-slate-600">
+                      <div className="text-muted" style={{ fontSize: "0.95rem" }}>
                         Status: {m.taken ? "taken" : "not taken yet"}
                       </div>
                     </div>
                   </label>
                 ))}
               </div>
-            </div>
 
-            {/* Upcoming Appointments */}
-            <div className={`${card} ${cardPad}`}>
-              <div className={titleLG}>Upcoming Appointments</div>
-
-              <div className="mt-4 space-y-3">
-                {upcomingAppointments.map((a, i) => (
-                  <div key={i} className="rounded-lg border p-4">
-                    <div className="flex justify-between text-sm text-slate-600">
-                      <span>{a.day}</span>
-                      <span>{a.location}</span>
-                    </div>
-                    <div className="mt-2 font-semibold">{a.title}</div>
-                  </div>
-                ))}
+              <div className="mt-3">
+                <button type="button" className="btn btn-light border" onClick={goMeds}>
+                  Open Medication Tracker
+                </button>
               </div>
             </div>
           </div>
 
-          {/* ======================================================
-              FINAL STATUS CARD (DEV CONFIRMATION)
-              ====================================================== */}
-          <div className={`${card} ${cardPad}`}>
-            <div className="flex gap-3">
-              <span className="text-2xl">✅</span>
-              <div>
-                <div className="font-medium">
-                  Components loaded successfully.
-                </div>
-                <div className="text-slate-600">
-                  Dashboard is complete for Iteration 1.
-                </div>
+          {/* Right: Upcoming appointments */}
+          <div className="col-12 col-md-6">
+            <div className="bg-white p-4 h-100" style={styles.cardLike}>
+              <div className="fw-bold" style={{ fontSize: "1.75rem" }}>
+                Upcoming Appointments
+              </div>
+              <div className="text-muted mt-1">(Mock list — routing only)</div>
+
+              <div className="d-grid gap-3 mt-3">
+                {upcomingAppointments.map((a, i) => (
+                  <div
+                    key={i}
+                    className="p-3"
+                    style={{
+                      borderRadius: "14px",
+                      border: "1px solid #E5E7EB",
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <div className="d-flex justify-content-between text-muted" style={{ fontSize: "0.95rem" }}>
+                      <span className="fw-semibold">{a.day}</span>
+                      <span>{a.location}</span>
+                    </div>
+                    <div className="mt-2 fw-semibold" style={{ fontSize: "1.05rem" }}>
+                      {a.title}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-3">
+                <button type="button" className="btn btn-light border" onClick={goTasks}>
+                  Open Task Manager
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ======================================================
+            FINAL STATUS CARD (Developer confirmation / milestone)
+           ====================================================== */}
+        <div className="bg-white p-4" style={styles.cardLike}>
+          <div className="d-flex gap-3 align-items-start">
+            <span style={{ fontSize: "1.6rem" }}>✅</span>
+            <div>
+              <div className="fw-semibold">Components loaded successfully.</div>
+              <div className="text-muted">
+                Dashboard is complete for Iteration 1 (UI-only, mock data, routing).
               </div>
             </div>
           </div>
