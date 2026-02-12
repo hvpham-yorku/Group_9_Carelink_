@@ -7,16 +7,19 @@ const Login = () => {
 
   return (
     <>
-      <div className="d-flex justify-content-center">
-       <LoginText/>
-       <LoginTextBox name="username" id="username" />
-       <LoginTextBox name="password" id="password" />
-        <button
+      <div className="container vh-100 d-flex justify-content-center align-items-center">
+
+        <div className="col-md-6 col-lg-4" >
+          <LoginText />
+          <LoginTextBox name="username" id="username" />
+          <LoginTextBox name="password" id="password" />
+          <button
           className="btn btn-primary mt-5"
           onClick={() => navigate("/dashboard")}
-        >
+          >
           Login
-        </button>
+          </button>
+      </div>
       </div>
     </>
   );
