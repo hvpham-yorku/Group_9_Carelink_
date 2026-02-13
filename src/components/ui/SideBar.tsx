@@ -45,7 +45,7 @@ const SideBar = ({ username }: SideBarProps) => {
           </li>
           <li>
             <NavLink to="/notes" className="nav-link">
-               Notes
+              Notes
             </NavLink>
           </li>
           <li>
@@ -66,7 +66,7 @@ const SideBar = ({ username }: SideBarProps) => {
           </button>
           <ul className="dropdown-menu">
             <li>
-              <a className="dropdown-item" href="#">
+              <a className="dropdown-item disabled" href="#">
                 Profile
               </a>
             </li>
