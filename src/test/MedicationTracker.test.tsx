@@ -54,8 +54,9 @@ describe("MedicationTracker page - rendering", () => {
 
 /*
   These tests cover sidebar behavior.
-  The sidebar should collapse using the main toggle button
-  and show again when clicked again.
+  The sidebar should collapse using the main toggle button,
+  show again when clicked again,
+  and hide when the internal "Hide" button is clicked.
 */
 describe("MedicationTracker page - sidebar toggling", () => {
   beforeEach(() => {
@@ -85,5 +86,28 @@ describe("MedicationTracker page - sidebar toggling", () => {
     fireEvent.click(screen.getByRole("button", { name: /show sidebar/i }));
 
     expect(screen.getByText(/active medications/i)).toBeInTheDocument();
+  });
+
+  /*
+    This test checks the secondary hide control inside the sidebar.
+    Clicking "Hide" should close the sidebar
+    and the main toggle should switch to "Show Sidebar".
+  */
+  it("hides the sidebar when the sidebar 'Hide' button is clicked", () => {
+    render(<MedicationTracker />);
+
+    // Sidebar starts open
+    expect(screen.getByText(/active medications/i)).toBeInTheDocument();
+
+    // Click internal Hide button
+    fireEvent.click(screen.getByRole("button", { name: /^hide$/i }));
+
+    // Sidebar should disappear
+    expect(screen.queryByText(/active medications/i)).not.toBeInTheDocument();
+
+    // Main toggle button should now say "Show Sidebar"
+    expect(
+      screen.getByRole("button", { name: /show sidebar/i }),
+    ).toBeInTheDocument();
   });
 });
