@@ -14,6 +14,11 @@ import TaskCard from "../components/task/TaskCard";
 import TaskForm from "../components/task/TaskForm";
 import TaskList from "../components/task/TaskList";
 
+/*
+    This tests the TaskManager page. It checks whether the header and sample task render, 
+    whether adding a new task works, whether toggling completion works, and whether tasks are persisted to localStorage.
+*/
+
 describe("TaskManager page", () => {
   beforeEach(() => {
     window.localStorage.clear();
@@ -90,6 +95,11 @@ describe("TaskManager page", () => {
   });
 });
 
+/*
+    This tests the TaskForm component. 
+    It checks whether the form calls the onAddTask callback with the correct values and whether it clears the form after submission.
+*/
+
 describe("TaskForm component", () => {
   it("calls onAddTask with form values", () => {
     const onAddTask = vi.fn();
@@ -143,6 +153,11 @@ describe("TaskForm component", () => {
   });
 });
 
+/*
+    This tests the TaskCard component. 
+    It checks whether the task details render correctly and whether the onToggle callback is fired when the checkbox is clicked.
+*/
+
 describe("TaskCard component", () => {
   it("renders task details", () => {
     render(
@@ -179,6 +194,11 @@ describe("TaskCard component", () => {
     expect(onToggle).toHaveBeenCalledTimes(1);
   });
 });
+
+/*
+    This tests the TaskList component. 
+    It checks whether each task renders and whether the onToggleTask callback is fired with the correct task ID when a checkbox is clicked.
+*/
 
 describe("TaskList component", () => {
   it("renders each task and wires toggle", () => {
