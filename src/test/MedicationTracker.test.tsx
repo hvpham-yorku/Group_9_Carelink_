@@ -1,7 +1,8 @@
 /**
  * @vitest-environment jsdom
  * This file contains integration tests for the MedicationTracker page and its components.
- * It checks that the page renders correctly and that the sidebar toggles correctly.
+ * It checks that the page renders correctly, the sidebar toggles correctly,
+ * and that medications can be marked as taken (including UI changes and metadata rendering).
  */
 
 import "@testing-library/jest-dom/vitest";
@@ -109,5 +110,53 @@ describe("MedicationTracker page - sidebar toggling", () => {
     expect(
       screen.getByRole("button", { name: /show sidebar/i }),
     ).toBeInTheDocument();
+  });
+});
+
+/*
+  These tests cover medication "taken" toggling.
+  The medication should update visually and display metadata when checked.
+*/
+describe("MedicationTracker page - medication taken toggle", () => {
+  beforeEach(() => {
+    cleanup();
+  });
+
+  /*
+    This test checks:
+    - clicking the checkbox marks the medication as taken
+    - the medication title becomes line-through
+    - the medication card background changes
+    - taken metadata appears ("Taken at:" and "By:")
+  */
+  it("marks a medication as taken and shows taken metadata + styling", () => {
+    render(<MedicationTracker />);
+
+    // Target the first medication (Metformin)
+    const medTitle = screen.getByRole("heading", {
+      name: /metformin - 500mg/i,
+    });
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes).toHaveLength(3);
+
+    // Outer container for the medication item (may be nested)
+    const itemContainer = medTitle.parentElement?.parentElement?.parentElement;
+
+    // Before click: no metadata visible
+    expect(screen.queryByText(/taken at:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^by:/i)).not.toBeInTheDocument();
+
+    // Toggle taken ON
+    fireEvent.click(checkboxes[0]);
+
+    // Metadata appears
+    expect(screen.getByText(/taken at:/i)).toBeInTheDocument();
+    expect(screen.getByText(/^by:/i)).toBeInTheDocument();
+    expect(screen.getByText(/caregiver \(mock\)/i)).toBeInTheDocument();
+
+    // Styling changes (these may fail depending on how jsdom reports styles)
+    expect(medTitle).toHaveStyle({ textDecoration: "line-through" });
+    expect(itemContainer).toHaveStyle({ background: "#dcebde" });
   });
 });
