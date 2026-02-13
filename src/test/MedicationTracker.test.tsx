@@ -1,4 +1,5 @@
 /**
+ * ITR 1 TEST
  * @vitest-environment jsdom
  * This file contains integration tests for the MedicationTracker page and its components.
  * It checks that the page renders correctly, the sidebar toggles correctly,
