@@ -2,7 +2,7 @@
     run npm install --save-dev @testing-library/react @testing-library/jest-dom jest
     then run npm i --save-dev @types/jest
 */
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 import LoginText from "../components/login/LoginText";
@@ -11,7 +11,7 @@ import LoginTextBox from "../components/login/LoginTextBox";
 import Login from "../pages/Login";
 import { BrowserRouter } from "react-router-dom";
 
-import { vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /*
     Tests whether the LoginText component exists and renders correctly.
@@ -43,7 +43,7 @@ describe("LoginTextBox", () => {
         name="username"
         id="username"
         placeholder="Enter username"
-      />
+      />,
     );
 
     const input = screen.getByPlaceholderText(/enter username/i);
@@ -63,11 +63,12 @@ describe("LoginTextBox", () => {
 const mockNavigate = vi.fn();
 
 vi.mock("react-router-dom", async () => {
-    const actual = await vi.importActual<typeof import("react-router-dom")>(
-      "react-router-dom"
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
     );
 
-return {
+  return {
     ...actual,
     useNavigate: () => mockNavigate,
   };
@@ -82,11 +83,11 @@ describe("Login Page", () => {
     render(
       <BrowserRouter>
         <Login />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(
-      screen.getByRole("heading", { name: /login to carelink!/i })
+      screen.getByRole("heading", { name: /login to carelink!/i }),
     ).toBeInTheDocument();
   });
 
@@ -94,7 +95,7 @@ describe("Login Page", () => {
     render(
       <BrowserRouter>
         <Login />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByPlaceholderText(/enter username/i)).toBeInTheDocument();
@@ -105,7 +106,7 @@ describe("Login Page", () => {
     render(
       <BrowserRouter>
         <Login />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     const button = screen.getByRole("button", { name: /login/i });
