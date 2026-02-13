@@ -1,11 +1,11 @@
 /**
- * CareLink - Notes Page (ITR1)
- * - Create/Edit/Delete & save notes
- * - Notes stay in localStorage
- * - Tagging (for categorizing notes)
- * - Timeline grouping by day
- * - "Saved" badge shows for 5 seconds after saving
- * UI: Bootstrap + existing CustomSection + Button components.
+ * Notes Page (ITR1)
+ * - Local only notes (localStorage).
+ * - Timeline grouping by day.
+ * - Tag on each note & colored badge.
+ * - Editor does create/update/delete.
+ * - Accessibility: labels linked to fields (htmlFor + id), fields have name, issues page while inspect :(
+ * - all of the bugs fixed.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -13,141 +13,209 @@ import CustomSection from "../components/ui/CustomSection";
 import Button from "../components/ui/Button";
 
 type Tag = "Medical" | "Vitals" | "Mood" | "Nutrition" | "Activity" | "General";
-type Note = { id: string; title: string; content: string; tag: Tag; updatedAt: number };
+
+type Note = {
+  id: string;
+  title: string;
+  content: string;
+  tag: Tag;
+  updatedAt: number;
+};
 
 const STORAGE_KEY = "carelink_notes_v2";
 const TAGS: Tag[] = ["Medical", "Vitals", "Mood", "Nutrition", "Activity", "General"];
 
-const utils = {
-  id: () => `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-  badge: (t: Tag) =>
-    t === "Medical" || t === "Vitals"
-      ? "bg-danger"
-      : t === "Nutrition" || t === "Activity"
-      ? "bg-success"
-      : "bg-primary",
-  dayKey: (ts: number) => {
-    const d = new Date(ts);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  },
-  dayLabel: (key: string) => {
-    const [y, m, d] = key.split("-").map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString(undefined, {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  },
-  dt: (ts: number) => new Date(ts).toLocaleString(),
-};
+function tagBadgeClass(tag: Tag) {
+  if (tag === "Medical" || tag === "Vitals") return "bg-danger";
+  if (tag === "Nutrition" || tag === "Activity") return "bg-success";
+  return "bg-primary";
+}
+
+function makeId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function formatDateTime(ts: number) {
+  return new Date(ts).toLocaleString();
+}
+
+function dayKey(ts: number) {
+  const d = new Date(ts);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function formatDayLabel(key: string) {
+  const [y, m, d] = key.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+// Narrow-ish parsing (no `any`)
+function toTag(value: unknown): Tag {
+  return TAGS.includes(value as Tag) ? (value as Tag) : "General";
+}
 
 function loadNotes(): Note[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const arr = JSON.parse(raw);
-    if (!Array.isArray(arr)) return [];
-    return arr.map((n: any) => ({
-      id: String(n.id),
-      title: String(n.title ?? "(Untitled)"),
-      content: String(n.content ?? ""),
-      tag: (n.tag as Tag) ?? "General",
-      updatedAt: Number(n.updatedAt ?? Date.now()),
-    })) as Note[];
+
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .map((item): Note | null => {
+        if (typeof item !== "object" || item === null) return null;
+        const obj = item as Record<string, unknown>;
+
+        const id = typeof obj.id === "string" ? obj.id : "";
+        if (!id) return null;
+
+        const title = typeof obj.title === "string" ? obj.title : "(Untitled)";
+        const content = typeof obj.content === "string" ? obj.content : "";
+        const tag = toTag(obj.tag);
+        const updatedAt =
+          typeof obj.updatedAt === "number" && Number.isFinite(obj.updatedAt)
+            ? obj.updatedAt
+            : Date.now();
+
+        return { id, title, content, tag, updatedAt };
+      })
+      .filter((n): n is Note => n !== null);
   } catch {
     return [];
   }
 }
 
+function saveNotes(notes: Note[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+}
+
 export default function Notes() {
-  const [notes, setNotes] = useState<Note[]>(() => loadNotes().sort((a, b) => b.updatedAt - a.updatedAt));
+  const [notes, setNotes] = useState<Note[]>(() =>
+    loadNotes().sort((a, b) => b.updatedAt - a.updatedAt)
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // editor
+  // editor fields
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tag, setTag] = useState<Tag>("General");
 
   // UI
-  const [saved, setSaved] = useState(false);
-  const timerRef = useRef<number | null>(null);
+  const [savedFlash, setSavedFlash] = useState(false);
+  const saveTimerRef = useRef<number | null>(null);
 
-  const selected = useMemo(() => notes.find((n) => n.id === selectedId) ?? null, [notes, selectedId]);
+  const selectedNote = useMemo(
+    () => notes.find((n) => n.id === selectedId) ?? null,
+    [notes, selectedId]
+  );
 
+  // Persist on change
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+    saveNotes(notes);
   }, [notes]);
 
+  // Load selected note into editor
   useEffect(() => {
-    if (!selected) {
+    if (!selectedNote) {
       setTitle("");
       setContent("");
       setTag("General");
       return;
     }
-    setTitle(selected.title);
-    setContent(selected.content);
-    setTag(selected.tag);
-  }, [selected]);
+    setTitle(selectedNote.title);
+    setContent(selectedNote.content);
+    setTag(selectedNote.tag);
+  }, [selectedNote]);
 
+  // Cleanup timer
   useEffect(() => {
     return () => {
-      if (timerRef.current) window.clearTimeout(timerRef.current);
+      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     };
   }, []);
 
-  const timeline = useMemo(() => {
+  const timelineGroups = useMemo(() => {
     const map = new Map<string, Note[]>();
     for (const n of notes) {
-      const k = utils.dayKey(n.updatedAt);
-      (map.get(k) ?? map.set(k, []).get(k)!).push(n);
+      const k = dayKey(n.updatedAt);
+      const arr = map.get(k) ?? [];
+      arr.push(n);
+      map.set(k, arr);
     }
-    return Array.from(map.entries())
-      .sort(([a], [b]) => (a > b ? -1 : a < b ? 1 : 0))
-      .map(([day, items]) => ({ day, items: items.sort((a, b) => b.updatedAt - a.updatedAt) }));
+
+    const keys = Array.from(map.keys()).sort((a, b) => (a > b ? -1 : a < b ? 1 : 0));
+
+    return keys.map((k) => ({
+      day: k,
+      items: (map.get(k) ?? []).sort((a, b) => b.updatedAt - a.updatedAt),
+    }));
   }, [notes]);
 
-  const flashSaved = () => {
-    setSaved(true);
-    if (timerRef.current) window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => setSaved(false), 5000);
-  };
+  function flashSaved() {
+    setSavedFlash(true);
+    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+    // show for 5 seconds
+    saveTimerRef.current = window.setTimeout(() => setSavedFlash(false), 5000);
+  }
 
-  const handleNew = () => {
+  function handleNew() {
     setSelectedId(null);
     setTitle("");
     setContent("");
     setTag("General");
-  };
+  }
 
-  const handleSave = () => {
-    const t = title.trim();
-    const c = content.trim();
-    if (!t && !c) return;
+  function handleSave() {
+    const trimmedTitle = title.trim();
+    const trimmedContent = content.trim();
 
-    const now = Date.now();
+    if (!trimmedTitle && !trimmedContent) return;
 
-    setNotes((prev) => {
-      const sorted = (arr: Note[]) => arr.sort((a, b) => b.updatedAt - a.updatedAt);
+    if (selectedNote) {
+      const updated: Note = {
+        ...selectedNote,
+        title: trimmedTitle || "(Untitled)",
+        content: trimmedContent,
+        tag,
+        updatedAt: Date.now(),
+      };
 
-      if (selected) {
-        const updated: Note = { ...selected, title: t || "(Untitled)", content: c, tag, updatedAt: now };
-        return sorted(prev.map((n) => (n.id === selected.id ? updated : n)));
-      }
+      setNotes((prev) =>
+        prev
+          .map((n) => (n.id === selectedNote.id ? updated : n))
+          .sort((a, b) => b.updatedAt - a.updatedAt)
+      );
+      flashSaved();
+      return;
+    }
 
-      const created: Note = { id: utils.id(), title: t || "(Untitled)", content: c, tag, updatedAt: now };
-      setSelectedId(created.id);
-      return sorted([created, ...prev]);
-    });
+    const created: Note = {
+      id: makeId(),
+      title: trimmedTitle || "(Untitled)",
+      content: trimmedContent,
+      tag,
+      updatedAt: Date.now(),
+    };
 
+    setNotes((prev) => [created, ...prev].sort((a, b) => b.updatedAt - a.updatedAt));
+    setSelectedId(created.id);
     flashSaved();
-  };
+  }
 
-  const handleDelete = (id: string) => {
+  function handleDelete(id: string) {
     setNotes((prev) => prev.filter((n) => n.id !== id));
     if (selectedId === id) handleNew();
-  };
+  }
 
   return (
     <div className="py-3">
@@ -159,16 +227,15 @@ export default function Notes() {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          {saved && <span className="badge text-bg-success px-3 py-2">Saved</span>}
+          {savedFlash && <span className="badge text-bg-success px-3 py-2">Saved</span>}
           <Button color="outline-secondary" onClick={handleNew}>
             + New
           </Button>
         </div>
       </div>
 
-      {/* Main */}
       <div className="row g-3">
-        {/* Timeline */}
+        {/* Left: Timeline */}
         <div className="col-12 col-lg-5">
           <CustomSection title="Care Timeline" subheader={`Showing ${notes.length} note(s)`}>
             {notes.length === 0 ? (
@@ -176,28 +243,37 @@ export default function Notes() {
                 No notes yet. Click <strong>New</strong> and write something.
               </div>
             ) : (
-              timeline.map((g) => (
-                <div key={g.day} className="mb-3">
-                  <div className="text-muted small fw-semibold mb-2">{utils.dayLabel(g.day)}</div>
+              timelineGroups.map((group) => (
+                <div key={group.day} className="mb-3">
+                  <div className="text-muted small fw-semibold mb-2">{formatDayLabel(group.day)}</div>
+
                   <div className="list-group">
-                    {g.items.map((n) => {
+                    {group.items.map((n) => {
                       const active = n.id === selectedId;
+
                       return (
-                        <button
+                        <div
                           key={n.id}
-                          type="button"
+                          role="button"
+                          tabIndex={0}
                           className={
                             "list-group-item list-group-item-action d-flex justify-content-between align-items-start " +
                             (active ? "active" : "")
                           }
+                          style={{ cursor: "pointer" }}
                           onClick={() => setSelectedId(n.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") setSelectedId(n.id);
+                          }}
                         >
                           <div className="me-2">
                             <div className="fw-semibold d-flex align-items-center gap-2">
                               {n.title}
-                              <span className={`badge ${utils.badge(n.tag)}`}>{n.tag}</span>
+                              <span className={`badge ${tagBadgeClass(n.tag)}`}>{n.tag}</span>
                             </div>
-                            <div className={active ? "text-white-50 small" : "text-muted small"}>{utils.dt(n.updatedAt)}</div>
+                            <div className={active ? "text-white-50 small" : "text-muted small"}>
+                              {formatDateTime(n.updatedAt)}
+                            </div>
                           </div>
 
                           <button
@@ -207,10 +283,11 @@ export default function Notes() {
                               e.stopPropagation();
                               handleDelete(n.id);
                             }}
+                            aria-label={`Delete note ${n.title}`}
                           >
                             Delete
                           </button>
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -220,16 +297,20 @@ export default function Notes() {
           </CustomSection>
         </div>
 
-        {/* Editor */}
+        {/* Right: Editor */}
         <div className="col-12 col-lg-7">
           <CustomSection
-            title={selected ? "Edit Note" : "New Note"}
-            subheader={selected ? `Last updated: ${utils.dt(selected.updatedAt)}` : "Not saved yet"}
+            title={selectedNote ? "Edit Note" : "New Note"}
+            subheader={selectedNote ? `Last updated: ${formatDateTime(selectedNote.updatedAt)}` : "Not saved yet"}
           >
             <div className="row g-3">
               <div className="col-12 col-md-8">
-                <label className="form-label">Title</label>
+                <label htmlFor="noteTitle" className="form-label">
+                  Title
+                </label>
                 <input
+                  id="noteTitle"
+                  name="noteTitle"
                   className="form-control"
                   placeholder="e.g., Doctor appointment"
                   value={title}
@@ -238,8 +319,16 @@ export default function Notes() {
               </div>
 
               <div className="col-12 col-md-4">
-                <label className="form-label">Tag</label>
-                <select className="form-select" value={tag} onChange={(e) => setTag(e.target.value as Tag)}>
+                <label htmlFor="noteTag" className="form-label">
+                  Tag
+                </label>
+                <select
+                  id="noteTag"
+                  name="noteTag"
+                  className="form-select"
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value as Tag)}
+                >
                   {TAGS.map((t) => (
                     <option key={t} value={t}>
                       {t}
@@ -248,14 +337,18 @@ export default function Notes() {
                 </select>
 
                 <div className="mt-2">
-                  <span className={`badge ${utils.badge(tag)}`}>{tag}</span>
+                  <span className={`badge ${tagBadgeClass(tag)}`}>{tag}</span>
                 </div>
               </div>
             </div>
 
             <div className="mt-3">
-              <label className="form-label">Content</label>
+              <label htmlFor="noteContent" className="form-label">
+                Content
+              </label>
               <textarea
+                id="noteContent"
+                name="noteContent"
                 className="form-control"
                 rows={10}
                 placeholder="Write your note here..."
@@ -264,17 +357,15 @@ export default function Notes() {
               />
             </div>
 
-            <div className="d-flex justify-content-end align-items-center mt-3">
-              <div className="d-flex gap-2">
-                {selected && (
-                  <Button color="outline-danger" onClick={() => handleDelete(selected.id)}>
-                    Delete
-                  </Button>
-                )}
-                <Button color="primary" onClick={handleSave}>
-                  Save
+            <div className="d-flex justify-content-end align-items-center mt-3 gap-2">
+              {selectedNote && (
+                <Button color="outline-danger" onClick={() => handleDelete(selectedNote.id)}>
+                  Delete
                 </Button>
-              </div>
+              )}
+              <Button color="primary" onClick={handleSave}>
+                Save
+              </Button>
             </div>
           </CustomSection>
         </div>
