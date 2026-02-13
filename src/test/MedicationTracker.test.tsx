@@ -1,12 +1,11 @@
 /**
  * @vitest-environment jsdom
  * This file contains integration tests for the MedicationTracker page and its components.
- * It checks that the page renders correctly, the sidebar toggles correctly,
- * and that medications can be marked as taken (including UI changes and metadata rendering).
+ * It checks that the page renders correctly and that the sidebar toggles correctly.
  */
 
 import "@testing-library/jest-dom/vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import MedicationTracker from "../pages/MedicationTracker";
@@ -36,10 +35,10 @@ describe("MedicationTracker page - rendering", () => {
     expect(screen.getByText(/active medications/i)).toBeInTheDocument();
   });
 
-/*
+  /*
     This test checks that the hardcoded medications from the schedule
     appear inside the sidebar list and that the count matches the number of scheduled items.
-*/
+  */
   it("renders all scheduled medications in the sidebar list and shows the count", () => {
     render(<MedicationTracker />);
 
@@ -51,5 +50,40 @@ describe("MedicationTracker page - rendering", () => {
     // The count of scheduled items should display correctly
     expect(screen.getByText(/3 scheduled items/i)).toBeInTheDocument();
   });
+});
 
+/*
+  These tests cover sidebar behavior.
+  The sidebar should collapse using the main toggle button
+  and show again when clicked again.
+*/
+describe("MedicationTracker page - sidebar toggling", () => {
+  beforeEach(() => {
+    cleanup();
+  });
+
+  it("collapses the sidebar when 'Collapse Sidebar' is clicked and shows it again", () => {
+    render(<MedicationTracker />);
+
+    // Sidebar starts open
+    expect(screen.getByText(/active medications/i)).toBeInTheDocument();
+
+    // Collapse using main toggle button
+    fireEvent.click(
+      screen.getByRole("button", { name: /collapse sidebar/i }),
+    );
+
+    // Sidebar content should disappear
+    expect(screen.queryByText(/active medications/i)).not.toBeInTheDocument();
+
+    // Button text changes when sidebar is closed
+    expect(
+      screen.getByRole("button", { name: /show sidebar/i }),
+    ).toBeInTheDocument();
+
+    // Show sidebar again
+    fireEvent.click(screen.getByRole("button", { name: /show sidebar/i }));
+
+    expect(screen.getByText(/active medications/i)).toBeInTheDocument();
+  });
 });
