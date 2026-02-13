@@ -23,12 +23,10 @@ describe("MedicationTracker page - rendering", () => {
   it("renders the page heading and both section titles", () => {
     render(<MedicationTracker />);
 
-    // Main page heading
     expect(
       screen.getByRole("heading", { name: /medication tracker/i }),
     ).toBeInTheDocument();
 
-    // Section titles (from CustomSection)
     expect(
       screen.getByText(/today's medication schedule/i),
     ).toBeInTheDocument();
@@ -43,12 +41,10 @@ describe("MedicationTracker page - rendering", () => {
   it("renders all scheduled medications in the sidebar list and shows the count", () => {
     render(<MedicationTracker />);
 
-    // Medication names + dosage should appear in sidebar
     expect(screen.getByText(/metformin \(500mg\)/i)).toBeInTheDocument();
     expect(screen.getByText(/lisinopril \(10mg\)/i)).toBeInTheDocument();
     expect(screen.getByText(/aspirin \(81mg\)/i)).toBeInTheDocument();
 
-    // The count of scheduled items should display correctly
     expect(screen.getByText(/3 scheduled items/i)).toBeInTheDocument();
   });
 });
@@ -67,23 +63,18 @@ describe("MedicationTracker page - sidebar toggling", () => {
   it("collapses the sidebar when 'Collapse Sidebar' is clicked and shows it again", () => {
     render(<MedicationTracker />);
 
-    // Sidebar starts open
     expect(screen.getByText(/active medications/i)).toBeInTheDocument();
 
-    // Collapse using main toggle button
     fireEvent.click(
       screen.getByRole("button", { name: /collapse sidebar/i }),
     );
 
-    // Sidebar content should disappear
     expect(screen.queryByText(/active medications/i)).not.toBeInTheDocument();
 
-    // Button text changes when sidebar is closed
     expect(
       screen.getByRole("button", { name: /show sidebar/i }),
     ).toBeInTheDocument();
 
-    // Show sidebar again
     fireEvent.click(screen.getByRole("button", { name: /show sidebar/i }));
 
     expect(screen.getByText(/active medications/i)).toBeInTheDocument();
@@ -97,16 +88,12 @@ describe("MedicationTracker page - sidebar toggling", () => {
   it("hides the sidebar when the sidebar 'Hide' button is clicked", () => {
     render(<MedicationTracker />);
 
-    // Sidebar starts open
     expect(screen.getByText(/active medications/i)).toBeInTheDocument();
 
-    // Click internal Hide button
     fireEvent.click(screen.getByRole("button", { name: /^hide$/i }));
 
-    // Sidebar should disappear
     expect(screen.queryByText(/active medications/i)).not.toBeInTheDocument();
 
-    // Main toggle button should now say "Show Sidebar"
     expect(
       screen.getByRole("button", { name: /show sidebar/i }),
     ).toBeInTheDocument();
@@ -132,7 +119,6 @@ describe("MedicationTracker page - medication taken toggle", () => {
   it("marks a medication as taken and shows taken metadata + styling", () => {
     render(<MedicationTracker />);
 
-    // Target the first medication (Metformin)
     const medTitle = screen.getByRole("heading", {
       name: /metformin - 500mg/i,
     });
@@ -140,23 +126,49 @@ describe("MedicationTracker page - medication taken toggle", () => {
     const checkboxes = screen.getAllByRole("checkbox");
     expect(checkboxes).toHaveLength(3);
 
-    // Outer container for the medication item (may be nested)
     const itemContainer = medTitle.parentElement?.parentElement?.parentElement;
 
-    // Before click: no metadata visible
     expect(screen.queryByText(/taken at:/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^by:/i)).not.toBeInTheDocument();
 
-    // Toggle taken ON
     fireEvent.click(checkboxes[0]);
 
-    // Metadata appears
     expect(screen.getByText(/taken at:/i)).toBeInTheDocument();
     expect(screen.getByText(/^by:/i)).toBeInTheDocument();
     expect(screen.getByText(/caregiver \(mock\)/i)).toBeInTheDocument();
 
-    // Styling changes (these may fail depending on how jsdom reports styles)
     expect(medTitle).toHaveStyle({ textDecoration: "line-through" });
     expect(itemContainer).toHaveStyle({ background: "#dcebde" });
+  });
+
+  /*
+    This test checks that unchecking a taken medication reverts the UI:
+    - taken metadata is removed
+    - line-through is removed
+    - background returns to normal
+  */
+  it("unchecks a taken medication and removes taken metadata + styling", () => {
+    render(<MedicationTracker />);
+
+    const medTitle = screen.getByRole("heading", {
+      name: /metformin - 500mg/i,
+    });
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    const itemContainer = medTitle.parentElement?.parentElement?.parentElement;
+
+    fireEvent.click(checkboxes[0]);
+
+    expect(screen.getByText(/taken at:/i)).toBeInTheDocument();
+    expect(screen.getByText(/^by:/i)).toBeInTheDocument();
+    expect(medTitle).toHaveStyle({ textDecoration: "line-through" });
+    expect(itemContainer).toHaveStyle({ background: "#dcebde" });
+
+    fireEvent.click(checkboxes[0]);
+
+    expect(screen.queryByText(/taken at:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^by:/i)).not.toBeInTheDocument();
+    expect(medTitle).toHaveStyle({ textDecoration: "none" });
+    expect(itemContainer).toHaveStyle({ background: "white" });
   });
 });
