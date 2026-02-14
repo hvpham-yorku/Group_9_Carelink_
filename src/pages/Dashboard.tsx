@@ -49,7 +49,7 @@ type MedItem = {
 
 type AppointmentItem = {
   day: string;
-  title: string;
+  title: string; 
   location: string;
 };
 
@@ -435,21 +435,6 @@ export default function Dashboard() {
                 <button type="button" className="btn btn-light border" onClick={goTasks}>
                   Open Task Manager
                 </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ======================================================
-            FINAL STATUS CARD (Developer confirmation / milestone)
-           ====================================================== */}
-        <div className="bg-white p-4" style={styles.cardLike}>
-          <div className="d-flex gap-3 align-items-start">
-            <span style={{ fontSize: "1.6rem" }}>✅</span>
-            <div>
-              <div className="fw-semibold">Components loaded successfully.</div>
-              <div className="text-muted">
-                Dashboard is complete for Iteration 1 (UI-only, mock data, routing).
               </div>
             </div>
           </div>
