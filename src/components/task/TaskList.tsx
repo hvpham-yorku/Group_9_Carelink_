@@ -6,18 +6,13 @@
     - tasks: an array of task objects: title, description, category, time, and completion status.
     - onToggleTask: a function that is called when a task's completion status is toggled. It takes the task's id as an argument.
 */
+import type { Task } from "./TaskType";
+
 import TaskCard from "./TaskCard";
 
 interface TaskListProps {
-  tasks: {
-    id: number;
-    title: string;
-    description: string;
-    category: string;
-    time?: string;
-    completed?: boolean;
-  }[];
-  onToggleTask: (id: number) => void;
+  tasks: Task[];
+  onToggleTask: (id: string) => void;
 }
 
 const TaskList = ({ tasks, onToggleTask }: TaskListProps) => {
@@ -26,14 +21,7 @@ const TaskList = ({ tasks, onToggleTask }: TaskListProps) => {
       <ul className="list-unstyled">
         {tasks.map((task) => (
           <li key={task.id}>
-            <TaskCard
-              title={task.title}
-              description={task.description}
-              category={task.category}
-              time={task.time}
-              completed={task.completed ?? false}
-              onToggle={() => onToggleTask(task.id)}
-            />
+            <TaskCard task={task} onToggle={() => onToggleTask(task.id)} />
           </li>
         ))}
       </ul>

@@ -9,19 +9,11 @@
 */
 
 import { useState, useEffect } from "react";
+import type { Task, TaskCategory } from "../components/task/TaskType";
 
 import CustomSection from "../components/ui/CustomSection";
 import TaskList from "../components/task/TaskList";
 import TaskForm from "../components/task/TaskForm";
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  time?: string;
-  completed: boolean;
-}
 
 const TaskManager = () => {
   // Initialize tasks state with a sample task for demonstration purposes
@@ -32,11 +24,11 @@ const TaskManager = () => {
       ? (JSON.parse(savedTasks) as Task[])
       : [
           {
-            id: 1,
+            id: crypto.randomUUID(), // api to generate unique id for the task
             title: "Sample Task",
             description: "This is a sample task description.",
             category: "None",
-            time: "2024-06-30 10:00",
+            time: "10:00 AM",
             completed: false,
           },
         ];
@@ -50,11 +42,11 @@ const TaskManager = () => {
     category: string,
   ) => {
     const newTask: Task = {
-      id: tasks.length + 1,
+      id: crypto.randomUUID(), // Generate a unique id for the new task
       title,
       description,
       time,
-      category,
+      category: category as TaskCategory,
       completed: false,
     };
     setTasks([...tasks, newTask]);
@@ -66,7 +58,7 @@ const TaskManager = () => {
   }, [tasks]);
 
   // Function to toggle the completion status of a task based on its id
-  const handleToggleTask = (id: number) => {
+  const handleToggleTask = (id: string) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
         task.id === id ? { ...task, completed: !task.completed } : task,
