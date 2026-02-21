@@ -8,14 +8,17 @@
   Syntax:
   <TaskCard title description category time completed onToggle />
 */
-import type { Task } from "./TaskType";
+import type { Task, TaskCategoryColor } from "./TaskType";
 
 interface TaskCardProps {
   task: Task;
+  categoryColors: TaskCategoryColor;
   onToggle: () => void;
 }
 
-const TaskCard = ({ task, onToggle }: TaskCardProps) => {
+const TaskCard = ({ task, categoryColors, onToggle }: TaskCardProps) => {
+  const badgeColor = categoryColors[task.category];
+
   return (
     <>
       <div className="card mb-3">
@@ -45,7 +48,9 @@ const TaskCard = ({ task, onToggle }: TaskCardProps) => {
 
           <div className="text-end">
             <span className="text-muted">{task.time}</span> <br />
-            <span>{task.category}</span>
+            <span className={`badge text-bg-${badgeColor}`}>
+              {task.category}
+            </span>
           </div>
         </div>
       </div>

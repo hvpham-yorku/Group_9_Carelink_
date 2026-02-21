@@ -15,7 +15,7 @@ interface TaskFormProps {
 }
 
 const CATEGORIES: TaskCategory[] = [
-  "None",
+  "General",
   "Vitals",
   "Medication",
   "Personal",
@@ -29,7 +29,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [time, setTime] = useState("");
-  const [category, setCategory] = useState<TaskCategory>("None");
+  const [category, setCategory] = useState<TaskCategory>("General");
 
   /*
     Calls onAddTask prop function with the current values from the inputs.
@@ -41,7 +41,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
     setTitle("");
     setDescription("");
     setTime("");
-    setCategory("None");
+    setCategory("General");
   };
 
   return (

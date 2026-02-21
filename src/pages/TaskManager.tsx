@@ -9,14 +9,31 @@
 */
 
 import { useState, useEffect } from "react";
-import type { Task, TaskCategory } from "../components/task/TaskType";
+import type {
+  Task,
+  TaskCategory,
+  TaskCategoryColor,
+} from "../components/task/TaskType";
 
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
 import TaskList from "../components/task/TaskList";
 import TaskForm from "../components/task/TaskForm";
+import Button from "../components/ui/Button";
 
 const TaskManager = () => {
+  const CATEGORY_COLORS: TaskCategoryColor = {
+    General: "primary",
+    Vitals: "danger",
+    Medication: "danger",
+    Personal: "secondary",
+    Nutrition: "success",
+    Therapy: "primary",
+    Activity: "success",
+  };
+
+  const [visible, setVisible] = useState(false);
+
   // Initialize tasks state with a sample task for demonstration purposes
   const [tasks, setTasks] = useState<Task[]>(() => {
     // Load tasks from localStorage if available, otherwise initialize with a sample task
@@ -28,7 +45,7 @@ const TaskManager = () => {
             id: crypto.randomUUID(), // api to generate unique id for the task
             title: "Sample Task",
             description: "This is a sample task description.",
-            category: "None",
+            category: "General",
             time: "10:00 AM",
             completed: false,
           },
@@ -67,6 +84,11 @@ const TaskManager = () => {
     );
   };
 
+  // Toggles the visibility of the TaskForm component when the "Add New Task" button is clicked
+  const toggleFormVisibility = () => {
+    setVisible((prevVisible) => !prevVisible);
+  };
+
   return (
     <>
       <div className="container">
@@ -74,21 +96,32 @@ const TaskManager = () => {
           title="Task Manager"
           subheader="Manage your tasks efficiently"
         >
-          <button className="btn btn-primary">+ Add New Task</button>
+          <Button color="primary" onClick={toggleFormVisibility}>
+            + Add New Task
+          </Button>
         </CustomTitleBanner>
 
         <section className="row mb-4">
           <div className="col">
             <CustomSection title="All Tasks" subheader="Manage your tasks here">
-              <TaskList tasks={tasks} onToggleTask={handleToggleTask} />
+              <TaskList
+                tasks={tasks}
+                categoryColors={CATEGORY_COLORS}
+                onToggleTask={handleToggleTask}
+              />
             </CustomSection>
           </div>
 
-          <div className="col">
-            <CustomSection title="Add Task" subheader="Create new Tasks here: ">
-              <TaskForm onAddTask={handleAddTask} />
-            </CustomSection>
-          </div>
+          {visible && (
+            <div className="col">
+              <CustomSection
+                title="Manage Task"
+                subheader="Create new Tasks here: "
+              >
+                <TaskForm onAddTask={handleAddTask} />
+              </CustomSection>
+            </div>
+          )}
         </section>
       </div>
     </>

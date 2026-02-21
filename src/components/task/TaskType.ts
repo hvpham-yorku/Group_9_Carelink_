@@ -3,13 +3,17 @@
  */
 
 export type TaskCategory =
-  | "None"
+  | "General"
   | "Vitals"
   | "Medication"
   | "Personal"
   | "Nutrition"
   | "Therapy"
   | "Activity";
+
+export type TaskCategoryColor = {
+  [key in TaskCategory]: string;
+};
 
 export interface Task {
   id: string;
