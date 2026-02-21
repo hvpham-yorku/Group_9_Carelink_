@@ -11,6 +11,7 @@
 import { useState, useEffect } from "react";
 import type { Task, TaskCategory } from "../components/task/TaskType";
 
+import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
 import TaskList from "../components/task/TaskList";
 import TaskForm from "../components/task/TaskForm";
@@ -69,17 +70,26 @@ const TaskManager = () => {
   return (
     <>
       <div className="container">
-        <h1>Task Manager</h1>
-        <p>This is the Task Manager page.</p>
-        <hr />
+        <CustomTitleBanner
+          title="Task Manager"
+          subheader="Manage your tasks efficiently"
+        >
+          <button className="btn btn-primary">+ Add New Task</button>
+        </CustomTitleBanner>
 
-        <CustomSection title="Add Task" subheader="Create new Tasks here: ">
-          <TaskForm onAddTask={handleAddTask} />
-        </CustomSection>
+        <section className="row mb-4">
+          <div className="col">
+            <CustomSection title="All Tasks" subheader="Manage your tasks here">
+              <TaskList tasks={tasks} onToggleTask={handleToggleTask} />
+            </CustomSection>
+          </div>
 
-        <CustomSection title="All Tasks" subheader="Manage your tasks here">
-          <TaskList tasks={tasks} onToggleTask={handleToggleTask} />
-        </CustomSection>
+          <div className="col">
+            <CustomSection title="Add Task" subheader="Create new Tasks here: ">
+              <TaskForm onAddTask={handleAddTask} />
+            </CustomSection>
+          </div>
+        </section>
       </div>
     </>
   );
