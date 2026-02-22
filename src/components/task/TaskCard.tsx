@@ -47,7 +47,7 @@ const TaskCard = ({ task, categoryColors, onToggle }: TaskCardProps) => {
           }
 
           <div className="text-end">
-            <span className="text-muted">{task.time}</span> <br />
+            <span className="">{task.time}</span> <br />
             <span className={`badge text-bg-${badgeColor}`}>
               {task.category}
             </span>

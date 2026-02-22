@@ -20,13 +20,14 @@ import CustomSection from "../components/ui/CustomSection";
 import TaskList from "../components/task/TaskList";
 import TaskForm from "../components/task/TaskForm";
 import Button from "../components/ui/Button";
+import TaskListGroup from "../components/task/TaskListGroup";
 
 const TaskManager = () => {
   const CATEGORY_COLORS: TaskCategoryColor = {
     General: "primary",
     Vitals: "danger",
     Medication: "danger",
-    Personal: "secondary",
+    Personal: "success",
     Nutrition: "success",
     Therapy: "primary",
     Activity: "success",
@@ -100,6 +101,8 @@ const TaskManager = () => {
             + Add New Task
           </Button>
         </CustomTitleBanner>
+
+        <TaskListGroup />
 
         <section className="row mb-4">
           <div className="col">
