@@ -8,23 +8,17 @@
   Syntax:
   <TaskCard title description category time completed onToggle />
 */
+import type { Task, TaskCategoryColor } from "./TaskType";
+
 interface TaskCardProps {
-  title: string;
-  description: string;
-  category: string;
-  time?: string;
-  completed: boolean;
+  task: Task;
+  categoryColors: TaskCategoryColor;
   onToggle: () => void;
 }
 
-const TaskCard = ({
-  title,
-  description,
-  category,
-  time,
-  completed,
-  onToggle,
-}: TaskCardProps) => {
+const TaskCard = ({ task, categoryColors, onToggle }: TaskCardProps) => {
+  const badgeColor = categoryColors[task.category];
+
   return (
     <>
       <div className="card mb-3">
@@ -34,7 +28,7 @@ const TaskCard = ({
               className="form-check-input"
               type="checkbox"
               name="taskCheck"
-              checked={completed}
+              checked={task.completed}
               onChange={onToggle}
             />
           </div>
@@ -44,17 +38,19 @@ const TaskCard = ({
             // if checked, the title will have a line through them to indicate completion
             <div className="flex-grow-1">
               <h5
-                className={`card-title ${completed ? "text-decoration-line-through" : ""}`}
+                className={`card-title ${task.completed ? "text-decoration-line-through" : ""}`}
               >
-                {title}
+                {task.title}
               </h5>
-              <p className="card-text">{description}</p>
+              <p className="card-text">{task.description}</p>
             </div>
           }
 
           <div className="text-end">
-            <span className="text-muted">{time}</span> <br />
-            <span>{category}</span>
+            <span className="">{task.time}</span> <br />
+            <span className={`badge text-bg-${badgeColor}`}>
+              {task.category}
+            </span>
           </div>
         </div>
       </div>

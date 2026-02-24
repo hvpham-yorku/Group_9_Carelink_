@@ -3,61 +3,50 @@
     It includes input fields for task title, description, due date, and category level. 
 */
 import { useState } from "react";
+import type { TaskCategory } from "./TaskType";
 
 interface TaskFormProps {
   onAddTask: (
     title: string,
     description: string,
     time: string,
-    category: string,
+    category: TaskCategory,
   ) => void;
 }
+
+const CATEGORIES: TaskCategory[] = [
+  "General",
+  "Vitals",
+  "Medication",
+  "Personal",
+  "Nutrition",
+  "Therapy",
+  "Activity",
+];
 
 const TaskForm = ({ onAddTask }: TaskFormProps) => {
   // State variables to hold the values of the form inputs
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [time, setTime] = useState("");
-  const [category, setCategory] = useState("None");
-
-  // Event handlers to update the state variables when the user types in the form inputs
-  const titleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(event.target.value);
-  };
-
-  const descriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDescription(event.target.value);
-  };
-
-  const timeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTime(event.target.value);
-  };
-
-  const categoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategory(event.target.value);
-  };
+  const [category, setCategory] = useState<TaskCategory>("General");
 
   /*
     Calls onAddTask prop function with the current values from the inputs.
     Resets the inputs after adding a task. 
   */
-  const handleAddClick = () => {
+  const handleAddClick = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevents the default form submission behavior
     onAddTask(title, description, time, category);
     setTitle("");
     setDescription("");
     setTime("");
-    setCategory("None");
+    setCategory("General");
   };
 
   return (
     <>
-      <form
-        className="mb-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleAddClick();
-        }}
-      >
+      <form className="mb-3" onSubmit={handleAddClick}>
         <label htmlFor="task-title" className="form-label">
           Task Title:
         </label>
@@ -66,7 +55,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           className="form-control"
           id="task-title"
           value={title}
-          onChange={titleChange}
+          onChange={(e) => setTitle(e.target.value)}
           required
         />
 
@@ -78,7 +67,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           id="task-description"
           rows={2}
           value={description}
-          onChange={descriptionChange}
+          onChange={(e) => setDescription(e.target.value)}
           required
         />
 
@@ -90,7 +79,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           className="form-control"
           id="task-time"
           value={time}
-          onChange={timeChange}
+          onChange={(e) => setTime(e.target.value)}
           required
         />
 
@@ -101,16 +90,14 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           className="form-select"
           id="task-category"
           value={category}
-          onChange={categoryChange}
+          onChange={(e) => setCategory(e.target.value as TaskCategory)}
           required
         >
-          <option value="None">None</option>
-          <option value="Vitals">Vitals</option>
-          <option value="Medication">Medication</option>
-          <option value="Personal">Personal</option>
-          <option value="Nutrition">Nutrition</option>
-          <option value="Therapy">Therapy</option>
-          <option value="Activity">Activity</option>
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
         </select>
 
         <button className="btn btn-primary mt-3" type="submit">
