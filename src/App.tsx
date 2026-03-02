@@ -6,11 +6,13 @@ import PatientProfile from "./pages/PatientProfile";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import Notes from "./pages/Notes";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
     <>
       <Routes>
+        <Route path="/landingpage" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
 
         <Route element={<Layout />}>
@@ -21,7 +23,7 @@ function App() {
           <Route path="/notes" element={<Notes />} />
         </Route>
 
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/landingpage" replace />} />
       </Routes>
     </>
   );
