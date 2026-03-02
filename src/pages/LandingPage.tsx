@@ -5,9 +5,9 @@ const LandingPage = () => {
   return (
     <>
     <button
-      className="btn btn-primary mt-5"
+      className="btn btn-outline-primary btn-lg mt-5"
       onClick={() => navigate("/Login")}
-    >
+    > Login
     </button>
     </>
   );
