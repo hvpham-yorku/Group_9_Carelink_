@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-function Header() {
+export default function Header() {
   const navigate = useNavigate();
   return (
     <header className="header">
@@ -15,7 +15,7 @@ function Header() {
         <a href="#contact">Who It's For</a>
         <button
         className="btn btn-outline-primary btn-lg mt-5"
-        onClick={() => navigate("/Login")}
+        onClick={() => navigate("/login")}
         > Login
         </button>
       </nav>
@@ -23,4 +23,3 @@ function Header() {
   );
 }
 
-export default Header;
