@@ -9,11 +9,8 @@
 */
 
 import { useState, useEffect } from "react";
-import type {
-  Task,
-  TaskCategory,
-  TaskCategoryColor,
-} from "../components/task/TaskType";
+import type { Task, TaskCategory, TaskCategoryColor } from "../types/TaskType";
+import { mockService } from "../data/mockService";
 
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
@@ -34,24 +31,11 @@ const TaskManager = () => {
   };
 
   const [visible, setVisible] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  // Initialize tasks state with a sample task for demonstration purposes
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    // Load tasks from localStorage if available, otherwise initialize with a sample task
-    const savedTasks = localStorage.getItem("tasks");
-    return savedTasks
-      ? (JSON.parse(savedTasks) as Task[])
-      : [
-          {
-            id: crypto.randomUUID(), // api to generate unique id for the task
-            title: "Sample Task",
-            description: "This is a sample task description.",
-            category: "General",
-            time: "10:00 AM",
-            completed: false,
-          },
-        ];
-  });
+  useEffect(() => {
+    mockService.getTasks().then(setTasks);
+  }, []);
 
   // Function to handle adding a new task to the list
   const handleAddTask = (
@@ -60,21 +44,16 @@ const TaskManager = () => {
     time: string,
     category: string,
   ) => {
-    const newTask: Task = {
-      id: crypto.randomUUID(), // Generate a unique id for the new task
-      title,
-      description,
-      time,
-      category: category as TaskCategory,
-      completed: false,
-    };
-    setTasks([...tasks, newTask]);
+    mockService
+      .addTask({
+        title,
+        description,
+        time,
+        category: category as TaskCategory,
+        completed: false,
+      })
+      .then((newTask) => setTasks((prev) => [...prev, newTask]));
   };
-
-  // (Temporary) Saves tasks to localStorage whenever the tasks state changes
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
 
   // Function to toggle the completion status of a task based on its id
   const handleToggleTask = (id: string) => {

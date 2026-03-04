@@ -3,7 +3,7 @@
     It includes input fields for task title, description, due date, and category level. 
 */
 import { useState } from "react";
-import type { TaskCategory } from "./TaskType";
+import type { TaskCategory } from "../../types/TaskType";
 
 interface TaskFormProps {
   onAddTask: (
