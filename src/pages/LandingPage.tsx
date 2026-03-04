@@ -6,6 +6,9 @@ const LandingPage = () => {
   return (
     <>
     <Header />
+    <div className="Hero bg-primary-subtle">
+       div
+    </div>
     </>
   );
 };
