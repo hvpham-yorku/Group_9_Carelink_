@@ -6,7 +6,7 @@
     - tasks: an array of task objects: title, description, category, time, and completion status.
     - onToggleTask: a function that is called when a task's completion status is toggled. It takes the task's id as an argument.
 */
-import type { Task, TaskCategoryColor } from "../../types/TaskType";
+import type { Task, TaskCategoryColor } from "../../types/Types";
 
 import TaskCard from "./TaskCard";
 

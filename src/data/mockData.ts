@@ -1,4 +1,4 @@
-import type { Task } from "../types/TaskType";
+import type { Task } from "../types/Types";
 
 export const mockTasks: Task[] = [
   {
@@ -26,3 +26,9 @@ export const mockTasks: Task[] = [
     completed: false,
   },
 ];
+
+// export const medicationTasks: Task[] = [];
+
+// export const notes: Task[] = [];
+
+// export const patientInfo: Task[] = [];

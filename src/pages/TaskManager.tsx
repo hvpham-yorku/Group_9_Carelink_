@@ -9,7 +9,7 @@
 */
 
 import { useState, useEffect } from "react";
-import type { Task, TaskCategory, TaskCategoryColor } from "../types/TaskType";
+import type { Task, Tags, TaskCategoryColor } from "../types/Types";
 import { mockService } from "../data/mockService";
 
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
@@ -28,6 +28,8 @@ const TaskManager = () => {
     Nutrition: "success",
     Therapy: "primary",
     Activity: "success",
+    Medical: "danger",
+    Mood: "primary",
   };
 
   const [visible, setVisible] = useState(false);
@@ -49,7 +51,7 @@ const TaskManager = () => {
         title,
         description,
         time,
-        category: category as TaskCategory,
+        category: category as Tags,
         completed: false,
       })
       .then((newTask) => setTasks((prev) => [...prev, newTask]));

@@ -1,4 +1,4 @@
-import type { Task } from "../types/TaskType";
+import type { Task } from "../types/Types";
 import { mockTasks } from "./mockData";
 
 const tasks = [...mockTasks];

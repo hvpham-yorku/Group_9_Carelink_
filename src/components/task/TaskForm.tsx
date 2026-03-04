@@ -3,25 +3,27 @@
     It includes input fields for task title, description, due date, and category level. 
 */
 import { useState } from "react";
-import type { TaskCategory } from "../../types/TaskType";
+import type { Tags } from "../../types/Types";
 
 interface TaskFormProps {
   onAddTask: (
     title: string,
     description: string,
     time: string,
-    category: TaskCategory,
+    category: Tags,
   ) => void;
 }
 
-const CATEGORIES: TaskCategory[] = [
-  "General",
+const CATEGORIES: Tags[] = [
+  "Medical",
   "Vitals",
+  "Mood",
+  "Nutrition",
+  "Activity",
+  "General",
   "Medication",
   "Personal",
-  "Nutrition",
   "Therapy",
-  "Activity",
 ];
 
 const TaskForm = ({ onAddTask }: TaskFormProps) => {
@@ -29,7 +31,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [time, setTime] = useState("");
-  const [category, setCategory] = useState<TaskCategory>("General");
+  const [category, setCategory] = useState<Tags>("General");
 
   /*
     Calls onAddTask prop function with the current values from the inputs.
@@ -90,7 +92,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           className="form-select"
           id="task-category"
           value={category}
-          onChange={(e) => setCategory(e.target.value as TaskCategory)}
+          onChange={(e) => setCategory(e.target.value as Tags)}
           required
         >
           {CATEGORIES.map((cat) => (

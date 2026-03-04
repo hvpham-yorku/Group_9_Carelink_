@@ -8,7 +8,7 @@
   Syntax:
   <TaskCard title description category time completed onToggle />
 */
-import type { Task, TaskCategoryColor } from "../../types/TaskType";
+import type { Task, TaskCategoryColor } from "../../types/Types";
 
 interface TaskCardProps {
   task: Task;
