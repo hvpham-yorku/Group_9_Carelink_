@@ -13,10 +13,8 @@ export default function Section2() {
                     manage multiple patients, and rely on clear communication to 
                     ensure patient safety.
                     </h5>
-                </div>
-                
+                </div> 
             </div>
-            
         </section>
     )
 }
