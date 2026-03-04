@@ -1,3 +1,4 @@
+import Footer from "../components/landingpage/Footer";
 import Header from "../components/landingpage/Header";
 import Hero from "../components/landingpage/Hero";
 
@@ -6,6 +7,7 @@ const LandingPage = () => {
     <>
     <Header />
     <Hero />
+    <Footer />
     </>
   );
 };
