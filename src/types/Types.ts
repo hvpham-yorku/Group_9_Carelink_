@@ -34,3 +34,7 @@ export interface Task {
   time?: string;
   completed: boolean;
 }
+
+/**
+ * Dashboard Type Definitions
+ */
