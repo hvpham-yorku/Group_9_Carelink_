@@ -4,7 +4,7 @@ import CustomSection from "../components/ui/CustomSection";
 import PatientList from "../components/team/PatientList";
 import TeamList from "../components/team/TeamList";
 import ModalForm from "../components/team/ModalForm";
-import { mockService } from "../data/mockService";
+import { mockService } from "../services/mockService";
 import type { CaregiverInfo, PatientInfo } from "../types/Types";
 
 const Teams = () => {

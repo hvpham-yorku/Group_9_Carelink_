@@ -10,7 +10,7 @@
 
 import { useState, useEffect } from "react";
 import type { Task, Tags, TaskCategoryColor } from "../types/Types";
-import { mockService } from "../data/mockService";
+import { mockService } from "../services/mockService";
 
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
