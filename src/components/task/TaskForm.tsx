@@ -12,6 +12,7 @@ interface TaskFormProps {
     time: string,
     category: Tags,
   ) => void;
+  onCancel?: () => void;
 }
 
 const CATEGORIES: Tags[] = [
@@ -26,7 +27,7 @@ const CATEGORIES: Tags[] = [
   "Therapy",
 ];
 
-const TaskForm = ({ onAddTask }: TaskFormProps) => {
+const TaskForm = ({ onAddTask, onCancel }: TaskFormProps) => {
   // State variables to hold the values of the form inputs
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -102,9 +103,20 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           ))}
         </select>
 
-        <button className="btn btn-primary mt-3" type="submit">
-          Add Task
-        </button>
+        <div className="d-flex gap-2 mt-3">
+          <button className="btn btn-primary" type="submit">
+            Add Task
+          </button>
+          {onCancel && (
+            <button
+              className="btn btn-outline-secondary"
+              type="button"
+              onClick={onCancel}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
     </>
   );

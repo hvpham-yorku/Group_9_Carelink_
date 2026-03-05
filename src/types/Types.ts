@@ -31,6 +31,7 @@ export interface Task {
   category: Tags;
   time?: string;
   completedAt?: string;
+  completedBy?: string;
   completed: boolean;
 }
 

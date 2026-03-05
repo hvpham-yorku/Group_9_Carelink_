@@ -6,7 +6,8 @@ const tasks = [...mockTasks];
 export const mockService = {
   async getTasks(): Promise<Task[]> {
     return new Promise((resolve) => {
-      setTimeout(() => resolve(tasks), 300);
+      // Return a new array instance to avoid shared reference mutations in React state.
+      setTimeout(() => resolve([...tasks]), 300);
     });
   },
 
@@ -18,5 +19,12 @@ export const mockService = {
 
     tasks.push(newTask);
     return newTask;
+  },
+
+  async deleteTask(id: string): Promise<void> {
+    const index = tasks.findIndex((task) => task.id === id);
+    if (index !== -1) {
+      tasks.splice(index, 1);
+    }
   },
 };

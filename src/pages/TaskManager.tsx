@@ -17,7 +17,7 @@ import CustomSection from "../components/ui/CustomSection";
 import TaskList from "../components/task/TaskList";
 import TaskForm from "../components/task/TaskForm";
 import Button from "../components/ui/Button";
-import TaskListGroup from "../components/task/TaskListGroup";
+import TaskEdit from "../components/task/TaskEdit";
 
 const TaskManager = () => {
   const CATEGORY_COLORS: TaskCategoryColor = {
@@ -33,6 +33,8 @@ const TaskManager = () => {
   };
 
   const [visible, setVisible] = useState(false);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
@@ -44,31 +46,86 @@ const TaskManager = () => {
     title: string,
     description: string,
     time: string,
-    category: string,
+    category: Tags,
   ) => {
     mockService
       .addTask({
         title,
         description,
         time,
-        category: category as Tags,
+        completedAt: "",
+        completedBy: "",
+        category,
         completed: false,
       })
-      .then((newTask) => setTasks((prev) => [...prev, newTask]));
+      .then((newTask) => {
+        setTasks((prev) =>
+          prev.some((task) => task.id === newTask.id)
+            ? prev
+            : [...prev, newTask],
+        );
+        setSelectedTask(newTask);
+        setFormMode("edit");
+        setVisible(true);
+      });
   };
 
   // Function to toggle the completion status of a task based on its id
   const handleToggleTask = (id: string) => {
+    setTasks((prevTasks) => {
+      const updatedTasks = prevTasks.map((task) =>
+        task.id === id
+          ? {
+              ...task,
+              completed: !task.completed,
+              completedAt: !task.completed
+                ? new Date().toLocaleString()
+                : undefined,
+              completedBy: !task.completed ? "Caregiver" : undefined,
+            }
+          : task,
+      );
+
+      const updated = updatedTasks.find((task) => task.id === id);
+      if (updated && selectedTask && selectedTask.id === id) {
+        setSelectedTask(updated);
+      }
+
+      return updatedTasks;
+    });
+  };
+
+  const handleUpdateTask = (updatedTask: Task) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task,
+        task.id === updatedTask.id ? updatedTask : task,
       ),
     );
+    setSelectedTask(updatedTask);
+  };
+
+  const handleDeleteTask = (id: string) => {
+    mockService.deleteTask(id).then(() => {
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+      if (selectedTask?.id === id) {
+        setSelectedTask(null);
+        setVisible(false);
+        setFormMode("add");
+      }
+    });
   };
 
   // Toggles the visibility of the TaskForm component when the "Add New Task" button is clicked
   const toggleFormVisibility = () => {
-    setVisible((prevVisible) => !prevVisible);
+    setSelectedTask(null);
+    setFormMode("add");
+    setVisible(true);
+  };
+
+  const handleSelectTask = (task: Task) => {
+    setSelectedTask(task);
+    setFormMode("edit");
+    setVisible(true);
   };
 
   return (
@@ -83,8 +140,6 @@ const TaskManager = () => {
           </Button>
         </CustomTitleBanner>
 
-        <TaskListGroup />
-
         <section className="row mb-4">
           <div className="col">
             <CustomSection title="All Tasks" subheader="Manage your tasks here">
@@ -92,6 +147,7 @@ const TaskManager = () => {
                 tasks={tasks}
                 categoryColors={CATEGORY_COLORS}
                 onToggleTask={handleToggleTask}
+                onSelectTask={handleSelectTask}
               />
             </CustomSection>
           </div>
@@ -99,10 +155,29 @@ const TaskManager = () => {
           {visible && (
             <div className="col">
               <CustomSection
-                title="Manage Task"
-                subheader="Create new Tasks here: "
+                title={formMode === "add" ? "Add Task" : "Edit Task"}
+                subheader={
+                  formMode === "add"
+                    ? "Create a new task"
+                    : "Update the selected task"
+                }
               >
-                <TaskForm onAddTask={handleAddTask} />
+                {formMode === "add" ? (
+                  <TaskForm
+                    onAddTask={handleAddTask}
+                    onCancel={() => setVisible(false)}
+                  />
+                ) : (
+                  selectedTask && (
+                    <TaskEdit
+                      key={selectedTask.id}
+                      task={selectedTask}
+                      onUpdateTask={handleUpdateTask}
+                      onDeleteTask={handleDeleteTask}
+                      onCancel={() => setVisible(false)}
+                    />
+                  )
+                )}
               </CustomSection>
             </div>
           )}

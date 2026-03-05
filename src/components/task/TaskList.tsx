@@ -14,9 +14,15 @@ interface TaskListProps {
   tasks: Task[];
   categoryColors: TaskCategoryColor;
   onToggleTask: (id: string) => void;
+  onSelectTask: (task: Task) => void;
 }
 
-const TaskList = ({ tasks, categoryColors, onToggleTask }: TaskListProps) => {
+const TaskList = ({
+  tasks,
+  categoryColors,
+  onToggleTask,
+  onSelectTask,
+}: TaskListProps) => {
   return (
     <>
       <ul className="list-unstyled">
@@ -26,6 +32,7 @@ const TaskList = ({ tasks, categoryColors, onToggleTask }: TaskListProps) => {
               task={task}
               categoryColors={categoryColors}
               onToggle={() => onToggleTask(task.id)}
+              onSelect={() => onSelectTask(task)}
             />
           </li>
         ))}

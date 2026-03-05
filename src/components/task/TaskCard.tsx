@@ -14,22 +14,48 @@ interface TaskCardProps {
   task: Task;
   categoryColors: TaskCategoryColor;
   onToggle: () => void;
+  onSelect?: () => void;
 }
 
-const TaskCard = ({ task, categoryColors, onToggle }: TaskCardProps) => {
+const TaskCard = ({
+  task,
+  categoryColors,
+  onToggle,
+  onSelect,
+}: TaskCardProps) => {
   const badgeColor = categoryColors[task.category];
+  const isCompleted = task.completed;
+  const completedAt = task.completedAt;
+  const completedBy = task.completedBy;
 
   return (
     <>
-      <div className="card mb-3">
+      <div
+        className={`card mb-3 ${
+          isCompleted ? "bg-success-subtle border-success" : ""
+        }`}
+        style={{ cursor: "pointer" }}
+        role="button"
+        tabIndex={0}
+        onClick={onSelect}
+        onKeyDown={(e) => {
+          if ((e.key === "Enter" || e.key === " ") && onSelect) {
+            e.preventDefault();
+            onSelect();
+          }
+        }}
+      >
         <div className="card-body d-flex align-items-center">
           <div className="form-check me-3">
             <input
               className="form-check-input"
               type="checkbox"
               name="taskCheck"
-              checked={task.completed}
-              onChange={onToggle}
+              checked={isCompleted}
+              onChange={(e) => {
+                e.stopPropagation();
+                onToggle();
+              }}
             />
           </div>
 
@@ -38,16 +64,24 @@ const TaskCard = ({ task, categoryColors, onToggle }: TaskCardProps) => {
             // if checked, the title will have a line through them to indicate completion
             <div className="flex-grow-1">
               <h5
-                className={`card-title ${task.completed ? "text-decoration-line-through" : ""}`}
+                className={`card-title text-muted ${
+                  isCompleted ? "text-decoration-line-through" : ""
+                }`}
               >
                 {task.title}
               </h5>
               <p className="card-text">{task.description}</p>
+              {isCompleted && (completedAt || completedBy) && (
+                <div className="card-text text-success-emphasis small mb-0">
+                  {completedAt && <div>Completed at {completedAt}</div>}
+                  {completedBy && <div>By {completedBy}</div>}
+                </div>
+              )}
             </div>
           }
 
           <div className="text-end">
-            <span className="">{task.time}</span> <br />
+            {task.time && <span>{task.time}</span>} {task.time && <br />}
             <span className={`badge text-bg-${badgeColor}`}>
               {task.category}
             </span>

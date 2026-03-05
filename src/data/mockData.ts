@@ -11,7 +11,9 @@ export const mockTasks: Task[] = [
     title: "Sample Task",
     description: "This is a sample task description.",
     category: "General",
-    time: "10:00 AM",
+    time: "10:00",
+    completedAt: "3/1/2024, 10:00:00 AM",
+    completedBy: "Jose Urbina",
     completed: false,
   },
   {
@@ -19,7 +21,9 @@ export const mockTasks: Task[] = [
     title: "Medication Reminder",
     description: "Take blood pressure medication.",
     category: "Medication",
-    time: "8:00 AM",
+    time: "08:00",
+    completedAt: "3/4/2024, 8:00:00 AM",
+    completedBy: "Jose Urbina",
     completed: false,
   },
   {
@@ -27,7 +31,9 @@ export const mockTasks: Task[] = [
     title: "Physical Therapy",
     description: "Attend physical therapy session.",
     category: "Therapy",
-    time: "2:00 PM",
+    time: "14:00",
+    completedAt: "3/4/2024, 2:00:00 PM",
+    completedBy: "Jose Urbina",
     completed: false,
   },
 ];
