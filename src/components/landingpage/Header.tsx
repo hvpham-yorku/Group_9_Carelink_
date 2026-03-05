@@ -1,25 +1,27 @@
 import { useNavigate } from "react-router-dom";
+import { Heart } from 'lucide-react';
 
 export default function Header() {
   const navigate = useNavigate();
   return (
-    <header className="header d-flex justify-content-between align-items-center px-4 py-3 border-bottom">
-      <div className="logo-container">
-        <h1 className="h3 mb-0">CareLink</h1>
+    <header className="header d-flex justify-content-between align-items-center px-5 mx-5 py-3 border-bottom">
+      <div className="logo-container d-flex align-items-center">
+        <Heart size={40} className="text-primary me-2" />
+        <h1 className="h3 mb-0 col-6">CareLink</h1>
       </div>
 
       <nav className="d-flex align-items-center">
         <div className="nav nav-pills me-3">
-          <a className="nav-link" href="#home">Features</a>
-          <a className="nav-link" href="#about">Benefits</a>
-          <a className="nav-link" href="#contact">Who It's For</a>
+          <a className="nav-link text-secondary fw-light" href="#home">Features</a>
+          <a className="nav-link text-secondary fw-light" href="#about">Benefits</a>
+          <a className="nav-link text-secondary fw-light" href="#contact">Who It's For</a>
         </div>
 
         <button
-          className="btn btn-outline-primary"
+          className="btn btn-primary px-5 py-2 rounded-lg"
           onClick={() => navigate("/login")}
         >
-          Login
+          Sign in
         </button>
       </nav>
     </header>
