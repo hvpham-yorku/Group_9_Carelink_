@@ -92,7 +92,7 @@ export const taskService = {
     return data;
   },
 
-  // Remove task completion (mark existing log entries as not completed)
+  // updates the isCompleted field to false, but keeps the log entry for historical tracking
   async unmarkTaskAsDone(taskId: string) {
     const { error } = await supabase
       .from("taskLogs")
