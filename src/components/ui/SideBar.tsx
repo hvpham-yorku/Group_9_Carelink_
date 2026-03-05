@@ -64,7 +64,7 @@ const SideBar = ({ username }: SideBarProps) => {
               <hr className="dropdown-divider" />
             </li>
             <li>
-              <NavLink className="dropdown-item" to="/login">
+              <NavLink className="dropdown-item" to="/landingpage">
                 Sign out
               </NavLink>
             </li>
