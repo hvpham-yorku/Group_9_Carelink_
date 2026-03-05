@@ -9,6 +9,7 @@
   <TaskCard title description category time completed onToggle />
 */
 import type { Task } from "../../types/Types";
+import { formatToTime } from "../../utils/formatters";
 
 interface TaskCardProps {
   task: Task;
@@ -17,13 +18,9 @@ interface TaskCardProps {
   onSelect?: () => void;
 }
 
-const TaskCard = ({
-  task,
-
-  onToggle,
-  onSelect,
-}: TaskCardProps) => {
+const TaskCard = ({ task, onToggle, onSelect }: TaskCardProps) => {
   const categoryName = task.categories?.name ?? "General";
+  const displayTime = formatToTime(task.scheduledAt);
 
   const isCompleted = (task.taskLogs?.length ?? 0) > 0;
   const completedAt = task.taskLogs?.[0]?.completedAt;
@@ -82,7 +79,7 @@ const TaskCard = ({
           }
 
           <div className="text-end">
-            {task.scheduledAt && <span>{task.scheduledAt}</span>}{" "}
+            {task.scheduledAt && <span>{displayTime}</span>}{" "}
             {task.scheduledAt && <br />}
             <span className="badge text-bg-primary">{categoryName}</span>
           </div>
