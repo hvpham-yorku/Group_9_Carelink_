@@ -1,7 +1,7 @@
 
 export default function Section2() {
     return (
-        <section className="bg-light">
+        <section id="about" className="bg-light">
             <div className="row justify-content-center text-center p-5">
                 <div className="col-11 col-md-8 col-lg-5 my-3">
                     <h2>Home Care Needs Better Tools</h2>

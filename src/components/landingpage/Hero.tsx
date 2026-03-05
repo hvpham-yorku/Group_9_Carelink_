@@ -22,9 +22,10 @@ export default function Hero() {
                 <button className="btn btn-primary btn-lg px-4">
                 Get Started!
                 </button>
-                <button className="btn btn-outline-primary border border-2 border-primary btn-lg">
+                <a href="#about" className="btn btn-outline-primary border border-2 border-primary btn-lg px-4">
                 Learn More
-                </button>
+                </a>
+                
             </div>
         
         </div>
