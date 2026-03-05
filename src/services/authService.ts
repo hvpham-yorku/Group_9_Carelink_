@@ -23,13 +23,6 @@ export const authService = {
     if (error) throw error;
   },
 
-  async getCurrentUser() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user;
-  },
-
   async signUp({
     email,
     password,
@@ -50,6 +43,24 @@ export const authService = {
         },
       },
     });
+    if (error) throw error;
+    return data;
+  },
+
+  async getCurrentUser() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user;
+  },
+
+  async getProfile(userId: string) {
+    const { data, error } = await supabase
+      .from("caregivers")
+      .select("*")
+      .eq("caregiverId", userId)
+      .single();
+
     if (error) throw error;
     return data;
   },
