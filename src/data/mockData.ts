@@ -1,8 +1,13 @@
-import type { Task } from "../types/Types";
+import type {
+  Task,
+  MedicationScheduleItemProps,
+  Note,
+  DashboardData,
+} from "../types/Types";
 
 export const mockTasks: Task[] = [
   {
-    id: "1",
+    id: crypto.randomUUID(),
     title: "Sample Task",
     description: "This is a sample task description.",
     category: "General",
@@ -10,7 +15,7 @@ export const mockTasks: Task[] = [
     completed: false,
   },
   {
-    id: "2",
+    id: crypto.randomUUID(),
     title: "Medication Reminder",
     description: "Take blood pressure medication.",
     category: "Medication",
@@ -18,7 +23,7 @@ export const mockTasks: Task[] = [
     completed: false,
   },
   {
-    id: "3",
+    id: crypto.randomUUID(),
     title: "Physical Therapy",
     description: "Attend physical therapy session.",
     category: "Therapy",
@@ -27,8 +32,15 @@ export const mockTasks: Task[] = [
   },
 ];
 
-// export const medicationTasks: Task[] = [];
+export const medicationTasks: MedicationScheduleItemProps[] = [];
 
-// export const notes: Task[] = [];
+export const notes: Note[] = [];
 
 // export const patientInfo: Task[] = [];
+
+export const dashboardData: DashboardData = {
+  stats: [],
+  recentActivities: [],
+  medications: [],
+  appointments: [],
+};
