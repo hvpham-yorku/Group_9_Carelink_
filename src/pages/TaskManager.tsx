@@ -9,9 +9,9 @@
 */
 
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
 import type { Task } from "../types/Types";
 import { taskService } from "../services/taskService";
+import { patientService } from "../services/patientService";
 import { useAuth } from "../hooks/useAuth";
 
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
@@ -41,41 +41,24 @@ const TaskManager = () => {
   useEffect(() => {
     async function loadContext() {
       if (!user) return;
+
       try {
-        const { data: member } = await supabase
-          .from("careTeamMembers")
-          .select("careTeamId")
-          .eq("caregiverId", user.id)
-          .maybeSingle();
+        // The component now just asks the SERVICE for the info
+        const contextData = await patientService.getInitialContext(user.id);
 
-        if (!member) return;
+        if (contextData && contextData.patientId) {
+          // Fetch categories and tasks using the IDs we got back
+          const cats = await taskService.getCategories(contextData.careTeamId);
+          const data = await taskService.getTasksByPatient(
+            contextData.patientId,
+          );
 
-        const cats = await taskService.getCategories(member.careTeamId);
-        if (cats) setCategories(cats);
-
-        // Look in the members table to find a patient linked to this team
-        const { data: memberPatients } = await supabase
-          .from("careTeamMembers")
-          .select("patientId")
-          .eq("careTeamId", member.careTeamId)
-          .not("patientId", "is", null) // Filter out rows that represent caregivers
-          .limit(1)
-          .maybeSingle();
-
-        const patientId = memberPatients?.patientId;
-        if (!patientId) return;
-
-        const ctx = {
-          patientId,
-          careTeamId: member.careTeamId,
-          caregiverId: user.id,
-        };
-        setContext(ctx);
-
-        const data = await taskService.getTasksByPatient(patientId);
-        if (data) setTasks(data);
+          setCategories(cats);
+          setTasks(data);
+          setContext({ ...contextData, caregiverId: user.id });
+        }
       } catch (err) {
-        console.error("Failed to load context:", err);
+        console.error("Clean architecture load failed:", err);
       }
     }
     loadContext();
