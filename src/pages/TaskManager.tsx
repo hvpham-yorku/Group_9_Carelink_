@@ -27,6 +27,7 @@ const TaskManager = () => {
   const [visible, setVisible] = useState(false);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [categories, setCategories] = useState<
     { categoryId: string; name: string }[]
@@ -43,22 +44,22 @@ const TaskManager = () => {
       if (!user) return;
 
       try {
-        // The component now just asks the SERVICE for the info
-        const contextData = await patientService.getInitialContext(user.id);
+        // Get IDs from PatientService
+        const ids = await patientService.getInitialContext(user.id);
 
-        if (contextData && contextData.patientId) {
-          // Fetch categories and tasks using the IDs we got back
-          const cats = await taskService.getCategories(contextData.careTeamId);
-          const data = await taskService.getTasksByPatient(
-            contextData.patientId,
-          );
+        if (ids?.patientId) {
+          // Fetch data from TaskService
+          const [fetchedTasks, fetchedCats] = await Promise.all([
+            taskService.getTasksByPatient(ids.patientId),
+            taskService.getCategories(ids.careTeamId),
+          ]);
 
-          setCategories(cats);
-          setTasks(data);
-          setContext({ ...contextData, caregiverId: user.id });
+          setTasks(fetchedTasks as Task[]);
+          setCategories(fetchedCats);
+          setContext({ ...ids, caregiverId: user.id });
         }
       } catch (err) {
-        console.error("Clean architecture load failed:", err);
+        console.error("Architecture violation avoided! Error:", err);
       }
     }
     loadContext();

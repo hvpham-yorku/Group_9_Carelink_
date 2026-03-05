@@ -5,16 +5,16 @@ export const patientService = {
   // Connected to TaskManager.tsx
   async getInitialContext(caregiverId: string) {
     // Get Team ID
-    const { data: member } = await supabase
+    const { data: member, error: teamError } = await supabase
       .from("careTeamMembers")
       .select("careTeamId")
       .eq("caregiverId", caregiverId)
       .maybeSingle();
 
-    if (!member) return null;
+    if (teamError || !member) throw new Error("No team found for user");
 
     // Get the first Patient ID linked to that team
-    const { data: memberPatient } = await supabase
+    const { data: patientLink, error: patientError } = await supabase
       .from("careTeamMembers")
       .select("patientId")
       .eq("careTeamId", member.careTeamId)
@@ -22,9 +22,11 @@ export const patientService = {
       .limit(1)
       .maybeSingle();
 
+    if (patientError) throw patientError;
+
     return {
       careTeamId: member.careTeamId,
-      patientId: memberPatient?.patientId || null,
+      patientId: patientLink?.patientId || null,
     };
   },
 };
