@@ -6,7 +6,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   return (
-    <>
+    <div style={{ 
+    background: 'linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%)'}}>
       <div className="container vh-100 d-flex justify-content-center align-items-center">
         <div className="col-md-6 col-lg-4 d-flex flex-column gap-3 p-4 shadow rounded">
           <LoginText />
@@ -28,7 +29,7 @@ const Login = () => {
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
