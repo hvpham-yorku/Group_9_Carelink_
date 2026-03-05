@@ -3,6 +3,8 @@ import type {
   MedicationScheduleItemProps,
   Note,
   DashboardData,
+  CaregiverInfo,
+  PatientInfo,
 } from "../types/Types";
 
 export const mockTasks: Task[] = [
@@ -106,3 +108,49 @@ export const dashboardData: DashboardData = {
   medications: [],
   appointments: [],
 };
+
+export const teamMembers: CaregiverInfo[] = [
+  {
+    id: "cg-1",
+    firstName: "Jennifer",
+    lastName: "Chen",
+    phone: "(555) 111-2233",
+    email: "jennifer.chen@carelink.local",
+    jobTitle: "Registered Nurse",
+  },
+  {
+    id: "cg-2",
+    firstName: "Marco",
+    lastName: "Lopez",
+    phone: "(555) 222-3344",
+    email: "marco.lopez@carelink.local",
+    jobTitle: "Personal Support Worker",
+  },
+  {
+    id: "cg-3",
+    firstName: "Sara",
+    lastName: "Patel",
+    phone: "(555) 333-4455",
+    email: "sara.patel@carelink.local",
+    jobTitle: "Care Coordinator",
+  },
+];
+
+export const teamPatients: PatientInfo[] = [
+  {
+    id: "pt-1",
+    firstName: "Margaret",
+    lastName: "Chen",
+    dob: "1948-10-14",
+    address: "42 Maple Street, Toronto, ON",
+    phone: "(555) 987-6543",
+  },
+  {
+    id: "pt-2",
+    firstName: "Ali",
+    lastName: "Rahman",
+    dob: "1952-06-21",
+    address: "18 Cedar Avenue, Toronto, ON",
+    phone: "(555) 654-3388",
+  },
+];
