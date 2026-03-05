@@ -100,19 +100,21 @@ const TaskManager = () => {
     }
   };
 
-  // Toggle task completion (mark as done)
+  // Toggle task completion (mark or unmark as done)
   const handleToggleTask = async (taskId: string) => {
     if (!context) return;
     const task = tasks.find((t) => t.taskId === taskId);
     if (!task) return;
-    const isCompleted = (task.taskLogs?.length ?? 0) > 0;
-    if (!isCompleted) {
-      try {
+    const isCompleted = task.taskLogs?.some((log) => log.isCompleted) ?? false;
+    try {
+      if (isCompleted) {
+        await taskService.unmarkTaskAsDone(taskId);
+      } else {
         await taskService.markTaskAsDone(taskId, context.caregiverId);
-        await refreshTasks();
-      } catch (err) {
-        console.error("Failed to mark task as done:", err);
       }
+      await refreshTasks();
+    } catch (err) {
+      console.error("Failed to toggle task completion:", err);
     }
   };
 

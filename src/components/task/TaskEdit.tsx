@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import type { Task } from "../../types/Types";
+import { formatToDateTimeLocal } from "../../utils/formatters";
 
 interface Category {
   categoryId: string;
@@ -24,6 +25,11 @@ const TaskEdit = ({
   const isCompleted = (task.taskLogs?.length ?? 0) > 0;
   const completedAt = task.taskLogs?.[0]?.completedAt;
   const completedBy = task.taskLogs?.[0]?.caregivers?.firstName;
+
+  // Format the completion time for display in the form
+  const completedDateTimeLocal = formatToDateTimeLocal(
+    task.taskLogs?.[0]?.completedAt ?? null,
+  );
 
   const [formState, setFormState] = useState({
     title: task.title,
@@ -118,9 +124,9 @@ const TaskEdit = ({
       {isCompleted && (
         <div className="mt-3 p-3 bg-light border rounded">
           <div className="d-flex justify-content-between">
-            <span className="fw-semibold">Completion details</span>
+            <span className="fw-semibold">Latest Completion details</span>
             {completedAt && (
-              <span className="text-muted small">{completedAt}</span>
+              <span className="text-muted small">{completedDateTimeLocal}</span>
             )}
           </div>
           <div className="form-label mt-2 mb-0">Completed By:</div>

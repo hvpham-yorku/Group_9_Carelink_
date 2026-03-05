@@ -9,7 +9,7 @@
   <TaskCard title description category time completed onToggle />
 */
 import type { Task } from "../../types/Types";
-import { formatToTime } from "../../utils/formatters";
+import { formatToTime, formatToDateTimeLocal } from "../../utils/formatters";
 
 interface TaskCardProps {
   task: Task;
@@ -20,11 +20,17 @@ interface TaskCardProps {
 
 const TaskCard = ({ task, onToggle, onSelect }: TaskCardProps) => {
   const categoryName = task.categories?.name ?? "General";
-  const displayTime = formatToTime(task.scheduledAt);
 
-  const isCompleted = (task.taskLogs?.length ?? 0) > 0;
-  const completedAt = task.taskLogs?.[0]?.completedAt;
-  const completedBy = task.taskLogs?.[0]?.caregivers?.firstName;
+  // Format the scheduled time for display
+  const displayTime = formatToTime(task.scheduledAt);
+  const completedDateTimeLocal = formatToDateTimeLocal(
+    task.taskLogs?.[0]?.completedAt ?? null,
+  );
+
+  const isCompleted = task.taskLogs?.some((log) => log.isCompleted) ?? false;
+  const completedLog = task.taskLogs?.find((log) => log.isCompleted);
+  const completedAt = completedLog?.completedAt;
+  const completedBy = completedLog?.caregivers?.firstName;
 
   return (
     <>
@@ -71,7 +77,9 @@ const TaskCard = ({ task, onToggle, onSelect }: TaskCardProps) => {
               <p className="card-text">{task.description}</p>
               {isCompleted && (completedAt || completedBy) && (
                 <div className="card-text text-success-emphasis small mb-0">
-                  {completedAt && <div>Completed at {completedAt}</div>}
+                  {completedAt && (
+                    <div>Last Completed at {completedDateTimeLocal}</div>
+                  )}
                   {completedBy && <div>By {completedBy}</div>}
                 </div>
               )}

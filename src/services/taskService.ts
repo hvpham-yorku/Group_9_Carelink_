@@ -12,6 +12,7 @@ export const taskService = {
         categories (name),
         taskLogs (
           completedAt,
+          isCompleted,
           caregivers (firstName)
         )
       `,
@@ -89,5 +90,16 @@ export const taskService = {
 
     if (error) throw error;
     return data;
+  },
+
+  // Remove task completion (mark existing log entries as not completed)
+  async unmarkTaskAsDone(taskId: string) {
+    const { error } = await supabase
+      .from("taskLogs")
+      .update({ isCompleted: false })
+      .eq("taskId", taskId);
+
+    if (error) throw error;
+    return true;
   },
 };
