@@ -78,7 +78,7 @@ const TaskForm = ({ onAddTask, onCancel }: TaskFormProps) => {
           Time:
         </label>
         <input
-          type="time"
+          type="datetime-local"
           className="form-control"
           id="task-time"
           value={time}

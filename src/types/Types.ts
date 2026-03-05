@@ -35,6 +35,22 @@ export interface Task {
   completed: boolean;
 }
 
+export interface NewTask {
+  title: string;
+  description?: string;
+  categoryId: string;
+  patientId: string;
+  careTeamId: string;
+  scheduledAt: string;
+}
+
+export interface TaskLogEntry {
+  taskId: string;
+  caregiverId: string;
+  completedAt: string;
+  isCompleted: boolean;
+}
+
 /**
  * Medication Type Definitions
  */

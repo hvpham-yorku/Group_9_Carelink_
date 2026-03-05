@@ -78,7 +78,7 @@ const TaskEdit = ({
         Time:
       </label>
       <input
-        type="time"
+        type="datetime-local"
         className="form-control"
         id="edit-task-time"
         value={formState.time}
