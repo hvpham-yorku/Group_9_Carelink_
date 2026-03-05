@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 export default function Header() {
   const navigate = useNavigate();
   return (
-    <header className="header d-flex justify-content-between align-items-center px-4 py-2 border-bottom">
+    <header className="header d-flex justify-content-between align-items-center px-4 py-3 border-bottom">
       <div className="logo-container">
         <h1 className="h3 mb-0">CareLink</h1>
       </div>

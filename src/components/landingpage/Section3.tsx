@@ -3,7 +3,6 @@ import { Calendar, ClipboardList, Users, Shield, Bell, CheckCircle2 } from 'luci
 export default function Section3() {
     return (
         <section className="container my-5 py-5">
-            {/* Header - Centered with controlled width */}
             <div className="row justify-content-center text-center mb-5">
                 <div className="col-lg-8">
                     <h2 className="fw-bold mb-3">Built for Home Care Teams</h2>
@@ -13,10 +12,8 @@ export default function Section3() {
                 </div>
             </div>
 
-            {/* The Grid: 1 column on mobile, 2 on tablets, 3 on desktops */}
             <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                
-                {/* Card 1 */}
+
                 <div className="col">
                     <div className="card h-100 p-4 border-0 shadow-sm hover-shadow-transition">
                         <div className="rounded-3 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mb-4" style={{ width: '50px', height: '50px' }}>
@@ -29,7 +26,6 @@ export default function Section3() {
                     </div>
                 </div>
 
-                {/* Card 2 */}
                 <div className="col">
                     <div className="card h-100 p-4 border-0 shadow-sm hover-shadow-transition">
                         <div className="rounded-3 bg-success bg-opacity-10 d-flex align-items-center justify-content-center mb-4" style={{ width: '50px', height: '50px' }}>
@@ -42,7 +38,6 @@ export default function Section3() {
                     </div>
                 </div>
 
-                {/* Card 3 */}
                 <div className="col">
                     <div className="card h-100 p-4 border-0 shadow-sm hover-shadow-transition">
                         <div className="rounded-3 bg-info bg-opacity-10 d-flex align-items-center justify-content-center mb-4" style={{ width: '50px', height: '50px' }}>
@@ -55,7 +50,6 @@ export default function Section3() {
                     </div>
                 </div>
 
-                {/* Card 4 */}
                 <div className="col">
                     <div className="card h-100 p-4 border-0 shadow-sm hover-shadow-transition">
                         <div className="rounded-3 bg-warning bg-opacity-10 d-flex align-items-center justify-content-center mb-4" style={{ width: '50px', height: '50px' }}>
@@ -68,7 +62,6 @@ export default function Section3() {
                     </div>
                 </div>
 
-                {/* Card 5 */}
                 <div className="col">
                     <div className="card h-100 p-4 border-0 shadow-sm hover-shadow-transition">
                         <div className="rounded-3 bg-danger bg-opacity-10 d-flex align-items-center justify-content-center mb-4" style={{ width: '50px', height: '50px' }}>
@@ -81,7 +74,6 @@ export default function Section3() {
                     </div>
                 </div>
 
-                {/* Card 6 */}
                 <div className="col">
                     <div className="card h-100 p-4 border-0 shadow-sm hover-shadow-transition">
                         <div className="rounded-3 bg-dark bg-opacity-10 d-flex align-items-center justify-content-center mb-4" style={{ width: '50px', height: '50px' }}>
