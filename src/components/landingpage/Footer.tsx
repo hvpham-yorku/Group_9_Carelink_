@@ -2,8 +2,9 @@
 export default function Footer() {
     return (
         <>
-        <section className="Footer bg-dark d-flex justify-content-center pt-5">
+        <section className="Footer bg-dark d-flex justify-content-center">
         <div className="container" >
+            {/*
             <div className="row g-4 px-lg-5">
                 <div className="col-lg-4 col-md-6">
                     <h5 className="text-white">CareLink</h5>
@@ -34,7 +35,8 @@ export default function Footer() {
                     </ul>
                 </div>
             </div>
-            <div className="border-top border-secondary mt-5 pt-4 text-center">
+            */}
+            <div className="border-top border-secondary pt-4 text-center">
                     <p className="text-secondary small">© 2026 CareLink. All rights reserved.</p>
             </div>
         </div>
