@@ -7,6 +7,7 @@
 */
 
 import { NavLink } from "react-router-dom";
+import { authService } from "../../services/authService";
 
 interface SideBarProps {
   username: string;
@@ -79,7 +80,11 @@ const SideBar = ({ username }: SideBarProps) => {
               <hr className="dropdown-divider" />
             </li>
             <li>
-              <NavLink className="dropdown-item" to="/login">
+              <NavLink
+                className="dropdown-item"
+                to="/login"
+                onClick={() => authService.signOut()}
+              >
                 Sign out
               </NavLink>
             </li>

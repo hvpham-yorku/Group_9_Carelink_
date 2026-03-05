@@ -3,6 +3,7 @@
  * signIn, signOut, signUp, getCurrentUser
  */
 
+import type { SignUpWithPasswordCredentials } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import type { AuthCredentials } from "../types/auth";
 
@@ -27,5 +28,29 @@ export const authService = {
       data: { user },
     } = await supabase.auth.getUser();
     return user;
+  },
+
+  async signUp({
+    email,
+    password,
+    firstName,
+    lastName,
+  }: SignUpWithPasswordCredentials & {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+        },
+      },
+    });
+    if (error) throw error;
+    return data;
   },
 };
