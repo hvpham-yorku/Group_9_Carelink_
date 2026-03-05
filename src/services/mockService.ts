@@ -16,9 +16,9 @@ export const mockService = {
     });
   },
 
-  async addTask(task: Omit<Task, "id">): Promise<Task> {
+  async addTask(task: Omit<Task, "taskId">): Promise<Task> {
     const newTask: Task = {
-      id: crypto.randomUUID(),
+      taskId: crypto.randomUUID(),
       ...task,
     };
 
@@ -26,8 +26,8 @@ export const mockService = {
     return newTask;
   },
 
-  async deleteTask(id: string): Promise<void> {
-    const index = tasks.findIndex((task) => task.id === id);
+  async deleteTask(taskId: string): Promise<void> {
+    const index = tasks.findIndex((task) => task.taskId === taskId);
     if (index !== -1) {
       tasks.splice(index, 1);
     }
