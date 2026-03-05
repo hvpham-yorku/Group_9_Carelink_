@@ -111,7 +111,7 @@ export const dashboardData: DashboardData = {
 
 export const teamMembers: CaregiverInfo[] = [
   {
-    id: "cg-1",
+    id: crypto.randomUUID(),
     firstName: "Jennifer",
     lastName: "Chen",
     phone: "(555) 111-2233",
@@ -119,7 +119,7 @@ export const teamMembers: CaregiverInfo[] = [
     jobTitle: "Registered Nurse",
   },
   {
-    id: "cg-2",
+    id: crypto.randomUUID(),
     firstName: "Marco",
     lastName: "Lopez",
     phone: "(555) 222-3344",
@@ -127,7 +127,7 @@ export const teamMembers: CaregiverInfo[] = [
     jobTitle: "Personal Support Worker",
   },
   {
-    id: "cg-3",
+    id: crypto.randomUUID(),
     firstName: "Sara",
     lastName: "Patel",
     phone: "(555) 333-4455",
@@ -138,7 +138,7 @@ export const teamMembers: CaregiverInfo[] = [
 
 export const teamPatients: PatientInfo[] = [
   {
-    id: "pt-1",
+    id: crypto.randomUUID(),
     firstName: "Margaret",
     lastName: "Chen",
     dob: "1948-10-14",
@@ -146,7 +146,7 @@ export const teamPatients: PatientInfo[] = [
     phone: "(555) 987-6543",
   },
   {
-    id: "pt-2",
+    id: crypto.randomUUID(),
     firstName: "Ali",
     lastName: "Rahman",
     dob: "1952-06-21",

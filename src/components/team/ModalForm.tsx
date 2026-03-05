@@ -3,9 +3,10 @@ import { useState } from "react";
 interface ModalFormProps {
   modalId: string;
   entityType: "caregiver" | "patient";
+  onSubmitId: (id: string) => void | Promise<void>;
 }
 
-const ModalForm = ({ modalId, entityType }: ModalFormProps) => {
+const ModalForm = ({ modalId, entityType, onSubmitId }: ModalFormProps) => {
   const [entityId, setEntityId] = useState("");
 
   const isCaregiver = entityType === "caregiver";
@@ -15,7 +16,12 @@ const ModalForm = ({ modalId, entityType }: ModalFormProps) => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Placeholder submit behavior until add endpoints are connected.
+    const trimmedId = entityId.trim();
+    if (!trimmedId) {
+      return;
+    }
+
+    void onSubmitId(trimmedId);
     setEntityId("");
   };
 

@@ -1,11 +1,47 @@
+import { useEffect, useState } from "react";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
 import PatientList from "../components/team/PatientList";
 import TeamList from "../components/team/TeamList";
-import { teamMembers, teamPatients } from "../data/mockData";
 import ModalForm from "../components/team/ModalForm";
+import { mockService } from "../data/mockService";
+import type { CaregiverInfo, PatientInfo } from "../types/Types";
 
 const Teams = () => {
+  const [teamData, setTeamData] = useState<{
+    caregivers: CaregiverInfo[];
+    patients: PatientInfo[];
+  }>({
+    caregivers: [],
+    patients: [],
+  });
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadTeamData = async () => {
+      const [caregiverData, patientData] = await Promise.all([
+        mockService.getCaregivers(),
+        mockService.getPatients(),
+      ]);
+
+      if (!isActive) {
+        return;
+      }
+
+      // Single state update avoids back-to-back renders.
+      setTeamData({ caregivers: caregiverData, patients: patientData });
+    };
+
+    void loadTeamData();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  // const handleModalSubmit = (_id: string) => {};
+
   return (
     <>
       <div className="container">
@@ -24,9 +60,13 @@ const Teams = () => {
             Add Caregiver
           </button>
 
-          <ModalForm modalId="addCaregiverModal" entityType="caregiver" />
+          <ModalForm
+            modalId="addCaregiverModal"
+            entityType="caregiver"
+            onSubmitId={() => {}}
+          />
 
-          <TeamList members={teamMembers} />
+          <TeamList members={teamData.caregivers} />
         </CustomSection>
 
         <CustomSection
@@ -42,9 +82,13 @@ const Teams = () => {
             Add Patient
           </button>
 
-          <ModalForm modalId="addPatientModal" entityType="patient" />
+          <ModalForm
+            modalId="addPatientModal"
+            entityType="patient"
+            onSubmitId={() => {}}
+          />
 
-          <PatientList patients={teamPatients} />
+          <PatientList patients={teamData.patients} />
         </CustomSection>
       </div>
     </>
