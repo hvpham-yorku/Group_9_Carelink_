@@ -3,36 +3,29 @@
     It includes input fields for task title, description, due date, and category level. 
 */
 import { useState } from "react";
-import type { Tags } from "../../types/Types";
+
+interface Category {
+  categoryId: string;
+  name: string;
+}
 
 interface TaskFormProps {
+  categories: Category[];
   onAddTask: (
     title: string,
     description: string,
     time: string,
-    category: Tags,
+    categoryId: string,
   ) => void;
   onCancel?: () => void;
 }
 
-const CATEGORIES: Tags[] = [
-  "Medical",
-  "Vitals",
-  "Mood",
-  "Nutrition",
-  "Activity",
-  "General",
-  "Medication",
-  "Personal",
-  "Therapy",
-];
-
-const TaskForm = ({ onAddTask, onCancel }: TaskFormProps) => {
+const TaskForm = ({ categories, onAddTask, onCancel }: TaskFormProps) => {
   // State variables to hold the values of the form inputs
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [time, setTime] = useState("");
-  const [category, setCategory] = useState<Tags>("General");
+  const [categoryId, setCategoryId] = useState("");
 
   /*
     Calls onAddTask prop function with the current values from the inputs.
@@ -40,11 +33,11 @@ const TaskForm = ({ onAddTask, onCancel }: TaskFormProps) => {
   */
   const handleAddClick = (e: React.FormEvent) => {
     e.preventDefault(); // Prevents the default form submission behavior
-    onAddTask(title, description, time, category);
+    onAddTask(title, description, time, categoryId);
     setTitle("");
     setDescription("");
     setTime("");
-    setCategory("General");
+    setCategoryId("");
   };
 
   return (
@@ -92,13 +85,16 @@ const TaskForm = ({ onAddTask, onCancel }: TaskFormProps) => {
         <select
           className="form-select"
           id="task-category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value as Tags)}
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
           required
         >
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
+          <option value="" disabled>
+            Select a category
+          </option>
+          {categories.map((cat) => (
+            <option key={cat.categoryId} value={cat.categoryId}>
+              {cat.name}
             </option>
           ))}
         </select>

@@ -9,8 +9,10 @@
 */
 
 import { useState, useEffect } from "react";
-import type { Task, Tags, TaskCategoryColor } from "../types/Types";
-import { mockService } from "../services/mockService";
+import { supabase } from "../lib/supabase";
+import type { Task } from "../types/Types";
+import { taskService } from "../services/taskService";
+import { useAuth } from "../hooks/useAuth";
 
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
@@ -20,102 +22,150 @@ import Button from "../components/ui/Button";
 import TaskEdit from "../components/task/TaskEdit";
 
 const TaskManager = () => {
-  const CATEGORY_COLORS: TaskCategoryColor = {
-    General: "primary",
-    Vitals: "danger",
-    Medication: "danger",
-    Personal: "success",
-    Nutrition: "success",
-    Therapy: "primary",
-    Activity: "success",
-    Medical: "danger",
-    Mood: "primary",
-  };
+  const { user } = useAuth();
 
   const [visible, setVisible] = useState(false);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [categories, setCategories] = useState<
+    { categoryId: string; name: string }[]
+  >([]);
+  const [context, setContext] = useState<{
+    patientId: string;
+    careTeamId: string;
+    caregiverId: string;
+  } | null>(null);
 
+  // Load context: User -> CareTeam -> Patient, fetch categories, and initial task load
   useEffect(() => {
-    mockService.getTasks().then(setTasks);
-  }, []);
+    async function loadContext() {
+      if (!user) return;
+      try {
+        const { data: member } = await supabase
+          .from("careTeamMembers")
+          .select("careTeamId")
+          .eq("caregiverId", user.id)
+          .maybeSingle();
 
-  // Function to handle adding a new task to the list
-  const handleAddTask = (
+        if (!member) return;
+
+        const cats = await taskService.getCategories(member.careTeamId);
+        if (cats) setCategories(cats);
+
+        // Look in the members table to find a patient linked to this team
+        const { data: memberPatients } = await supabase
+          .from("careTeamMembers")
+          .select("patientId")
+          .eq("careTeamId", member.careTeamId)
+          .not("patientId", "is", null) // Filter out rows that represent caregivers
+          .limit(1)
+          .maybeSingle();
+
+        const patientId = memberPatients?.patientId;
+        if (!patientId) return;
+
+        const ctx = {
+          patientId,
+          careTeamId: member.careTeamId,
+          caregiverId: user.id,
+        };
+        setContext(ctx);
+
+        const data = await taskService.getTasksByPatient(patientId);
+        if (data) setTasks(data);
+      } catch (err) {
+        console.error("Failed to load context:", err);
+      }
+    }
+    loadContext();
+  }, [user]);
+
+  const refreshTasks = async () => {
+    if (!context) return;
+    try {
+      const data = await taskService.getTasksByPatient(context.patientId);
+      if (data) setTasks(data);
+    } catch (err) {
+      console.error("Failed to fetch tasks:", err);
+    }
+  };
+
+  // Add a new task
+  const handleAddTask = async (
     title: string,
     description: string,
     time: string,
-    category: Tags,
+    categoryId: string,
   ) => {
-    mockService
-      .addTask({
+    if (!context) return;
+    try {
+      await taskService.addTask({
         title,
         description,
-        time,
-        completedAt: "",
-        completedBy: "",
-        category,
-        completed: false,
-      })
-      .then((newTask) => {
-        setTasks((prev) =>
-          prev.some((task) => task.id === newTask.id)
-            ? prev
-            : [...prev, newTask],
-        );
-        setSelectedTask(newTask);
-        setFormMode("edit");
-        setVisible(true);
+        scheduledAt: time,
+        categoryId,
+        patientId: context.patientId,
+        careTeamId: context.careTeamId,
       });
+      await refreshTasks();
+      setVisible(false);
+      setFormMode("add");
+    } catch (err) {
+      console.error("Failed to add task:", err);
+    }
   };
 
-  // Function to toggle the completion status of a task based on its id
-  const handleToggleTask = (id: string) => {
-    setTasks((prevTasks) => {
-      const updatedTasks = prevTasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              completed: !task.completed,
-              completedAt: !task.completed
-                ? new Date().toLocaleString()
-                : undefined,
-              completedBy: !task.completed ? "Caregiver" : undefined,
-            }
-          : task,
-      );
-
-      const updated = updatedTasks.find((task) => task.id === id);
-      if (updated && selectedTask && selectedTask.id === id) {
-        setSelectedTask(updated);
+  // Toggle task completion (mark as done)
+  const handleToggleTask = async (taskId: string) => {
+    if (!context) return;
+    const task = tasks.find((t) => t.taskId === taskId);
+    if (!task) return;
+    const isCompleted = (task.taskLogs?.length ?? 0) > 0;
+    if (!isCompleted) {
+      try {
+        await taskService.markTaskAsDone(taskId, context.caregiverId);
+        await refreshTasks();
+      } catch (err) {
+        console.error("Failed to mark task as done:", err);
       }
-
-      return updatedTasks;
-    });
+    }
   };
 
-  const handleUpdateTask = (updatedTask: Task) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === updatedTask.id ? updatedTask : task,
-      ),
-    );
-    setSelectedTask(updatedTask);
+  // Update an existing task
+  const handleUpdateTask = async (updatedTask: Task) => {
+    if (!context) return;
+    try {
+      await taskService.updateTask(updatedTask.taskId, {
+        title: updatedTask.title,
+        description: updatedTask.description,
+        scheduledAt: updatedTask.scheduledAt,
+        categoryId: updatedTask.categoryId,
+      });
+      await refreshTasks();
+      setSelectedTask(null);
+      setVisible(false);
+    } catch (err) {
+      console.error("Failed to update task:", err);
+    }
   };
 
-  const handleDeleteTask = (id: string) => {
-    mockService.deleteTask(id).then(() => {
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
-      if (selectedTask?.id === id) {
+  // Delete a task
+  const handleDeleteTask = async (taskId: string) => {
+    if (!context) return;
+    try {
+      await taskService.deleteTask(taskId);
+      await refreshTasks();
+      if (selectedTask?.taskId === taskId) {
         setSelectedTask(null);
         setVisible(false);
         setFormMode("add");
       }
-    });
+    } catch (err) {
+      console.error("Failed to delete task:", err);
+    }
   };
 
-  // Toggles the visibility of the TaskForm component when the "Add New Task" button is clicked
   const toggleFormVisibility = () => {
     setSelectedTask(null);
     setFormMode("add");
@@ -145,7 +195,6 @@ const TaskManager = () => {
             <CustomSection title="All Tasks" subheader="Manage your tasks here">
               <TaskList
                 tasks={tasks}
-                categoryColors={CATEGORY_COLORS}
                 onToggleTask={handleToggleTask}
                 onSelectTask={handleSelectTask}
               />
@@ -164,14 +213,16 @@ const TaskManager = () => {
               >
                 {formMode === "add" ? (
                   <TaskForm
+                    categories={categories}
                     onAddTask={handleAddTask}
                     onCancel={() => setVisible(false)}
                   />
                 ) : (
                   selectedTask && (
                     <TaskEdit
-                      key={selectedTask.id}
+                      key={selectedTask.taskId}
                       task={selectedTask}
+                      categories={categories}
                       onUpdateTask={handleUpdateTask}
                       onDeleteTask={handleDeleteTask}
                       onCancel={() => setVisible(false)}

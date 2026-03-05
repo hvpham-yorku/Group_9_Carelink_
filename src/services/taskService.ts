@@ -8,16 +8,17 @@ export const taskService = {
       .from("tasks")
       .select(
         `
-    *,
-    taskLogs (
-      completedAt,
-      caregivers (firstName)
-    )
-  `,
+        *,
+        categories (name),
+        taskLogs (
+          completedAt,
+          caregivers (firstName)
+        )
+      `,
       )
       .eq("patientId", patientId)
-      .order("completedAt", { foreignTable: "taskLogs", ascending: false })
-      .limit(1, { foreignTable: "taskLogs" });
+      // We order logs by newest first so the first item in the array is the "current" status
+      .order("completedAt", { foreignTable: "taskLogs", ascending: false });
 
     if (error) throw error;
     return data;

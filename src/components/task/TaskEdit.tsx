@@ -1,46 +1,51 @@
 import { useState, type FormEvent } from "react";
-import type { Tags, Task } from "../../types/Types";
+import type { Task } from "../../types/Types";
+
+interface Category {
+  categoryId: string;
+  name: string;
+}
 
 interface TaskEditProps {
   task: Task;
+  categories: Category[];
   onUpdateTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
   onCancel?: () => void;
 }
 
-const CATEGORIES: Tags[] = [
-  "Medical",
-  "Vitals",
-  "Mood",
-  "Nutrition",
-  "Activity",
-  "General",
-  "Medication",
-  "Personal",
-  "Therapy",
-];
-
 const TaskEdit = ({
   task,
+  categories,
   onUpdateTask,
   onDeleteTask,
   onCancel,
 }: TaskEditProps) => {
+  const isCompleted = (task.taskLogs?.length ?? 0) > 0;
+  const completedAt = task.taskLogs?.[0]?.completedAt;
+  const completedBy = task.taskLogs?.[0]?.caregivers?.firstName;
+
   const [formState, setFormState] = useState({
     title: task.title,
     description: task.description,
-    time: task.time ?? "",
-    category: task.category,
+    time: task.scheduledAt ?? "",
+    categoryId: task.categoryId,
   });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    const updatedCategory = categories.find(
+      (c) => c.categoryId === formState.categoryId,
+    );
     onUpdateTask({
       ...task,
       title: formState.title,
       description: formState.description,
-      time: formState.time,
-      category: formState.category,
+      scheduledAt: formState.time,
+      categoryId: formState.categoryId,
+      categories: updatedCategory
+        ? { name: updatedCategory.name }
+        : task.categories,
     });
   };
 
@@ -94,34 +99,32 @@ const TaskEdit = ({
       <select
         className="form-select"
         id="edit-task-category"
-        value={formState.category}
+        value={formState.categoryId}
         onChange={(e) =>
           setFormState((prev) => ({
             ...prev,
-            category: e.target.value as Tags,
+            categoryId: e.target.value,
           }))
         }
         required
       >
-        {CATEGORIES.map((cat) => (
-          <option key={cat} value={cat}>
-            {cat}
+        {categories.map((cat) => (
+          <option key={cat.categoryId} value={cat.categoryId}>
+            {cat.name}
           </option>
         ))}
       </select>
 
-      {task.completed && (
+      {isCompleted && (
         <div className="mt-3 p-3 bg-light border rounded">
           <div className="d-flex justify-content-between">
             <span className="fw-semibold">Completion details</span>
-            {task.completedAt && (
-              <span className="text-muted small">{task.completedAt}</span>
+            {completedAt && (
+              <span className="text-muted small">{completedAt}</span>
             )}
           </div>
           <div className="form-label mt-2 mb-0">Completed By:</div>
-          <div className="text-muted">
-            {task.completedBy ?? "Not specified"}
-          </div>
+          <div className="text-muted">{completedBy ?? "Not specified"}</div>
         </div>
       )}
 
@@ -144,7 +147,7 @@ const TaskEdit = ({
         <button
           className="btn btn-outline-danger"
           type="button"
-          onClick={() => onDeleteTask(task.id)}
+          onClick={() => onDeleteTask(task.taskId)}
         >
           Delete Task
         </button>

@@ -20,19 +20,18 @@ export type Tags =
 /**
  * Task Type Definition
  */
-export type TaskCategoryColor = {
-  [key in Tags]: string;
-};
 
 export interface Task {
-  id: string;
+  taskId: string;
+  patientId: string;
+  careTeamId: string;
+  categoryId: string;
   title: string;
   description: string;
-  category: Tags;
-  time?: string;
-  completedAt?: string;
-  completedBy?: string;
-  completed: boolean;
+  scheduledAt: string;
+  // Supabase Join
+  categories?: { name: string };
+  taskLogs?: TaskLogEntry[];
 }
 
 export interface NewTask {
@@ -49,6 +48,7 @@ export interface TaskLogEntry {
   caregiverId: string;
   completedAt: string;
   isCompleted: boolean;
+  caregivers?: { firstName: string };
 }
 
 /**

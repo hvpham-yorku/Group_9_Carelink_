@@ -8,25 +8,26 @@
   Syntax:
   <TaskCard title description category time completed onToggle />
 */
-import type { Task, TaskCategoryColor } from "../../types/Types";
+import type { Task } from "../../types/Types";
 
 interface TaskCardProps {
   task: Task;
-  categoryColors: TaskCategoryColor;
+
   onToggle: () => void;
   onSelect?: () => void;
 }
 
 const TaskCard = ({
   task,
-  categoryColors,
+
   onToggle,
   onSelect,
 }: TaskCardProps) => {
-  const badgeColor = categoryColors[task.category];
-  const isCompleted = task.completed;
-  const completedAt = task.completedAt;
-  const completedBy = task.completedBy;
+  const categoryName = task.categories?.name ?? "General";
+
+  const isCompleted = (task.taskLogs?.length ?? 0) > 0;
+  const completedAt = task.taskLogs?.[0]?.completedAt;
+  const completedBy = task.taskLogs?.[0]?.caregivers?.firstName;
 
   return (
     <>
@@ -81,10 +82,9 @@ const TaskCard = ({
           }
 
           <div className="text-end">
-            {task.time && <span>{task.time}</span>} {task.time && <br />}
-            <span className={`badge text-bg-${badgeColor}`}>
-              {task.category}
-            </span>
+            {task.scheduledAt && <span>{task.scheduledAt}</span>}{" "}
+            {task.scheduledAt && <br />}
+            <span className="badge text-bg-primary">{categoryName}</span>
           </div>
         </div>
       </div>
