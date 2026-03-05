@@ -12,9 +12,9 @@ export default function Header() {
 
       <nav className="d-flex align-items-center">
         <div className="nav nav-pills me-3">
-          <a className="nav-link text-secondary fw-light" href="#home">Features</a>
-          <a className="nav-link text-secondary fw-light" href="#about">Benefits</a>
-          <a className="nav-link text-secondary fw-light" href="#contact">Who It's For</a>
+          <a className="nav-link text-secondary fw-light" href="#features">Features</a>
+          <a className="nav-link text-secondary fw-light" href="#benefits">Benefits</a>
+          <a className="nav-link text-secondary fw-light" href="#who-its-for">Who It's For</a>
         </div>
 
         <button

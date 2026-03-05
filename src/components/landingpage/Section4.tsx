@@ -2,7 +2,7 @@ import { CheckCircle2 } from 'lucide-react';
 
 export default function Section4() {
     return (
-        <section className="bg-primary py-5">
+        <section id="benefits" className="bg-primary py-5">
             <div className="container">
                 <div className="row align-items-center"> 
                     <div className="col-md-6">

@@ -1,9 +1,7 @@
-import { Calendar, ClipboardList, Users, Shield, Bell, CheckCircle2 } from 'lucide-react';
 
 export default function Section5() {
     return (
-        <section className="container my-5 py-5">
-            {/* Header - Centered with controlled width */}
+        <section id="who-its-for" className="container my-5 py-5">
             <div className="row justify-content-center text-center mb-5">
                 <div className="col-lg-8">
                     <h2 className="fw-bold mb-3">Who CareLink Is For</h2>
@@ -13,10 +11,8 @@ export default function Section5() {
                 </div>
             </div>
 
-            {/* The Grid: 1 column on mobile, 2 on tablets, 3 on desktops */}
             <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                 
-                {/* Card 1 */}
                 <div className="col">
                     <div className="card h-100 p-4 border bg-light shadow-sm">
                         <h5 className="fw-bold text-dark">Home-Care Nurses</h5>
@@ -26,7 +22,6 @@ export default function Section5() {
                     </div>
                 </div>
 
-                {/* Card 2 */}
                 <div className="col">
                     <div className="card h-100 p-4 border bg-light shadow-sm">
                         <h5 className="fw-bold text-dark">Personal Support Workers (PSWs)</h5>
@@ -36,7 +31,6 @@ export default function Section5() {
                     </div>
                 </div>
 
-                {/* Card 3 */}
                 <div className="col">
                     <div className="card h-100 p-4 border bg-light shadow-sm">
                         <h5 className="fw-bold text-dark">Professional Caregiving Agencies</h5>
@@ -46,7 +40,6 @@ export default function Section5() {
                     </div>
                 </div>
 
-                {/* Card 4 */}
                 <div className="col">
                     <div className="card h-100 p-4 border bg-light shadow-sm">
                         <h5 className="fw-bold text-dark">Family Caregivers</h5>
@@ -56,7 +49,6 @@ export default function Section5() {
                     </div>
                 </div>
 
-                {/* Card 5 */}
                 <div className="col">
                     <div className="card h-100 p-4 border bg-light shadow-sm">
                         <h5 className="fw-bold text-dark">Care Supervisors & Nurse Managers</h5>
@@ -66,7 +58,6 @@ export default function Section5() {
                     </div>
                 </div>
 
-                {/* Card 6 */}
                 <div className="col">
                     <div className="card h-100 p-4 border bg-light shadow-sm">
                         <h5 className="fw-bold text-dark">Small to Mid-Sized Organizations</h5>

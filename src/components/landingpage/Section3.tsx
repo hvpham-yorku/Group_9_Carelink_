@@ -2,7 +2,7 @@ import { Calendar, ClipboardList, Users, Shield, Bell, CheckCircle2 } from 'luci
 
 export default function Section3() {
     return (
-        <section className="container my-5 py-5">
+        <section id="features" className="container my-5 py-5">
             <div className="row justify-content-center text-center mb-5">
                 <div className="col-lg-8">
                     <h2 className="fw-bold mb-3">Built for Home Care Teams</h2>
