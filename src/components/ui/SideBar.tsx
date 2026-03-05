@@ -48,6 +48,16 @@ const SideBar = ({ username }: SideBarProps) => {
               Notes
             </NavLink>
           </li>
+          <li>
+            <NavLink to="/teams" className="nav-link">
+              Care Team
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/patient-profile" className="nav-link">
+              Patient Profile
+            </NavLink>
+          </li>
         </ul>
         <hr />
         <div className="btn-group dropup">

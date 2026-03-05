@@ -3,6 +3,7 @@ import Dashboard from "./pages/Dashboard";
 import TaskManager from "./pages/TaskManager";
 import MedicationTracker from "./pages/MedicationTracker";
 import PatientProfile from "./pages/PatientProfile";
+import Teams from "./pages/Teams";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import Notes from "./pages/Notes";
@@ -19,6 +20,7 @@ function App() {
           <Route path="/medication-tracker" element={<MedicationTracker />} />
           <Route path="/patient-profile" element={<PatientProfile />} />
           <Route path="/notes" element={<Notes />} />
+          <Route path="/teams" element={<Teams />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />
