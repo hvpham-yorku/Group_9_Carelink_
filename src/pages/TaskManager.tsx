@@ -10,10 +10,13 @@
 
 import { useState, useEffect } from "react";
 import type { Task } from "../types/Types";
-import { taskService } from "../services/taskService";
-import { patientService } from "../services/patientService";
-import { useAuth } from "../hooks/useAuth";
 
+// Context and services
+import { taskService } from "../services/taskService";
+import { useAuth } from "../hooks/useAuth";
+import { usePatient } from "../contexts/patient/usePatient";
+
+// UI Components
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
 import TaskList from "../components/task/TaskList";
@@ -22,54 +25,55 @@ import Button from "../components/ui/Button";
 import TaskEdit from "../components/task/TaskEdit";
 
 const TaskManager = () => {
-  const { user } = useAuth();
-
+  // Local state for tasks, categories, and form visibility
   const [visible, setVisible] = useState(false);
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+  // Get current user and patient context
+  const { user } = useAuth();
+  const {
+    selectedPatientId,
+    careTeamId,
+    loading: contextLoading,
+  } = usePatient();
+
+  // Context state: patientId, careTeamId, caregiverId
   const [tasks, setTasks] = useState<Task[]>([]);
   const [categories, setCategories] = useState<
     { categoryId: string; name: string }[]
   >([]);
-  const [context, setContext] = useState<{
-    patientId: string;
-    careTeamId: string;
-    caregiverId: string;
-  } | null>(null);
+  const [loadingTasks, setLoadingTasks] = useState(false);
 
   // Load context: User -> CareTeam -> Patient, fetch categories, and initial task load
   useEffect(() => {
-    async function loadContext() {
-      if (!user) return;
+    async function loadTaskData() {
+      if (!selectedPatientId || !careTeamId) return;
 
+      setLoadingTasks(true);
       try {
-        // Get IDs from PatientService
-        const ids = await patientService.getInitialContext(user.id);
+        const [fetchedTasks, fetchedCats] = await Promise.all([
+          taskService.getTasksByPatient(selectedPatientId),
+          taskService.getCategories(careTeamId),
+        ]);
 
-        if (ids?.patientId) {
-          // Fetch data from TaskService
-          const [fetchedTasks, fetchedCats] = await Promise.all([
-            taskService.getTasksByPatient(ids.patientId),
-            taskService.getCategories(ids.careTeamId),
-          ]);
-
-          setTasks(fetchedTasks as Task[]);
-          setCategories(fetchedCats);
-          setContext({ ...ids, caregiverId: user.id });
-        }
+        setTasks(fetchedTasks as Task[]);
+        setCategories(fetchedCats);
       } catch (err) {
-        console.error("Architecture violation avoided! Error:", err);
+        console.error("Failed to load tasks for patient:", err);
+      } finally {
+        setLoadingTasks(false);
       }
     }
-    loadContext();
-  }, [user]);
+
+    loadTaskData();
+  }, [selectedPatientId, careTeamId]);
 
   const refreshTasks = async () => {
-    if (!context) return;
+    if (!selectedPatientId) return;
     try {
-      const data = await taskService.getTasksByPatient(context.patientId);
-      if (data) setTasks(data);
+      const data = await taskService.getTasksByPatient(selectedPatientId);
+      if (data) setTasks(data as Task[]);
     } catch (err) {
       console.error("Failed to fetch tasks:", err);
     }
@@ -82,15 +86,15 @@ const TaskManager = () => {
     time: string,
     categoryId: string,
   ) => {
-    if (!context) return;
+    if (!selectedPatientId || !careTeamId) return;
     try {
       await taskService.addTask({
         title,
         description,
         scheduledAt: time,
         categoryId,
-        patientId: context.patientId,
-        careTeamId: context.careTeamId,
+        patientId: selectedPatientId,
+        careTeamId: careTeamId,
       });
       await refreshTasks();
       setVisible(false);
@@ -102,7 +106,7 @@ const TaskManager = () => {
 
   // Toggle task completion (mark or unmark as done)
   const handleToggleTask = async (taskId: string) => {
-    if (!context) return;
+    if (!user) return;
     const task = tasks.find((t) => t.taskId === taskId);
     if (!task) return;
     const isCompleted = task.taskLogs?.some((log) => log.isCompleted) ?? false;
@@ -110,7 +114,7 @@ const TaskManager = () => {
       if (isCompleted) {
         await taskService.unmarkTaskAsDone(taskId);
       } else {
-        await taskService.markTaskAsDone(taskId, context.caregiverId);
+        await taskService.markTaskAsDone(taskId, user.id);
       }
       await refreshTasks();
     } catch (err) {
@@ -120,7 +124,6 @@ const TaskManager = () => {
 
   // Update an existing task
   const handleUpdateTask = async (updatedTask: Task) => {
-    if (!context) return;
     try {
       await taskService.updateTask(updatedTask.taskId, {
         title: updatedTask.title,
@@ -138,7 +141,6 @@ const TaskManager = () => {
 
   // Delete a task
   const handleDeleteTask = async (taskId: string) => {
-    if (!context) return;
     try {
       await taskService.deleteTask(taskId);
       await refreshTasks();
@@ -163,6 +165,19 @@ const TaskManager = () => {
     setFormMode("edit");
     setVisible(true);
   };
+
+  if (contextLoading || loadingTasks) {
+    return (
+      <div
+        className="container d-flex justify-content-center align-items-center"
+        style={{ minHeight: "50vh" }}
+      >
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
