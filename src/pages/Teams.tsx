@@ -124,6 +124,11 @@ const Teams = () => {
           )}
         </CustomTitleBanner>
 
+        <CustomSection
+          title="Join for full Project Demo"
+          subheader="Code: 5BE3CB"
+        />
+
         <div className="row mb-2">
           <div className="col-md-6">
             <CustomSection
