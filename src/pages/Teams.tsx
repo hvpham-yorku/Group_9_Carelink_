@@ -23,6 +23,7 @@ const Teams = () => {
   const [joinCode, setJoinCode] = useState<string | null>(null);
   const [caregivers, setCaregivers] = useState<CaregiverInfo[]>([]);
   const [patients, setPatients] = useState<PatientInfo[]>([]);
+  const [joinError, setJoinError] = useState<string | null>(null);
 
   // map raw Supabase
   const mapCaregivers = (rows: any[]): CaregiverInfo[] =>
@@ -92,13 +93,15 @@ const Teams = () => {
 
   const handleJoinTeam = async (joinCode: string) => {
     if (!user) return;
+    setJoinError(null);
     try {
       const newTeamId = await teamService.joinTeamWithCode(user.id, joinCode);
       // Persist so this team is restored on the next page refresh
       localStorage.setItem("carelink_selectedTeamId", newTeamId);
       window.location.reload();
-    } catch (error) {
-      console.error("Failed to join team:", error);
+    } catch (error: any) {
+      // change to "any" if error does show
+      setJoinError(error?.message ?? "Failed to join team");
     }
   };
 
@@ -144,6 +147,14 @@ const Teams = () => {
               subheader="Enter a team code to join"
             >
               <JoinTeamForm onJoinTeam={handleJoinTeam} />
+              {joinError && (
+                <div
+                  className="alert alert-danger mt-2 py-2 px-3 mb-0"
+                  role="alert"
+                >
+                  {joinError}
+                </div>
+              )}
             </CustomSection>
           </div>
 

@@ -53,7 +53,7 @@ export const teamService = {
 
   // Allow a caregiver to join a team using a code
   async joinTeamWithCode(caregiverId: string, joinCode: string) {
-    // finding the team with the code
+    // Find the team with the code
     const { data: team, error: teamError } = await supabase
       .from("careTeams")
       .select("careTeamId")
@@ -61,6 +61,16 @@ export const teamService = {
       .single();
 
     if (teamError || !team) throw new Error("Invalid Join Code");
+
+    // Check if the caregiver is already a member of this team
+    const { data: existing } = await supabase
+      .from("careTeamMembers")
+      .select("membershipId")
+      .eq("careTeamId", team.careTeamId)
+      .eq("caregiverId", caregiverId)
+      .maybeSingle();
+
+    if (existing) throw new Error("You are already a member of this team");
 
     // Add the caregiver to the team
     const { error: joinError } = await supabase.from("careTeamMembers").insert([
