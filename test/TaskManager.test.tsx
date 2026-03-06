@@ -16,13 +16,13 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Task } from "../types/Types";
-import TaskManager from "../pages/TaskManager";
-import TaskCard from "../components/task/TaskCard";
-import TaskEdit from "../components/task/TaskEdit";
-import TaskForm from "../components/task/TaskForm";
-import TaskList from "../components/task/TaskList";
-import { taskService } from "../services/taskService";
+import type { Task } from "../src/types/Types";
+import TaskManager from "../src/pages/TaskManager";
+import TaskCard from "../src/components/task/TaskCard";
+import TaskEdit from "../src/components/task/TaskEdit";
+import TaskForm from "../src/components/task/TaskForm";
+import TaskList from "../src/components/task/TaskList";
+import { taskService } from "../src/services/taskService";
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
 
