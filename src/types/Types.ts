@@ -82,7 +82,7 @@ export interface Note {
  * Patient Info Type Definition
  */
 export interface PatientInfo {
-  id: string;
+  patientId: string;
   firstName: string;
   lastName: string;
   dob: string; // date of birth
@@ -94,7 +94,7 @@ export interface PatientInfo {
  * Caregiver Info Type Definition
  */
 export interface CaregiverInfo {
-  id: string;
+  caregiverId: string;
   firstName: string;
   lastName: string;
   phone: string;
@@ -106,10 +106,20 @@ export interface CaregiverInfo {
  * Caregiver Teams Type Definition
  */
 export interface CaregiverTeam {
-  id: string;
-  caregiver: CaregiverInfo[];
-  patient: PatientInfo[];
+  careTeamId: string;
+  caregivers: CaregiverInfo[];
+  patients: PatientInfo[];
+  joinCode: string;
   caregiverRole: string;
+  dateAssigned: string;
+}
+
+export interface careTeamMember {
+  membershipId: string;
+  careTeamId: string;
+  caregiverId: string;
+  patientId: string;
+  role: string;
   dateAssigned: string;
 }
 

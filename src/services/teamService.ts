@@ -62,24 +62,14 @@ export const teamService = {
     teamId: string,
     patientData: { firstName: string; lastName: string; dob: string },
   ) {
-    // Create the patient record
-    const { data: patient, error: pError } = await supabase
-      .from("patients")
-      .insert([patientData])
-      .select()
-      .single();
+    const { data, error } = await supabase.rpc("add_patient_to_team", {
+      p_first_name: patientData.firstName,
+      p_last_name: patientData.lastName,
+      p_dob: patientData.dob,
+      p_team_id: teamId,
+    });
 
-    if (pError) throw pError;
-
-    // Link the patient to the team
-    const { error: linkError } = await supabase.from("careTeamMembers").insert([
-      {
-        careTeamId: teamId,
-        patientId: patient.patientId,
-      },
-    ]);
-
-    if (linkError) throw linkError;
-    return patient;
+    if (error) throw error;
+    return data;
   },
 };

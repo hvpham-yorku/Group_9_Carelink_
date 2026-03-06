@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
+import { mockService } from "../services/mockService";
+import type { CaregiverInfo, PatientInfo } from "../types/Types";
+
+// Components
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
 import PatientList from "../components/team/PatientList";
 import TeamList from "../components/team/TeamList";
+import JoinTeamForm from "../components/team/JoinTeamForm";
 import ModalForm from "../components/team/ModalForm";
-import { mockService } from "../services/mockService";
-import type { CaregiverInfo, PatientInfo } from "../types/Types";
 
 const Teams = () => {
   const [teamData, setTeamData] = useState<{
@@ -45,51 +48,65 @@ const Teams = () => {
   return (
     <>
       <div className="container">
-        <CustomTitleBanner title="Care Team" />
+        <CustomTitleBanner
+          title="Care Team"
+          subheader="Manage Your Team or Join One"
+        />
 
-        <CustomSection
-          title="Team Members"
-          subheader="Current caregivers on this team"
-        >
-          <button
-            type="button"
-            className="btn btn-outline-primary mb-3"
-            data-bs-toggle="modal"
-            data-bs-target="#addCaregiverModal"
-          >
-            Add Caregiver
-          </button>
+        <div className="row mb-2">
+          <div className="col-md-6">
+            <CustomSection
+              title="Join a Team"
+              subheader="Enter a team code to join"
+            >
+              <JoinTeamForm
+                onJoinTeam={(joinCode) =>
+                  console.log("Joining team with code:", joinCode)
+                }
+              />
+            </CustomSection>
+          </div>
 
-          <ModalForm
-            modalId="addCaregiverModal"
-            entityType="caregiver"
-            onSubmitId={() => {}}
-          />
+          <div className="col-md-6">
+            <CustomSection
+              title="Add a Patient to Your Team"
+              subheader="Create a new Patient and add them to your team"
+            >
+              <button
+                className="btn btn-success mb-2"
+                data-bs-toggle="modal"
+                data-bs-target="#addPatientModal"
+              >
+                Add Patient
+              </button>
 
-          <TeamList members={teamData.caregivers} />
-        </CustomSection>
+              <ModalForm
+                modalId="addPatientModal"
+                onSubmit={(data) => console.log("New patient data:", data)}
+              />
+            </CustomSection>
+          </div>
+        </div>
 
-        <CustomSection
-          title="Patients"
-          subheader="Patients currently being cared for"
-        >
-          <button
-            type="button"
-            className="btn btn-outline-primary mb-3"
-            data-bs-toggle="modal"
-            data-bs-target="#addPatientModal"
-          >
-            Add Patient
-          </button>
+        <div className="row">
+          <div className="col-md-6 mb-4">
+            <CustomSection
+              title="Team Members"
+              subheader="Current caregivers on this team"
+            >
+              <TeamList members={teamData.caregivers} />
+            </CustomSection>
+          </div>
 
-          <ModalForm
-            modalId="addPatientModal"
-            entityType="patient"
-            onSubmitId={() => {}}
-          />
-
-          <PatientList patients={teamData.patients} />
-        </CustomSection>
+          <div className="col-md-6 mb-4">
+            <CustomSection
+              title="Patients"
+              subheader="Patients currently being cared for"
+            >
+              <PatientList patients={teamData.patients} />
+            </CustomSection>
+          </div>
+        </div>
       </div>
     </>
   );
