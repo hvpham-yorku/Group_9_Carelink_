@@ -9,85 +9,159 @@
 */
 
 import { useState, useEffect } from "react";
-import type {
-  Task,
-  TaskCategory,
-  TaskCategoryColor,
-} from "../components/task/TaskType";
+import type { Task } from "../types/Types";
+import { taskService } from "../services/taskService";
+import { patientService } from "../services/patientService";
+import { useAuth } from "../hooks/useAuth";
 
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
 import TaskList from "../components/task/TaskList";
 import TaskForm from "../components/task/TaskForm";
 import Button from "../components/ui/Button";
-import TaskListGroup from "../components/task/TaskListGroup";
+import TaskEdit from "../components/task/TaskEdit";
 
 const TaskManager = () => {
-  const CATEGORY_COLORS: TaskCategoryColor = {
-    General: "primary",
-    Vitals: "danger",
-    Medication: "danger",
-    Personal: "success",
-    Nutrition: "success",
-    Therapy: "primary",
-    Activity: "success",
-  };
+  const { user } = useAuth();
 
   const [visible, setVisible] = useState(false);
+  const [formMode, setFormMode] = useState<"add" | "edit">("add");
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  // Initialize tasks state with a sample task for demonstration purposes
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    // Load tasks from localStorage if available, otherwise initialize with a sample task
-    const savedTasks = localStorage.getItem("tasks");
-    return savedTasks
-      ? (JSON.parse(savedTasks) as Task[])
-      : [
-          {
-            id: crypto.randomUUID(), // api to generate unique id for the task
-            title: "Sample Task",
-            description: "This is a sample task description.",
-            category: "General",
-            time: "10:00 AM",
-            completed: false,
-          },
-        ];
-  });
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [categories, setCategories] = useState<
+    { categoryId: string; name: string }[]
+  >([]);
+  const [context, setContext] = useState<{
+    patientId: string;
+    careTeamId: string;
+    caregiverId: string;
+  } | null>(null);
 
-  // Function to handle adding a new task to the list
-  const handleAddTask = (
+  // Load context: User -> CareTeam -> Patient, fetch categories, and initial task load
+  useEffect(() => {
+    async function loadContext() {
+      if (!user) return;
+
+      try {
+        // Get IDs from PatientService
+        const ids = await patientService.getInitialContext(user.id);
+
+        if (ids?.patientId) {
+          // Fetch data from TaskService
+          const [fetchedTasks, fetchedCats] = await Promise.all([
+            taskService.getTasksByPatient(ids.patientId),
+            taskService.getCategories(ids.careTeamId),
+          ]);
+
+          setTasks(fetchedTasks as Task[]);
+          setCategories(fetchedCats);
+          setContext({ ...ids, caregiverId: user.id });
+        }
+      } catch (err) {
+        console.error("Architecture violation avoided! Error:", err);
+      }
+    }
+    loadContext();
+  }, [user]);
+
+  const refreshTasks = async () => {
+    if (!context) return;
+    try {
+      const data = await taskService.getTasksByPatient(context.patientId);
+      if (data) setTasks(data);
+    } catch (err) {
+      console.error("Failed to fetch tasks:", err);
+    }
+  };
+
+  // Add a new task
+  const handleAddTask = async (
     title: string,
     description: string,
     time: string,
-    category: string,
+    categoryId: string,
   ) => {
-    const newTask: Task = {
-      id: crypto.randomUUID(), // Generate a unique id for the new task
-      title,
-      description,
-      time,
-      category: category as TaskCategory,
-      completed: false,
-    };
-    setTasks([...tasks, newTask]);
+    if (!context) return;
+    try {
+      await taskService.addTask({
+        title,
+        description,
+        scheduledAt: time,
+        categoryId,
+        patientId: context.patientId,
+        careTeamId: context.careTeamId,
+      });
+      await refreshTasks();
+      setVisible(false);
+      setFormMode("add");
+    } catch (err) {
+      console.error("Failed to add task:", err);
+    }
   };
 
-  // (Temporary) Saves tasks to localStorage whenever the tasks state changes
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
-
-  // Function to toggle the completion status of a task based on its id
-  const handleToggleTask = (id: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task,
-      ),
-    );
+  // Toggle task completion (mark or unmark as done)
+  const handleToggleTask = async (taskId: string) => {
+    if (!context) return;
+    const task = tasks.find((t) => t.taskId === taskId);
+    if (!task) return;
+    const isCompleted = task.taskLogs?.some((log) => log.isCompleted) ?? false;
+    try {
+      if (isCompleted) {
+        await taskService.unmarkTaskAsDone(taskId);
+      } else {
+        await taskService.markTaskAsDone(taskId, context.caregiverId);
+      }
+      await refreshTasks();
+    } catch (err) {
+      console.error("Failed to toggle task completion:", err);
+    }
   };
 
-  // Toggles the visibility of the TaskForm component when the "Add New Task" button is clicked
+  // Update an existing task
+  const handleUpdateTask = async (updatedTask: Task) => {
+    if (!context) return;
+    try {
+      await taskService.updateTask(updatedTask.taskId, {
+        title: updatedTask.title,
+        description: updatedTask.description,
+        scheduledAt: updatedTask.scheduledAt,
+        categoryId: updatedTask.categoryId,
+      });
+      await refreshTasks();
+      setSelectedTask(null);
+      setVisible(false);
+    } catch (err) {
+      console.error("Failed to update task:", err);
+    }
+  };
+
+  // Delete a task
+  const handleDeleteTask = async (taskId: string) => {
+    if (!context) return;
+    try {
+      await taskService.deleteTask(taskId);
+      await refreshTasks();
+      if (selectedTask?.taskId === taskId) {
+        setSelectedTask(null);
+        setVisible(false);
+        setFormMode("add");
+      }
+    } catch (err) {
+      console.error("Failed to delete task:", err);
+    }
+  };
+
   const toggleFormVisibility = () => {
-    setVisible((prevVisible) => !prevVisible);
+    setSelectedTask(null);
+    setFormMode("add");
+    setVisible(true);
+  };
+
+  const handleSelectTask = (task: Task) => {
+    setSelectedTask(task);
+    setFormMode("edit");
+    setVisible(true);
   };
 
   return (
@@ -102,15 +176,13 @@ const TaskManager = () => {
           </Button>
         </CustomTitleBanner>
 
-        <TaskListGroup />
-
         <section className="row mb-4">
           <div className="col">
             <CustomSection title="All Tasks" subheader="Manage your tasks here">
               <TaskList
                 tasks={tasks}
-                categoryColors={CATEGORY_COLORS}
                 onToggleTask={handleToggleTask}
+                onSelectTask={handleSelectTask}
               />
             </CustomSection>
           </div>
@@ -118,10 +190,31 @@ const TaskManager = () => {
           {visible && (
             <div className="col">
               <CustomSection
-                title="Manage Task"
-                subheader="Create new Tasks here: "
+                title={formMode === "add" ? "Add Task" : "Edit Task"}
+                subheader={
+                  formMode === "add"
+                    ? "Create a new task"
+                    : "Update the selected task"
+                }
               >
-                <TaskForm onAddTask={handleAddTask} />
+                {formMode === "add" ? (
+                  <TaskForm
+                    categories={categories}
+                    onAddTask={handleAddTask}
+                    onCancel={() => setVisible(false)}
+                  />
+                ) : (
+                  selectedTask && (
+                    <TaskEdit
+                      key={selectedTask.taskId}
+                      task={selectedTask}
+                      categories={categories}
+                      onUpdateTask={handleUpdateTask}
+                      onDeleteTask={handleDeleteTask}
+                      onCancel={() => setVisible(false)}
+                    />
+                  )
+                )}
               </CustomSection>
             </div>
           )}

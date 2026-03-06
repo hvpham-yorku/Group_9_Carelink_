@@ -7,6 +7,7 @@
 */
 
 import { NavLink } from "react-router-dom";
+import { authService } from "../../services/authService";
 
 interface SideBarProps {
   username: string;
@@ -48,6 +49,16 @@ const SideBar = ({ username }: SideBarProps) => {
               Notes
             </NavLink>
           </li>
+          <li>
+            <NavLink to="/teams" className="nav-link">
+              Care Team
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/patient-profile" className="nav-link">
+              Patient Profile
+            </NavLink>
+          </li>
         </ul>
         <hr />
         <div className="btn-group dropup">
@@ -61,10 +72,15 @@ const SideBar = ({ username }: SideBarProps) => {
           </button>
           <ul className="dropdown-menu">
             <li>
+              <NavLink className="dropdown-item" to="/profile">
+                Profile
+              </NavLink>
+            </li>
+            <li>
               <hr className="dropdown-divider" />
             </li>
             <li>
-              <NavLink className="dropdown-item" to="/landingpage">
+              <NavLink className="dropdown-item" to="/landingpage" onClick={() => authService.signOut()}>
                 Sign out
               </NavLink>
             </li>

@@ -12,6 +12,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.98.0",
     "bootstrap": "^5.3.8",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",

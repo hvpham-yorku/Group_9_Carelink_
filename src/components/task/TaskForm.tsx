@@ -3,33 +3,29 @@
     It includes input fields for task title, description, due date, and category level. 
 */
 import { useState } from "react";
-import type { TaskCategory } from "./TaskType";
+
+interface Category {
+  categoryId: string;
+  name: string;
+}
 
 interface TaskFormProps {
+  categories: Category[];
   onAddTask: (
     title: string,
     description: string,
     time: string,
-    category: TaskCategory,
+    categoryId: string,
   ) => void;
+  onCancel?: () => void;
 }
 
-const CATEGORIES: TaskCategory[] = [
-  "General",
-  "Vitals",
-  "Medication",
-  "Personal",
-  "Nutrition",
-  "Therapy",
-  "Activity",
-];
-
-const TaskForm = ({ onAddTask }: TaskFormProps) => {
+const TaskForm = ({ categories, onAddTask, onCancel }: TaskFormProps) => {
   // State variables to hold the values of the form inputs
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [time, setTime] = useState("");
-  const [category, setCategory] = useState<TaskCategory>("General");
+  const [categoryId, setCategoryId] = useState("");
 
   /*
     Calls onAddTask prop function with the current values from the inputs.
@@ -37,11 +33,11 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
   */
   const handleAddClick = (e: React.FormEvent) => {
     e.preventDefault(); // Prevents the default form submission behavior
-    onAddTask(title, description, time, category);
+    onAddTask(title, description, time, categoryId);
     setTitle("");
     setDescription("");
     setTime("");
-    setCategory("General");
+    setCategoryId("");
   };
 
   return (
@@ -75,7 +71,7 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
           Time:
         </label>
         <input
-          type="time"
+          type="datetime-local"
           className="form-control"
           id="task-time"
           value={time}
@@ -89,20 +85,34 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
         <select
           className="form-select"
           id="task-category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value as TaskCategory)}
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
           required
         >
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
+          <option value="" disabled>
+            Select a category
+          </option>
+          {categories.map((cat) => (
+            <option key={cat.categoryId} value={cat.categoryId}>
+              {cat.name}
             </option>
           ))}
         </select>
 
-        <button className="btn btn-primary mt-3" type="submit">
-          Add Task
-        </button>
+        <div className="d-flex gap-2 mt-3">
+          <button className="btn btn-primary" type="submit">
+            Add Task
+          </button>
+          {onCancel && (
+            <button
+              className="btn btn-outline-secondary"
+              type="button"
+              onClick={onCancel}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
     </>
   );
