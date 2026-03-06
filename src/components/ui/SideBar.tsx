@@ -33,7 +33,7 @@ const SideBar = ({ username }: SideBarProps) => {
         >
           <span className="fs-4">CareLink</span>
         </NavLink>
-        <hr />
+        
         <ul className="nav d-flex flex-row align-items-center gap-4 mb-0 flex-grow-1">
           <li className="nav-item">
             <NavLink to="/dashboard" end className="nav-link text-white text-uppercase fw-semibold px-0">
@@ -65,9 +65,9 @@ const SideBar = ({ username }: SideBarProps) => {
               Patient Profile
             </NavLink>
           </li>
-          <li className="nav-item mt-3 px-2">
+          <li className="nav-item px-2 d-flex flex-column justify-content-center">
             <small
-              className="text-muted text-uppercase fw-semibold d-block mb-1"
+              className="text-white text-uppercase fw-semibold d-block mb-1"
               style={{ fontSize: "0.7rem", letterSpacing: "0.08em" }}
             >
               Active Patient
@@ -86,7 +86,7 @@ const SideBar = ({ username }: SideBarProps) => {
           </li>
         </ul>
 
-        <hr />
+        
         <div className="btn-group dropup">
           <button
             type="button"
