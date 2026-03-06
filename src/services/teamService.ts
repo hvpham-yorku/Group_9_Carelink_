@@ -14,22 +14,40 @@ export const teamService = {
     return data.joinCode;
   },
 
-  // Fetch the everyone on the team (caregivers and patients)
-  async getTeamMembers(teamId: string) {
+  // Fetch only Caregivers (where patientId is null)
+  async getCaregivers(teamId: string) {
     const { data, error } = await supabase
       .from("careTeamMembers")
       .select(
         `
         caregiverId,
-        patientId,
-        caregiverRole,
-        caregivers (firstName, lastName, email),
-        patients (firstName, lastName)
+        role,
+        caregivers (firstName, lastName, email)
       `,
       )
-      .eq("careTeamId", teamId);
+      .eq("careTeamId", teamId)
+      .is("patientId", null); // This ensures we only get humans acting as caregivers
 
     if (error) throw error;
+
+    return data;
+  },
+
+  // Fetch only Patients (using the 'Patient' role)
+  async getPatients(teamId: string) {
+    const { data, error } = await supabase
+      .from("careTeamMembers")
+      .select(
+        `
+        patientId,
+        patients (firstName, lastName, dob)
+      `,
+      )
+      .eq("careTeamId", teamId)
+      .eq("role", "Patient");
+
+    if (error) throw error;
+
     return data;
   },
 
@@ -49,7 +67,7 @@ export const teamService = {
       {
         careTeamId: team.careTeamId,
         caregiverId: caregiverId,
-        caregiverRole: "Member",
+        role: "caregiver",
       },
     ]);
 
@@ -60,13 +78,21 @@ export const teamService = {
   // Add a new patient to the team
   async addPatientToTeam(
     teamId: string,
-    patientData: { firstName: string; lastName: string; dob: string },
+    patientData: {
+      firstName: string;
+      lastName: string;
+      dob: string;
+      address?: string; // Added
+      phoneNumber?: string; // Added
+    },
   ) {
     const { data, error } = await supabase.rpc("add_patient_to_team", {
       p_first_name: patientData.firstName,
       p_last_name: patientData.lastName,
       p_dob: patientData.dob,
       p_team_id: teamId,
+      p_address: patientData.address || null, // Pass new field
+      p_phone_number: patientData.phoneNumber || null, // Pass new field
     });
 
     if (error) throw error;

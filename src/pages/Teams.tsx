@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
-import { mockService } from "../services/mockService";
+
+// Services
+import { teamService } from "../services/teamService";
+import { patientService } from "../services/patientService";
+import { useAuth } from "../hooks/useAuth";
+
+// Types
 import type { CaregiverInfo, PatientInfo } from "../types/Types";
+import type { NewPatientFormData } from "../components/team/ModalForm";
 
 // Components
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
@@ -11,29 +18,61 @@ import JoinTeamForm from "../components/team/JoinTeamForm";
 import ModalForm from "../components/team/ModalForm";
 
 const Teams = () => {
-  const [teamData, setTeamData] = useState<{
-    caregivers: CaregiverInfo[];
-    patients: PatientInfo[];
-  }>({
-    caregivers: [],
-    patients: [],
-  });
+  const { user } = useAuth();
+  const [teamId, setTeamId] = useState<string | null>(null);
+  const [joinCode, setJoinCode] = useState<string | null>(null);
+  const [caregivers, setCaregivers] = useState<CaregiverInfo[]>([]);
+  const [patients, setPatients] = useState<PatientInfo[]>([]);
+
+  // map raw Supabase
+  const mapCaregivers = (rows: any[]): CaregiverInfo[] =>
+    rows.map((row) => ({
+      caregiverId: row.caregiverId as string,
+      firstName: (row.caregivers?.firstName as string) ?? "",
+      lastName: (row.caregivers?.lastName as string) ?? "",
+      email: (row.caregivers?.email as string) ?? "",
+      phone: (row.caregivers?.phone as string) ?? "",
+      jobTitle: (row.caregivers?.jobTitle as string) ?? "",
+      role: (row.role as string) ?? "",
+      dateAssigned: (row.dateAssigned as string) ?? "",
+    }));
+
+  // map raw Supabase join rows to flat PatientInfo[]
+  const mapPatients = (rows: any[]): PatientInfo[] =>
+    rows.map((row) => ({
+      patientId: row.patientId as string,
+      firstName: (row.patients?.firstName as string) ?? "",
+      lastName: (row.patients?.lastName as string) ?? "",
+      dob: (row.patients?.dob as string) ?? "",
+      address: "",
+      phone: "",
+    }));
 
   useEffect(() => {
+    if (!user) return;
+
     let isActive = true;
 
     const loadTeamData = async () => {
-      const [caregiverData, patientData] = await Promise.all([
-        mockService.getCaregivers(),
-        mockService.getPatients(),
-      ]);
+      try {
+        const context = await patientService.getInitialContext(user.id);
+        if (!isActive) return;
 
-      if (!isActive) {
-        return;
+        setTeamId(context.careTeamId);
+
+        const [caregiverRows, patientRows, code] = await Promise.all([
+          teamService.getCaregivers(context.careTeamId),
+          teamService.getPatients(context.careTeamId),
+          teamService.getTeamJoinCode(context.careTeamId),
+        ]);
+
+        if (!isActive) return;
+        setCaregivers(mapCaregivers(caregiverRows));
+        setPatients(mapPatients(patientRows));
+        setJoinCode(code);
+      } catch (error) {
+        console.error("Failed to load team data:", error);
       }
-
-      // Single state update avoids back-to-back renders.
-      setTeamData({ caregivers: caregiverData, patients: patientData });
     };
 
     void loadTeamData();
@@ -41,9 +80,34 @@ const Teams = () => {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [user]);
 
-  // const handleModalSubmit = (_id: string) => {};
+  const handleJoinTeam = async (joinCode: string) => {
+    if (!user) return;
+    try {
+      const newTeamId = await teamService.joinTeamWithCode(user.id, joinCode);
+      setTeamId(newTeamId);
+      const caregiverRows = await teamService.getCaregivers(newTeamId);
+      setCaregivers(mapCaregivers(caregiverRows));
+    } catch (error) {
+      console.error("Failed to join team:", error);
+    }
+  };
+
+  const handleAddPatient = async (data: NewPatientFormData) => {
+    if (!teamId) return;
+    try {
+      await teamService.addPatientToTeam(teamId, {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        dob: data.dob,
+      });
+      const patientRows = await teamService.getPatients(teamId);
+      setPatients(mapPatients(patientRows));
+    } catch (error) {
+      console.error("Failed to add patient:", error);
+    }
+  };
 
   return (
     <>
@@ -51,7 +115,14 @@ const Teams = () => {
         <CustomTitleBanner
           title="Care Team"
           subheader="Manage Your Team or Join One"
-        />
+        >
+          {joinCode && (
+            <div className="text-end">
+              <span className="text-muted small">Team Code</span>
+              <p className="fw-bold mb-0 fs-5">{joinCode}</p>
+            </div>
+          )}
+        </CustomTitleBanner>
 
         <div className="row mb-2">
           <div className="col-md-6">
@@ -59,11 +130,7 @@ const Teams = () => {
               title="Join a Team"
               subheader="Enter a team code to join"
             >
-              <JoinTeamForm
-                onJoinTeam={(joinCode) =>
-                  console.log("Joining team with code:", joinCode)
-                }
-              />
+              <JoinTeamForm onJoinTeam={handleJoinTeam} />
             </CustomSection>
           </div>
 
@@ -82,7 +149,7 @@ const Teams = () => {
 
               <ModalForm
                 modalId="addPatientModal"
-                onSubmit={(data) => console.log("New patient data:", data)}
+                onSubmit={handleAddPatient}
               />
             </CustomSection>
           </div>
@@ -94,7 +161,7 @@ const Teams = () => {
               title="Team Members"
               subheader="Current caregivers on this team"
             >
-              <TeamList members={teamData.caregivers} />
+              <TeamList caregivers={caregivers} />
             </CustomSection>
           </div>
 
@@ -103,7 +170,7 @@ const Teams = () => {
               title="Patients"
               subheader="Patients currently being cared for"
             >
-              <PatientList patients={teamData.patients} />
+              <PatientList patients={patients} />
             </CustomSection>
           </div>
         </div>

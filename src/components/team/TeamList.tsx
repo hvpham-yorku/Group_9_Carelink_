@@ -1,24 +1,24 @@
 import type { CaregiverInfo } from "../../types/Types";
 
 interface TeamListProps {
-  members: CaregiverInfo[];
+  caregivers: CaregiverInfo[];
 }
 
-const TeamList = ({ members }: TeamListProps) => {
-  if (members.length === 0) {
+const TeamList = ({ caregivers }: TeamListProps) => {
+  if (caregivers.length === 0) {
     return <p className="mb-0 text-muted">No team members assigned yet.</p>;
   }
 
   return (
     <ul className="list-group list-group-flush">
-      {members.map((member) => (
-        <li key={member.id} className="list-group-item px-0">
+      {caregivers.map((caregiver) => (
+        <li key={caregiver.caregiverId} className="list-group-item px-0">
           <h6 className="mb-1">
-            {member.firstName} {member.lastName}
+            {caregiver.firstName} {caregiver.lastName}
           </h6>
-          <p className="mb-1 text-muted">{member.jobTitle}</p>
+          <p className="mb-1 text-muted">{caregiver.jobTitle}</p>
           <p className="mb-0 text-muted">
-            {member.phone} | {member.email}
+            {caregiver.phone} | {caregiver.email}
           </p>
         </li>
       ))}
