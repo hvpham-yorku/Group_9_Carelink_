@@ -124,7 +124,7 @@ const SideBar = ({ username }: SideBarProps) => {
   </span>
 
   <select
-    className="form-select form-select-sm"
+    className="form-select form-select-sm navbar-select"
     style={{ width: "170px" }}
     value={selectedPatientId || ""}
     onChange={(e) => setSelectedPatientId(e.target.value)}
