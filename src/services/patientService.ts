@@ -65,4 +65,29 @@ export const patientService = {
       patientId: patientLink?.patientId || null,
     };
   },
+
+  // Fetch full profile details
+  async getFullProfile(patientId: string) {
+    const { data, error } = await supabase
+      .from("patients")
+      .select("*")
+      .eq("patientId", patientId)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Update profile fields
+  async updateProfile(patientId: string, updates: JSON) {
+    const { data, error } = await supabase
+      .from("patients")
+      .update(updates)
+      .eq("patientId", patientId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
 };

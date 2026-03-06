@@ -58,3 +58,14 @@ export const formatDayLabel = (key: string): string => {
     day: "numeric",
   });
 };
+
+/**
+ * Calculates age in years from a date of birth string.
+ * Example: "1990-04-25" -> 34 (as of 2024)
+ */
+export const calculateAge = (dob: string): number => {
+  const birthDate = new Date(dob);
+  const difference = Date.now() - birthDate.getTime();
+  const ageDate = new Date(difference);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+};
