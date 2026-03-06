@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, AlertCircle } from "lucide-react";
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import type { PatientInfo } from "../types/Types";
 import { usePatient } from "../contexts/patient/usePatient";
@@ -50,7 +50,7 @@ const PatientProfile = () => {
     );
   }
 
-    return (
+  return (
     <div className="container py-4">
       <PatientInfoBanner patient={patient} />
 
@@ -96,10 +96,42 @@ const PatientProfile = () => {
             style={{ borderRadius: "18px" }}
           >
             <div className="card-body p-4">
-              <h3 className="fw-semibold mb-3">Patient Profile</h3>
-              <p className="text-muted mb-0">
-                Additional patient details will be added in the next section.
-              </p>
+              <h3 className="fw-semibold mb-4">Medical Information</h3>
+
+              <div className="mb-3">
+                <div className="text-muted small">Blood Type</div>
+                <div>{patient.bloodType || "Not Available"}</div>
+              </div>
+
+              <div className="mb-3">
+                <div className="text-muted small">Height</div>
+                <div>{patient.height || "Not Available"}</div>
+              </div>
+
+              <div className="mb-3">
+                <div className="text-muted small">Weight</div>
+                <div>{patient.weight || "Not Available"}</div>
+              </div>
+
+              <div>
+                <div className="text-muted small mb-2">Allergies</div>
+
+                {patient.allergies && patient.allergies.length > 0 ? (
+                  <div className="d-flex flex-wrap gap-2">
+                    {patient.allergies.map((allergy, index) => (
+                      <span
+                        key={index}
+                        className="badge rounded-pill text-bg-danger"
+                      >
+                        <AlertCircle size={14} className="me-1" />
+                        {allergy}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-muted">No allergies listed</div>
+                )}
+              </div>
             </div>
           </div>
         </div>
