@@ -68,6 +68,7 @@ export const teamService = {
         careTeamId: team.careTeamId,
         caregiverId: caregiverId,
         role: "caregiver",
+        dateAssigned: new Date().toISOString(),
       },
     ]);
 

@@ -53,12 +53,20 @@ const Teams = () => {
 
     let isActive = true;
 
+    const TEAM_KEY = "carelink_selectedTeamId";
+
     const loadTeamData = async () => {
       try {
-        const context = await patientService.getInitialContext(user.id);
+        const storedTeamId = localStorage.getItem(TEAM_KEY);
+        const context = await patientService.getInitialContext(
+          user.id,
+          storedTeamId,
+        );
         if (!isActive) return;
 
-        setTeamId(context.careTeamId);
+        setTeamId(context?.careTeamId ?? null);
+
+        if (!context?.careTeamId) return;
 
         const [caregiverRows, patientRows, code] = await Promise.all([
           teamService.getCaregivers(context.careTeamId),
@@ -86,9 +94,9 @@ const Teams = () => {
     if (!user) return;
     try {
       const newTeamId = await teamService.joinTeamWithCode(user.id, joinCode);
-      setTeamId(newTeamId);
-      const caregiverRows = await teamService.getCaregivers(newTeamId);
-      setCaregivers(mapCaregivers(caregiverRows));
+      // Persist so this team is restored on the next page refresh
+      localStorage.setItem("carelink_selectedTeamId", newTeamId);
+      window.location.reload();
     } catch (error) {
       console.error("Failed to join team:", error);
     }

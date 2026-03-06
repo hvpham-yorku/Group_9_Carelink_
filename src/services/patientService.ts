@@ -3,26 +3,62 @@ import { supabase } from "../lib/supabase";
 
 export const patientService = {
   // Connected to TaskManager.tsx
-  async getInitialContext(caregiverId: string) {
-    // Get Team ID
+  // preferredTeamId: pass a stored value (e.g. from localStorage) to pin a
+  // specific team. Membership is validated before use, so stale values are safe.
+  async getInitialContext(
+    caregiverId: string,
+    preferredTeamId?: string | null,
+  ) {
+    // If a preferred team is provided, validate the user is still a member and use it.
+    if (preferredTeamId) {
+      const { data: pref } = await supabase
+        .from("careTeamMembers")
+        .select("careTeamId")
+        .eq("caregiverId", caregiverId)
+        .eq("careTeamId", preferredTeamId)
+        .maybeSingle();
+
+      if (pref) {
+        const { data: patientLink } = await supabase
+          .from("careTeamMembers")
+          .select("patientId")
+          .eq("careTeamId", preferredTeamId)
+          .not("patientId", "is", null)
+          .limit(1)
+          .maybeSingle();
+
+        return {
+          careTeamId: preferredTeamId,
+          patientId: patientLink?.patientId || null,
+        };
+      }
+    }
+
+    // Fallback: pick the most recently joined team.
+    // nullsFirst: true ensures rows without a dateAssigned (inserts that didn't
+    // set it explicitly) sort to the top rather than the bottom in PostgREST.
     const { data: member, error: teamError } = await supabase
       .from("careTeamMembers")
-      .select("careTeamId")
+      .select("careTeamId, dateAssigned")
       .eq("caregiverId", caregiverId)
+      .order("dateAssigned", { ascending: false, nullsFirst: true })
+      .limit(1)
       .maybeSingle();
 
-    if (teamError || !member) throw new Error("No team found for user");
+    if (teamError) {
+      console.error("Database error fetching team:", teamError);
+      return { careTeamId: null, patientId: null };
+    }
 
-    // Get the first Patient ID linked to that team
-    const { data: patientLink, error: patientError } = await supabase
+    if (!member) return { careTeamId: null, patientId: null };
+
+    const { data: patientLink } = await supabase
       .from("careTeamMembers")
       .select("patientId")
       .eq("careTeamId", member.careTeamId)
       .not("patientId", "is", null)
       .limit(1)
       .maybeSingle();
-
-    if (patientError) throw patientError;
 
     return {
       careTeamId: member.careTeamId,
