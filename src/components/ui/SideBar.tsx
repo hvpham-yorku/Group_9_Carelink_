@@ -34,7 +34,7 @@ const SideBar = ({ username }: SideBarProps) => {
           <span className="fs-4">CareLink</span>
         </NavLink>
         <hr />
-        <ul className="nav nav-pills flex-column mb-auto">
+        <ul className="nav d-flex flex-row align-items-center gap-4 mb-0 flex-grow-1">
           <li className="nav-item">
             <NavLink to="/dashboard" end className="nav-link ">
               Dashboard
