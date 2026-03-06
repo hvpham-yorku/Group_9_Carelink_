@@ -7,13 +7,19 @@
 */
 
 import { NavLink } from "react-router-dom";
+
+// Context and services
 import { authService } from "../../services/authService";
+import { usePatient } from "../../contexts/patient/usePatient";
 
 interface SideBarProps {
   username: string;
 }
 
 const SideBar = ({ username }: SideBarProps) => {
+  // Get patient context for the patient switcher dropdown
+  const { patients, selectedPatientId, setSelectedPatientId } = usePatient();
+
   return (
     <>
       <div
@@ -34,32 +40,52 @@ const SideBar = ({ username }: SideBarProps) => {
               Dashboard
             </NavLink>
           </li>
-          <li>
+          <li className="nav-item">
             <NavLink to="/task-manager" className="nav-link">
               Task Manager
             </NavLink>
           </li>
-          <li>
+          <li className="nav-item">
             <NavLink to="/medication-tracker" className="nav-link">
               Medication Tracker
             </NavLink>
           </li>
-          <li>
+          <li className="nav-item">
             <NavLink to="/notes" className="nav-link">
               Notes
             </NavLink>
           </li>
-          <li>
+          <li className="nav-item">
             <NavLink to="/teams" className="nav-link">
               Care Team
             </NavLink>
           </li>
-          <li>
+          <li className="nav-item">
             <NavLink to="/patient-profile" className="nav-link">
               Patient Profile
             </NavLink>
           </li>
+          <li className="nav-item mt-3 px-2">
+            <small
+              className="text-muted text-uppercase fw-semibold d-block mb-1"
+              style={{ fontSize: "0.7rem", letterSpacing: "0.08em" }}
+            >
+              Active Patient
+            </small>
+            <select
+              className="form-select form-select-sm"
+              value={selectedPatientId || ""}
+              onChange={(e) => setSelectedPatientId(e.target.value)}
+            >
+              {patients.map((p) => (
+                <option key={p.patientId} value={p.patientId}>
+                  {p.firstName} {p.lastName}
+                </option>
+              ))}
+            </select>
+          </li>
         </ul>
+
         <hr />
         <div className="btn-group dropup">
           <button
@@ -80,7 +106,11 @@ const SideBar = ({ username }: SideBarProps) => {
               <hr className="dropdown-divider" />
             </li>
             <li>
-              <NavLink className="dropdown-item" to="/landingpage" onClick={() => authService.signOut()}>
+              <NavLink
+                className="dropdown-item"
+                to="/landingpage"
+                onClick={() => authService.signOut()}
+              >
                 Sign out
               </NavLink>
             </li>
