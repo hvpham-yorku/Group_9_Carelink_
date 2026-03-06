@@ -29,39 +29,39 @@ const SideBar = ({ username }: SideBarProps) => {
         <NavLink
           to="/dashboard"
           end
-          className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none"
+          className="d-flex align-items-center me-4 text-white text-decoration-none"
         >
           <span className="fs-4">CareLink</span>
         </NavLink>
         <hr />
         <ul className="nav d-flex flex-row align-items-center gap-4 mb-0 flex-grow-1">
           <li className="nav-item">
-            <NavLink to="/dashboard" end className="nav-link ">
+            <NavLink to="/dashboard" end className="nav-link text-white text-uppercase fw-semibold px-0">
               Dashboard
             </NavLink>
           </li>
           <li className="nav-item">
-            <NavLink to="/task-manager" className="nav-link">
+            <NavLink to="/task-manager" className="nav-link text-white text-uppercase fw-semibold px-0">
               Task Manager
             </NavLink>
           </li>
           <li className="nav-item">
-            <NavLink to="/medication-tracker" className="nav-link">
+            <NavLink to="/medication-tracker" className="nav-link text-white text-uppercase fw-semibold px-0">
               Medication Tracker
             </NavLink>
           </li>
           <li className="nav-item">
-            <NavLink to="/notes" className="nav-link">
+            <NavLink to="/notes" className="nav-link text-white text-uppercase fw-semibold px-0">
               Notes
             </NavLink>
           </li>
           <li className="nav-item">
-            <NavLink to="/teams" className="nav-link">
+            <NavLink to="/teams" className="nav-link text-white text-uppercase fw-semibold px-0">
               Care Team
             </NavLink>
           </li>
           <li className="nav-item">
-            <NavLink to="/patient-profile" className="nav-link">
+            <NavLink to="/patient-profile" className="nav-link text-white text-uppercase fw-semibold px-0">
               Patient Profile
             </NavLink>
           </li>
