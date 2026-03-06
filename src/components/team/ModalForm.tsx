@@ -1,28 +1,44 @@
+/**
+ * ModalForm.tsx
+ * Component for adding a new patient via a modal form. Used in Teams.tsx.
+ * Resets the form after submission
+ */
+
 import { useState } from "react";
+
+export interface NewPatientFormData {
+  firstName: string;
+  lastName: string;
+  dob: string;
+  address: string;
+  phoneNumber: string;
+}
 
 interface ModalFormProps {
   modalId: string;
-  entityType: "caregiver" | "patient";
-  onSubmitId: (id: string) => void | Promise<void>;
+  onSubmit: (data: NewPatientFormData) => void | Promise<void>;
 }
 
-const ModalForm = ({ modalId, entityType, onSubmitId }: ModalFormProps) => {
-  const [entityId, setEntityId] = useState("");
+const EMPTY_FORM: NewPatientFormData = {
+  firstName: "",
+  lastName: "",
+  dob: "",
+  address: "",
+  phoneNumber: "",
+};
 
-  const isCaregiver = entityType === "caregiver";
-  const title = isCaregiver ? "Add Caregiver" : "Add Patient";
-  const idLabel = isCaregiver ? "Caregiver ID" : "Patient ID";
+const ModalForm = ({ modalId, onSubmit }: ModalFormProps) => {
+  const [form, setForm] = useState<NewPatientFormData>(EMPTY_FORM);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
-    const trimmedId = entityId.trim();
-    if (!trimmedId) {
-      return;
-    }
-
-    void onSubmitId(trimmedId);
-    setEntityId("");
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    void onSubmit(form);
+    setForm(EMPTY_FORM);
   };
 
   return (
@@ -37,7 +53,7 @@ const ModalForm = ({ modalId, entityType, onSubmitId }: ModalFormProps) => {
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5" id={`${modalId}Label`}>
-              {title}
+              Add Patient
             </h1>
             <button
               type="button"
@@ -48,19 +64,85 @@ const ModalForm = ({ modalId, entityType, onSubmitId }: ModalFormProps) => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="modal-body">
-              <label htmlFor={`${modalId}Input`} className="form-label">
-                {idLabel}
-              </label>
-              <input
-                id={`${modalId}Input`}
-                type="text"
-                className="form-control"
-                value={entityId}
-                onChange={(event) => setEntityId(event.target.value)}
-                placeholder={`Enter ${idLabel.toLowerCase()}`}
-                required
-              />
+            <div className="modal-body d-flex flex-column gap-3">
+              <div>
+                <label htmlFor={`${modalId}FirstName`} className="form-label">
+                  First Name:
+                </label>
+                <input
+                  id={`${modalId}FirstName`}
+                  name="firstName"
+                  type="text"
+                  className="form-control"
+                  value={form.firstName}
+                  onChange={handleChange}
+                  placeholder="Enter first name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor={`${modalId}LastName`} className="form-label">
+                  Last Name:
+                </label>
+                <input
+                  id={`${modalId}LastName`}
+                  name="lastName"
+                  type="text"
+                  className="form-control"
+                  value={form.lastName}
+                  onChange={handleChange}
+                  placeholder="Enter last name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor={`${modalId}Dob`} className="form-label">
+                  Date of Birth:
+                </label>
+                <input
+                  id={`${modalId}Dob`}
+                  name="dob"
+                  type="date"
+                  className="form-control"
+                  value={form.dob}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor={`${modalId}Address`} className="form-label">
+                  Address:
+                </label>
+                <input
+                  id={`${modalId}Address`}
+                  name="address"
+                  type="text"
+                  className="form-control"
+                  value={form.address}
+                  onChange={handleChange}
+                  placeholder="Enter address"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor={`${modalId}Phone`} className="form-label">
+                  Phone Number:
+                </label>
+                <input
+                  id={`${modalId}Phone`}
+                  name="phoneNumber"
+                  type="tel"
+                  className="form-control"
+                  value={form.phoneNumber}
+                  onChange={handleChange}
+                  placeholder="Enter phone number"
+                  required
+                />
+              </div>
             </div>
 
             <div className="modal-footer">

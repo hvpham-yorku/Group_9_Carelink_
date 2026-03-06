@@ -37,3 +37,35 @@ export const formatToDateTimeLocal = (dateString: string | null): string => {
 
   return `${datePart} ${timePart}`;
 };
+
+/**
+ * Extracts the "YYYY-MM-DD" date key from an ISO string.
+ * Example: "2024-05-12T14:30:00Z" -> "2024-05-12"
+ */
+export const formatDayKey = (iso: string): string => iso.slice(0, 10);
+
+/**
+ * Formats a "YYYY-MM-DD" key into a human-readable day label.
+ * Example: "2024-05-12" -> "Sunday, May 12, 2024"
+ */
+export const formatDayLabel = (key: string): string => {
+  const [y, m, d] = key.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+/**
+ * Calculates age in years from a date of birth string.
+ * Example: "1990-04-25" -> 34 (as of 2024)
+ */
+export const calculateAge = (dob: string): number => {
+  const birthDate = new Date(dob);
+  const difference = Date.now() - birthDate.getTime();
+  const ageDate = new Date(difference);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+};

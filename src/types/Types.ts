@@ -55,46 +55,67 @@ export interface TaskLogEntry {
  * Medication Type Definitions
  */
 export interface MedicationScheduleItemProps {
-  id: string;
+  prescriptionId: string;
+  careTeamId: string;
+  patientId: string;
   name: string;
   dosage: string;
   frequency: string;
   scheduledAt: string;
-  taken?: boolean;
-  takenAt?: string | null;
-  takenBy?: string | null;
-  onToggle?: () => void;
+  isActive: boolean;
+
+  // supabase join for prescriptions and medicationLogs
+  medicationLog?: {
+    caregiverId: string;
+    firstName: string;
+    lastName: string;
+    takenAt: string;
+    isCompleted: boolean;
+  };
+
+  onToggle: (prescriptionId: string, isCompleted: boolean) => void;
 }
 
 /**
  * Notes Type Definition
  */
 export interface Note {
-  id: string;
+  noteId: string;
+  careTeamId: string;
+  caregiverId: string;
+  patientId: string;
+  categoryId: string;
   title: string;
-  content: string;
-  tag: Tags;
+  description: string;
   createdAt: string;
-  updatedAt: number;
+  updatedAt: string;
+  // Supabase Joins
+  caregivers?: {
+    firstName: string;
+    lastName: string;
+  };
+  categories?: {
+    name: string;
+  };
 }
 
 /**
  * Patient Info Type Definition
  */
 export interface PatientInfo {
-  id: string;
+  patientId: string;
   firstName: string;
   lastName: string;
   dob: string; // date of birth
   address: string;
-  phone: string;
+  phoneNumber: string;
 }
 
 /**
  * Caregiver Info Type Definition
  */
 export interface CaregiverInfo {
-  id: string;
+  caregiverId: string;
   firstName: string;
   lastName: string;
   phone: string;
@@ -106,10 +127,20 @@ export interface CaregiverInfo {
  * Caregiver Teams Type Definition
  */
 export interface CaregiverTeam {
-  id: string;
-  caregiver: CaregiverInfo[];
-  patient: PatientInfo[];
+  careTeamId: string;
+  caregivers: CaregiverInfo[];
+  patients: PatientInfo[];
+  joinCode: string;
   caregiverRole: string;
+  dateAssigned: string;
+}
+
+export interface careTeamMember {
+  membershipId: string;
+  careTeamId: string;
+  caregiverId: string;
+  patientId: string;
+  role: string;
   dateAssigned: string;
 }
 
