@@ -115,25 +115,27 @@ const SideBar = ({ username }: SideBarProps) => {
     </NavLink>
   </li>
 
-  <li className="nav-item px-2 d-flex flex-column justify-content-center">
-    <small
-      className="text-white text-uppercase fw-semibold d-block mb-1"
-      style={{ fontSize: "0.7rem", letterSpacing: "0.08em" }}
-    >
-      Active Patient
-    </small>
-    <select
-      className="form-select form-select-sm"
-      value={selectedPatientId || ""}
-      onChange={(e) => setSelectedPatientId(e.target.value)}
-    >
-      {patients.map((p) => (
-        <option key={p.patientId} value={p.patientId}>
-          {p.firstName} {p.lastName}
-        </option>
-      ))}
-    </select>
-  </li>
+  <li className="nav-item d-flex align-items-center">
+  <span
+    className="text-white text-uppercase fw-semibold me-2"
+    style={{ fontSize: "0.75rem", letterSpacing: "0.08em" }}
+  >
+    Active Patient
+  </span>
+
+  <select
+    className="form-select form-select-sm"
+    style={{ width: "170px" }}
+    value={selectedPatientId || ""}
+    onChange={(e) => setSelectedPatientId(e.target.value)}
+  >
+    {patients.map((p) => (
+      <option key={p.patientId} value={p.patientId}>
+        {p.firstName} {p.lastName}
+      </option>
+    ))}
+  </select>
+</li>
 
 </ul>
 
