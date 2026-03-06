@@ -1,8 +1,10 @@
+import PatientInfoBanner from "../components/ui/PatientInfoBanner";
+
 const PatientProfile = () => {
   return (
     <>
       <div className="container">
-        <h1>Patient Profile</h1>
+        <PatientInfoBanner />
       </div>
     </>
   );
