@@ -85,7 +85,7 @@ const PatientInfoBanner = () => {
             Address: {patient.address || "—"}
           </div>
           <div style={{ color: "rgba(255,255,255,0.85)" }}>
-            Phone: {patient.phone || "—"}
+            Phone: {patient.phoneNumber || "—"}
           </div>
         </div>
 

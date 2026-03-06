@@ -108,7 +108,7 @@ export interface PatientInfo {
   lastName: string;
   dob: string; // date of birth
   address: string;
-  phone: string;
+  phoneNumber: string;
 }
 
 /**

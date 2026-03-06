@@ -44,8 +44,8 @@ const Teams = () => {
       firstName: (row.patients?.firstName as string) ?? "",
       lastName: (row.patients?.lastName as string) ?? "",
       dob: (row.patients?.dob as string) ?? "",
-      address: "",
-      phone: "",
+      address: (row.patients?.address as string) ?? "",
+      phoneNumber: (row.patients?.phoneNumber as string) ?? "",
     }));
 
   useEffect(() => {
