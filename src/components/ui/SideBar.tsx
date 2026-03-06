@@ -98,11 +98,6 @@ const SideBar = ({ username }: SideBarProps) => {
           </button>
           <ul className="dropdown-menu">
             <li>
-              <NavLink className="dropdown-item" to="/profile">
-                Profile
-              </NavLink>
-            </li>
-            <li>
               <hr className="dropdown-divider" />
             </li>
             <li>
