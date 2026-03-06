@@ -29,9 +29,9 @@ const SideBar = ({ username }: SideBarProps) => {
         <NavLink
           to="/dashboard"
           end
-          className="d-flex align-items-center me-4 text-white text-decoration-none"
+          className="d-flex align-items-center me-4 text-white text-decoration-none fw-bold"
         >
-          <span className="fs-4">CareLink</span>
+          <span style={{ fontSize: "1.8rem", lineHeight: 1 }}>CareLink</span>
         </NavLink>
         
         <ul className="nav d-flex flex-row align-items-center gap-4 mb-0 flex-grow-1">
