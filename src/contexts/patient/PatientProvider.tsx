@@ -22,14 +22,14 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!user) return;
       try {
         setLoading(true);
-        // 1. Get Initial Context (Team and First Patient ID)
+        // Get Initial Context (Team and First Patient ID)
         const contextData = await patientService.getInitialContext(user.id);
 
         if (contextData) {
           setCareTeamId(contextData.careTeamId);
           setSelectedPatientId(contextData.patientId);
 
-          // 2. Fetch ALL patients for this team (for the switcher)
+          // Fetch ALL patients for this team (for the switcher)
           const { data } = await supabase
             .from("careTeamMembers")
             .select(`patientId, patients(firstName, lastName)`)

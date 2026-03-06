@@ -154,6 +154,7 @@ const TaskManager = () => {
     }
   };
 
+  // Show the add/edit form and set the selected task for editing
   const toggleFormVisibility = () => {
     setSelectedTask(null);
     setFormMode("add");
@@ -186,6 +187,12 @@ const TaskManager = () => {
                   <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Loading...</span>
                   </div>
+                </div>
+              ) : tasks.length === 0 ? (
+                <div className="text-center p-5 bg-light rounded">
+                  <p className="text-muted">
+                    No tasks scheduled for this patient today.
+                  </p>
                 </div>
               ) : (
                 <TaskList
