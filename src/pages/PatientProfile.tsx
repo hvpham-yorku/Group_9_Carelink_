@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
+import type { PatientInfo } from "../types/Types";
 import { usePatient } from "../contexts/patient/usePatient";
 import { patientService } from "../services/patientService";
-import type { PatientInfo } from "../types/Types";
 
 const PatientProfile = () => {
   const { selectedPatientId } = usePatient();
@@ -51,7 +51,7 @@ const PatientProfile = () => {
 
   return (
     <div className="container py-4">
-      <PatientInfoBanner />
+      <PatientInfoBanner patient={patient} />
     </div>
   );
 };
