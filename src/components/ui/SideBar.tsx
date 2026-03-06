@@ -80,11 +80,7 @@ const SideBar = ({ username }: SideBarProps) => {
               <hr className="dropdown-divider" />
             </li>
             <li>
-              <NavLink
-                className="dropdown-item"
-                to="/login"
-                onClick={() => authService.signOut()}
-              >
+              <NavLink className="dropdown-item" to="/landingpage" onClick={() => authService.signOut()}>
                 Sign out
               </NavLink>
             </li>
