@@ -1,80 +1,30 @@
 import { Route, Routes, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthProvider";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-
-// Pages
 import Dashboard from "./pages/Dashboard";
 import TaskManager from "./pages/TaskManager";
 import MedicationTracker from "./pages/MedicationTracker";
 import PatientProfile from "./pages/PatientProfile";
-import Teams from "./pages/Teams";
 import Login from "./pages/Login";
-import SignUp from "./pages/SignUp";
 import Layout from "./components/Layout";
 import Notes from "./pages/Notes";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
     <>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+      <Routes>
+        <Route path="/landingpage" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
 
-          <Route element={<Layout />}>
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/task-manager"
-              element={
-                <ProtectedRoute>
-                  <TaskManager />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/medication-tracker"
-              element={
-                <ProtectedRoute>
-                  <MedicationTracker />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/patient-profile"
-              element={
-                <ProtectedRoute>
-                  <PatientProfile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/notes"
-              element={
-                <ProtectedRoute>
-                  <Notes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/teams"
-              element={
-                <ProtectedRoute>
-                  <Teams />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/task-manager" element={<TaskManager />} />
+          <Route path="/medication-tracker" element={<MedicationTracker />} />
+          <Route path="/patient-profile" element={<PatientProfile />} />
+          <Route path="/notes" element={<Notes />} />
+        </Route>
 
-          <Route path="/" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </AuthProvider>
+        <Route path="/" element={<Navigate to="/landingpage" replace />} />
+      </Routes>
     </>
   );
 }
