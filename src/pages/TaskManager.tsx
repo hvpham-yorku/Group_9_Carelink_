@@ -166,19 +166,6 @@ const TaskManager = () => {
     setVisible(true);
   };
 
-  if (contextLoading || loadingTasks) {
-    return (
-      <div
-        className="container d-flex justify-content-center align-items-center"
-        style={{ minHeight: "50vh" }}
-      >
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="container">
@@ -194,11 +181,19 @@ const TaskManager = () => {
         <section className="row mb-4">
           <div className="col">
             <CustomSection title="All Tasks" subheader="Manage your tasks here">
-              <TaskList
-                tasks={tasks}
-                onToggleTask={handleToggleTask}
-                onSelectTask={handleSelectTask}
-              />
+              {contextLoading || loadingTasks ? (
+                <div className="d-flex justify-content-center py-4">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              ) : (
+                <TaskList
+                  tasks={tasks}
+                  onToggleTask={handleToggleTask}
+                  onSelectTask={handleSelectTask}
+                />
+              )}
             </CustomSection>
           </div>
 
