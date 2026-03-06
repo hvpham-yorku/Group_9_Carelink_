@@ -1,141 +1,86 @@
-/**
- * Notes Page (ITR1)
- * - Local only notes (localStorage).
- * - Timeline grouping by day.
- * - Tag on each note & colored badge.
- * - Editor does create/update/delete.
- * - Accessibility: labels linked to fields (htmlFor + id), fields have name, issues page while inspect :(
- * - all of the bugs fixed.
- */
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import CustomSection from "../components/ui/CustomSection";
+import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import Button from "../components/ui/Button";
 
-type Tag = "Medical" | "Vitals" | "Mood" | "Nutrition" | "Activity" | "General";
-
-type Note = {
-  id: string;
-  title: string;
-  content: string;
-  tag: Tag;
-  updatedAt: number;
-};
-
-const STORAGE_KEY = "carelink_notes_v2";
-const TAGS: Tag[] = ["Medical", "Vitals", "Mood", "Nutrition", "Activity", "General"];
-
-function tagBadgeClass(tag: Tag) {
-  if (tag === "Medical" || tag === "Vitals") return "bg-danger";
-  if (tag === "Nutrition" || tag === "Activity") return "bg-success";
-  return "bg-primary";
-}
-
-function makeId() {
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function formatDateTime(ts: number) {
-  return new Date(ts).toLocaleString();
-}
-
-function dayKey(ts: number) {
-  const d = new Date(ts);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function formatDayLabel(key: string) {
-  const [y, m, d] = key.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString(undefined, {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-// Narrow-ish parsing (no `any`)
-function toTag(value: unknown): Tag {
-  return TAGS.includes(value as Tag) ? (value as Tag) : "General";
-}
-
-function loadNotes(): Note[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-
-    return parsed
-      .map((item): Note | null => {
-        if (typeof item !== "object" || item === null) return null;
-        const obj = item as Record<string, unknown>;
-
-        const id = typeof obj.id === "string" ? obj.id : "";
-        if (!id) return null;
-
-        const title = typeof obj.title === "string" ? obj.title : "(Untitled)";
-        const content = typeof obj.content === "string" ? obj.content : "";
-        const tag = toTag(obj.tag);
-        const updatedAt =
-          typeof obj.updatedAt === "number" && Number.isFinite(obj.updatedAt)
-            ? obj.updatedAt
-            : Date.now();
-
-        return { id, title, content, tag, updatedAt };
-      })
-      .filter((n): n is Note => n !== null);
-  } catch {
-    return [];
-  }
-}
-
-function saveNotes(notes: Note[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-}
+import { noteService } from "../services/noteService";
+import { useAuth } from "../hooks/useAuth";
+import { usePatient } from "../contexts/patient/usePatient";
+import {
+  formatToDateTimeLocal,
+  formatDayKey,
+  formatDayLabel,
+} from "../utils/formatters";
+import type { Note } from "../types/Types";
 
 export default function Notes() {
-  const [notes, setNotes] = useState<Note[]>(() =>
-    loadNotes().sort((a, b) => b.updatedAt - a.updatedAt)
-  );
+  const { user } = useAuth();
+  const {
+    selectedPatientId,
+    careTeamId,
+    loading: contextLoading,
+  } = usePatient();
+
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [categories, setCategories] = useState<
+    { categoryId: string; name: string }[]
+  >([]);
+  const [loadingNotes, setLoadingNotes] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // editor fields
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [tag, setTag] = useState<Tag>("General");
+  const [description, setDescription] = useState("");
+  const [categoryId, setCategoryId] = useState("");
 
-  // UI
+  // UI feedback
   const [savedFlash, setSavedFlash] = useState(false);
   const saveTimerRef = useRef<number | null>(null);
 
   const selectedNote = useMemo(
-    () => notes.find((n) => n.id === selectedId) ?? null,
-    [notes, selectedId]
+    () => notes.find((n) => n.noteId === selectedId) ?? null,
+    [notes, selectedId],
   );
 
-  // Persist on change
+  // Fetch categories when team is known
   useEffect(() => {
-    saveNotes(notes);
-  }, [notes]);
+    if (!careTeamId) return;
+    noteService
+      .getCategories(careTeamId)
+      .then((data) => {
+        setCategories(data ?? []);
+        if (data && data.length > 0) setCategoryId(data[0].categoryId);
+      })
+      .catch((err) => console.error("Failed to load categories:", err));
+  }, [careTeamId]);
+
+  // Load notes when patient changes
+  useEffect(() => {
+    if (!selectedPatientId) {
+      setNotes([]);
+      return;
+    }
+
+    setLoadingNotes(true);
+    noteService
+      .getNotesByPatient(selectedPatientId)
+      .then((data) => setNotes((data as Note[]) ?? []))
+      .catch((err) => console.error("Failed to load notes:", err))
+      .finally(() => setLoadingNotes(false));
+  }, [selectedPatientId]);
 
   // Load selected note into editor
   useEffect(() => {
     if (!selectedNote) {
       setTitle("");
-      setContent("");
-      setTag("General");
+      setDescription("");
+      setCategoryId(categories[0]?.categoryId ?? "");
       return;
     }
-    setTitle(selectedNote.title);
-    setContent(selectedNote.content);
-    setTag(selectedNote.tag);
-  }, [selectedNote]);
+    setTitle(selectedNote.title ?? "");
+    setDescription(selectedNote.description ?? "");
+    setCategoryId(selectedNote.categoryId ?? categories[0]?.categoryId ?? "");
+  }, [selectedNote, categories]);
 
   // Cleanup timer
   useEffect(() => {
@@ -147,164 +92,215 @@ export default function Notes() {
   const timelineGroups = useMemo(() => {
     const map = new Map<string, Note[]>();
     for (const n of notes) {
-      const k = dayKey(n.updatedAt);
+      const k = formatDayKey(n.createdAt);
       const arr = map.get(k) ?? [];
       arr.push(n);
       map.set(k, arr);
     }
-
-    const keys = Array.from(map.keys()).sort((a, b) => (a > b ? -1 : a < b ? 1 : 0));
-
-    return keys.map((k) => ({
-      day: k,
-      items: (map.get(k) ?? []).sort((a, b) => b.updatedAt - a.updatedAt),
-    }));
+    const keys = Array.from(map.keys()).sort((a, b) => (a > b ? -1 : 1));
+    return keys.map((k) => ({ day: k, items: map.get(k) ?? [] }));
   }, [notes]);
 
   function flashSaved() {
     setSavedFlash(true);
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
-    // show for 5 seconds
-    saveTimerRef.current = window.setTimeout(() => setSavedFlash(false), 5000);
+    saveTimerRef.current = window.setTimeout(() => setSavedFlash(false), 3000);
   }
 
   function handleNew() {
     setSelectedId(null);
     setTitle("");
-    setContent("");
-    setTag("General");
+    setDescription("");
+    setCategoryId(categories[0]?.categoryId ?? "");
   }
 
-  function handleSave() {
-    const trimmedTitle = title.trim();
-    const trimmedContent = content.trim();
+  async function handleSave() {
+    if (!description.trim() || !selectedPatientId || !user) return;
 
-    if (!trimmedTitle && !trimmedContent) return;
-
-    if (selectedNote) {
-      const updated: Note = {
-        ...selectedNote,
-        title: trimmedTitle || "(Untitled)",
-        content: trimmedContent,
-        tag,
-        updatedAt: Date.now(),
-      };
-
-      setNotes((prev) =>
-        prev
-          .map((n) => (n.id === selectedNote.id ? updated : n))
-          .sort((a, b) => b.updatedAt - a.updatedAt)
-      );
+    try {
+      if (selectedNote) {
+        const updated = await noteService.updateNote(selectedNote.noteId, {
+          title: title.trim(),
+          description: description.trim(),
+          categoryId,
+        });
+        setNotes((prev) =>
+          prev.map((n) =>
+            n.noteId === selectedNote.noteId ? (updated as Note) : n,
+          ),
+        );
+      } else {
+        const created = await noteService.addNote({
+          patientId: selectedPatientId,
+          caregiverId: user.id,
+          careTeamId: careTeamId ?? "",
+          title: title.trim(),
+          description: description.trim(),
+          categoryId,
+        });
+        setNotes((prev) => [created as Note, ...prev]);
+        setSelectedId((created as Note).noteId);
+      }
       flashSaved();
-      return;
+    } catch (err) {
+      console.error("Failed to save note:", err);
     }
-
-    const created: Note = {
-      id: makeId(),
-      title: trimmedTitle || "(Untitled)",
-      content: trimmedContent,
-      tag,
-      updatedAt: Date.now(),
-    };
-
-    setNotes((prev) => [created, ...prev].sort((a, b) => b.updatedAt - a.updatedAt));
-    setSelectedId(created.id);
-    flashSaved();
   }
 
-  function handleDelete(id: string) {
-    setNotes((prev) => prev.filter((n) => n.id !== id));
-    if (selectedId === id) handleNew();
+  async function handleDelete(noteId: string) {
+    try {
+      await noteService.deleteNote(noteId);
+      setNotes((prev) => prev.filter((n) => n.noteId !== noteId));
+      if (selectedId === noteId) handleNew();
+    } catch (err) {
+      console.error("Failed to delete note:", err);
+    }
   }
+
+  const isLoading = contextLoading || loadingNotes;
 
   return (
-    <div className="py-3">
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-start mb-3">
-        <div>
-          <h2 className="m-0">Notes</h2>
-          <p className="text-muted m-0">Create and manage quick notes for patient care.</p>
-        </div>
-
-        <div className="d-flex align-items-center gap-2">
-          {savedFlash && <span className="badge text-bg-success px-3 py-2">Saved</span>}
-          <Button color="outline-secondary" onClick={handleNew}>
-            + New
-          </Button>
-        </div>
+    <div className="container py-3">
+      <div className="">
+        <CustomTitleBanner
+          title="Notes"
+          subheader="Create and manage notes for patient care"
+        >
+          <div className="d-flex align-items-center gap-2 mt-2">
+            {savedFlash && (
+              <span className="badge text-bg-success px-3 py-2">Saved</span>
+            )}
+            <Button color="outline-secondary" onClick={handleNew}>
+              + New
+            </Button>
+          </div>
+        </CustomTitleBanner>
       </div>
 
-      <div className="row g-3">
-        {/* Left: Timeline */}
-        <div className="col-12 col-lg-5">
-          <CustomSection title="Care Timeline" subheader={`Showing ${notes.length} note(s)`}>
-            {notes.length === 0 ? (
-              <div className="text-muted">
-                No notes yet. Click <strong>New</strong> and write something.
-              </div>
-            ) : (
-              timelineGroups.map((group) => (
-                <div key={group.day} className="mb-3">
-                  <div className="text-muted small fw-semibold mb-2">{formatDayLabel(group.day)}</div>
-
-                  <div className="list-group">
-                    {group.items.map((n) => {
-                      const active = n.id === selectedId;
-
-                      return (
-                        <div
-                          key={n.id}
-                          role="button"
-                          tabIndex={0}
-                          className={
-                            "list-group-item list-group-item-action d-flex justify-content-between align-items-start " +
-                            (active ? "active" : "")
-                          }
-                          style={{ cursor: "pointer" }}
-                          onClick={() => setSelectedId(n.id)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") setSelectedId(n.id);
-                          }}
-                        >
-                          <div className="me-2">
-                            <div className="fw-semibold d-flex align-items-center gap-2">
-                              {n.title}
-                              <span className={`badge ${tagBadgeClass(n.tag)}`}>{n.tag}</span>
-                            </div>
-                            <div className={active ? "text-white-50 small" : "text-muted small"}>
-                              {formatDateTime(n.updatedAt)}
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            className={"btn btn-sm " + (active ? "btn-light" : "btn-outline-danger")}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(n.id);
-                            }}
-                            aria-label={`Delete note ${n.title}`}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))
-            )}
-          </CustomSection>
+      {!selectedPatientId && !contextLoading ? (
+        <div className="alert alert-info">
+          No patient selected. Please select a patient from the sidebar.
         </div>
+      ) : (
+        <div className="row g-3">
+          {/* Left: Timeline */}
+          <div className="col-12 col-lg-5">
+            <CustomSection
+              title="Care Timeline"
+              subheader={`Showing ${notes.length} note(s)`}
+            >
+              {isLoading ? (
+                <div className="text-muted">Loading notes…</div>
+              ) : notes.length === 0 ? (
+                <div className="text-muted">
+                  No notes yet. Click <strong>+ New</strong> and write
+                  something.
+                </div>
+              ) : (
+                timelineGroups.map((group) => (
+                  <div key={group.day} className="mb-3">
+                    <div className="text-muted small fw-semibold mb-2">
+                      {formatDayLabel(group.day)}
+                    </div>
+                    <div className="list-group">
+                      {group.items.map((n) => {
+                        const active = n.noteId === selectedId;
+                        return (
+                          <div
+                            key={n.noteId}
+                            role="button"
+                            tabIndex={0}
+                            className={
+                              "list-group-item list-group-item-action d-flex justify-content-between align-items-start " +
+                              (active ? "active" : "")
+                            }
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setSelectedId(n.noteId)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ")
+                                setSelectedId(n.noteId);
+                            }}
+                          >
+                            <div className="me-2">
+                              <div className="fw-semibold">
+                                {n.title || "(Untitled)"}
+                              </div>
+                              <div
+                                className={
+                                  active
+                                    ? "text-white-50 small"
+                                    : "text-muted small"
+                                }
+                              >
+                                {n.categories?.name}
+                                {n.caregivers && (
+                                  <>
+                                    {" "}
+                                    &middot; {n.caregivers.firstName}{" "}
+                                    {n.caregivers.lastName}
+                                  </>
+                                )}
+                              </div>
+                              <div
+                                className={
+                                  active
+                                    ? "text-white-50 small mt-1"
+                                    : "text-muted small mt-1"
+                                }
+                                style={{
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: "220px",
+                                }}
+                              >
+                                {n.description}
+                              </div>
+                              <div
+                                className={
+                                  active
+                                    ? "text-white-50 small"
+                                    : "text-muted small"
+                                }
+                              >
+                                {formatToDateTimeLocal(n.createdAt)}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              className={
+                                "btn btn-sm " +
+                                (active ? "btn-light" : "btn-outline-danger")
+                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(n.noteId);
+                              }}
+                              aria-label={`Delete note ${n.title || ""}`}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))
+              )}
+            </CustomSection>
+          </div>
 
-        {/* Right: Editor */}
-        <div className="col-12 col-lg-7">
-          <CustomSection
-            title={selectedNote ? "Edit Note" : "New Note"}
-            subheader={selectedNote ? `Last updated: ${formatDateTime(selectedNote.updatedAt)}` : "Not saved yet"}
-          >
-            <div className="row g-3">
-              <div className="col-12 col-md-8">
+          {/* Right: Editor */}
+          <div className="col-12 col-lg-7">
+            <CustomSection
+              title={selectedNote ? "Edit Note" : "New Note"}
+              subheader={
+                selectedNote
+                  ? `Created: ${formatToDateTimeLocal(selectedNote.createdAt)}`
+                  : "Not saved yet"
+              }
+            >
+              <div className="mb-3">
                 <label htmlFor="noteTitle" className="form-label">
                   Title
                 </label>
@@ -312,64 +308,66 @@ export default function Notes() {
                   id="noteTitle"
                   name="noteTitle"
                   className="form-control"
-                  placeholder="e.g., Doctor appointment"
+                  placeholder="e.g., Doctor visit summary"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
 
-              <div className="col-12 col-md-4">
-                <label htmlFor="noteTag" className="form-label">
-                  Tag
+              <div className="mb-3">
+                <label htmlFor="noteCategory" className="form-label">
+                  Category
                 </label>
                 <select
-                  id="noteTag"
-                  name="noteTag"
+                  id="noteCategory"
+                  name="noteCategory"
                   className="form-select"
-                  value={tag}
-                  onChange={(e) => setTag(e.target.value as Tag)}
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
                 >
-                  {TAGS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {categories.length === 0 && (
+                    <option value="">No categories available</option>
+                  )}
+                  {categories.map((c) => (
+                    <option key={c.categoryId} value={c.categoryId}>
+                      {c.name}
                     </option>
                   ))}
                 </select>
-
-                <div className="mt-2">
-                  <span className={`badge ${tagBadgeClass(tag)}`}>{tag}</span>
-                </div>
               </div>
-            </div>
 
-            <div className="mt-3">
-              <label htmlFor="noteContent" className="form-label">
-                Content
-              </label>
-              <textarea
-                id="noteContent"
-                name="noteContent"
-                className="form-control"
-                rows={10}
-                placeholder="Write your note here..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-              />
-            </div>
+              <div className="mb-3">
+                <label htmlFor="noteDescription" className="form-label">
+                  Content
+                </label>
+                <textarea
+                  id="noteDescription"
+                  name="noteDescription"
+                  className="form-control"
+                  rows={10}
+                  placeholder="Write your note here…"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
 
-            <div className="d-flex justify-content-end align-items-center mt-3 gap-2">
-              {selectedNote && (
-                <Button color="outline-danger" onClick={() => handleDelete(selectedNote.id)}>
-                  Delete
+              <div className="d-flex justify-content-end align-items-center gap-2">
+                {selectedNote && (
+                  <Button
+                    color="outline-danger"
+                    onClick={() => handleDelete(selectedNote.noteId)}
+                  >
+                    Delete
+                  </Button>
+                )}
+                <Button color="primary" onClick={handleSave}>
+                  Save
                 </Button>
-              )}
-              <Button color="primary" onClick={handleSave}>
-                Save
-              </Button>
-            </div>
-          </CustomSection>
+              </div>
+            </CustomSection>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -70,12 +70,23 @@ export interface MedicationScheduleItemProps {
  * Notes Type Definition
  */
 export interface Note {
-  id: string;
+  noteId: string;
+  careTeamId: string;
+  caregiverId: string;
+  patientId: string;
+  categoryId: string;
   title: string;
-  content: string;
-  tag: Tags;
+  description: string;
   createdAt: string;
-  updatedAt: number;
+  updatedAt: string;
+  // Supabase Joins
+  caregivers?: {
+    firstName: string;
+    lastName: string;
+  };
+  categories?: {
+    name: string;
+  };
 }
 
 /**
