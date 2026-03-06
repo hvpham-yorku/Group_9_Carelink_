@@ -14,6 +14,12 @@ npm i bootstrap@5.3.8
 npm i react-router-dom
 ```
 
+Installing database:
+
+```sh
+npm install @supabase/supabase-js
+```
+
 [Vitest](https://vitest.dev/) is required to run Test units
 
 To install test unit dependencies:
