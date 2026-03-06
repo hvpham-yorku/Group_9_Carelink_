@@ -34,57 +34,108 @@ const SideBar = ({ username }: SideBarProps) => {
           <span style={{ fontSize: "1.8rem", lineHeight: 1 }}>CareLink</span>
         </NavLink>
         
-        <ul className="nav d-flex flex-row align-items-center gap-4 mb-0 flex-grow-1">
-          <li className="nav-item">
-            <NavLink to="/dashboard" end className="nav-link text-white text-uppercase fw-semibold px-0">
-              Dashboard
-            </NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink to="/task-manager" className="nav-link text-white text-uppercase fw-semibold px-0">
-              Task Manager
-            </NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink to="/medication-tracker" className="nav-link text-white text-uppercase fw-semibold px-0">
-              Medication Tracker
-            </NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink to="/notes" className="nav-link text-white text-uppercase fw-semibold px-0">
-              Notes
-            </NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink to="/teams" className="nav-link text-white text-uppercase fw-semibold px-0">
-              Care Team
-            </NavLink>
-          </li>
-          <li className="nav-item">
-            <NavLink to="/patient-profile" className="nav-link text-white text-uppercase fw-semibold px-0">
-              Patient Profile
-            </NavLink>
-          </li>
-          <li className="nav-item px-2 d-flex flex-column justify-content-center">
-            <small
-              className="text-white text-uppercase fw-semibold d-block mb-1"
-              style={{ fontSize: "0.7rem", letterSpacing: "0.08em" }}
-            >
-              Active Patient
-            </small>
-            <select
-              className="form-select form-select-sm"
-              value={selectedPatientId || ""}
-              onChange={(e) => setSelectedPatientId(e.target.value)}
-            >
-              {patients.map((p) => (
-                <option key={p.patientId} value={p.patientId}>
-                  {p.firstName} {p.lastName}
-                </option>
-              ))}
-            </select>
-          </li>
-        </ul>
+        <ul className="nav d-flex flex-row align-items-center justify-content-evenly mb-0 flex-grow-1">
+
+  <li className="nav-item">
+    <NavLink
+      to="/dashboard"
+      end
+      className={({ isActive }) =>
+        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
+          isActive ? "bg-white bg-opacity-10" : ""
+        }`
+      }
+    >
+      Dashboard
+    </NavLink>
+  </li>
+
+  <li className="nav-item">
+    <NavLink
+      to="/task-manager"
+      className={({ isActive }) =>
+        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
+          isActive ? "bg-white bg-opacity-10" : ""
+        }`
+      }
+    >
+      Task Manager
+    </NavLink>
+  </li>
+
+  <li className="nav-item">
+    <NavLink
+      to="/medication-tracker"
+      className={({ isActive }) =>
+        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
+          isActive ? "bg-white bg-opacity-10" : ""
+        }`
+      }
+    >
+      Medication Tracker
+    </NavLink>
+  </li>
+
+  <li className="nav-item">
+    <NavLink
+      to="/notes"
+      className={({ isActive }) =>
+        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
+          isActive ? "bg-white bg-opacity-10" : ""
+        }`
+      }
+    >
+      Notes
+    </NavLink>
+  </li>
+
+  <li className="nav-item">
+    <NavLink
+      to="/teams"
+      className={({ isActive }) =>
+        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
+          isActive ? "bg-white bg-opacity-10" : ""
+        }`
+      }
+    >
+      Care Team
+    </NavLink>
+  </li>
+
+  <li className="nav-item">
+    <NavLink
+      to="/patient-profile"
+      className={({ isActive }) =>
+        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
+          isActive ? "bg-white bg-opacity-10" : ""
+        }`
+      }
+    >
+      Patient Profile
+    </NavLink>
+  </li>
+
+  <li className="nav-item px-2 d-flex flex-column justify-content-center">
+    <small
+      className="text-white text-uppercase fw-semibold d-block mb-1"
+      style={{ fontSize: "0.7rem", letterSpacing: "0.08em" }}
+    >
+      Active Patient
+    </small>
+    <select
+      className="form-select form-select-sm"
+      value={selectedPatientId || ""}
+      onChange={(e) => setSelectedPatientId(e.target.value)}
+    >
+      {patients.map((p) => (
+        <option key={p.patientId} value={p.patientId}>
+          {p.firstName} {p.lastName}
+        </option>
+      ))}
+    </select>
+  </li>
+
+</ul>
 
         
         <div className="btn-group dropup">
