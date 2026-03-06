@@ -12,7 +12,7 @@ import {
   formatDayLabel,
   formatToDateTimeLocal,
   formatToTime,
-} from "../src/utils/formatters";
+} from "../../../src/utils/formatters";
 
 // ─── formatToTime ─────────────────────────────────────────────────────────────
 
