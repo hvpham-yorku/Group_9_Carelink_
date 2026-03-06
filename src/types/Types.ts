@@ -55,15 +55,25 @@ export interface TaskLogEntry {
  * Medication Type Definitions
  */
 export interface MedicationScheduleItemProps {
-  id: string;
+  prescriptionId: string;
+  careTeamId: string;
+  patientId: string;
   name: string;
   dosage: string;
   frequency: string;
   scheduledAt: string;
-  taken?: boolean;
-  takenAt?: string | null;
-  takenBy?: string | null;
-  onToggle?: () => void;
+  isActive: boolean;
+
+  // supabase join for prescriptions and medicationLogs
+  medicationLog?: {
+    caregiverId: string;
+    firstName: string;
+    lastName: string;
+    takenAt: string;
+    isCompleted: boolean;
+  };
+
+  onToggle: (prescriptionId: string, isCompleted: boolean) => void;
 }
 
 /**
