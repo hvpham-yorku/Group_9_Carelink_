@@ -64,7 +64,7 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
 
           setPatients(formattedPatients);
         } else {
-          // IMPORTANT: Reset state for users with no team (like your new test account)
+          // IMPORTANT: Reset state for users with no team
           localStorage.removeItem(TEAM_KEY);
           setCareTeamId(null);
           setSelectedPatientId(null);
