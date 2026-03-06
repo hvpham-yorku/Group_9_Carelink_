@@ -23,8 +23,8 @@ const SideBar = ({ username }: SideBarProps) => {
   return (
     <>
       <div
-        className="position-fixed top-0 start-0 d-flex flex-column flex-shrink-0 p-3 bg-light vh-100 border-end overflow-auto"
-        style={{ width: "280px" }}
+        className="position-fixed top-0 start-0 w-100 d-flex align-items-center px-4"
+        style={{ height: "70px", zIndex: 1000, backgroundColor: "#4f67f6" }}
       >
         <NavLink
           to="/dashboard"
