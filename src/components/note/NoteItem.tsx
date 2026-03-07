@@ -1,10 +1,11 @@
+import type { Note } from "./types";
+
 type Props = {
-  note: any;
+  note: Note;
   active: boolean;
   onSelect: () => void;
   onDelete: () => void;
-  tagBadgeClass: (tag: any) => string;
-  formatDateTime: (ts: number) => string;
+  formatDateTime: (ts: string) => string;
 };
 
 export default function NoteItem({
@@ -12,7 +13,6 @@ export default function NoteItem({
   active,
   onSelect,
   onDelete,
-  tagBadgeClass,
   formatDateTime,
 }: Props) {
   return (
@@ -30,15 +30,34 @@ export default function NoteItem({
       }}
     >
       <div className="me-2">
-        <div className="fw-semibold d-flex align-items-center gap-2">
-          {note.title}
-          <span className={`badge ${tagBadgeClass(note.tag)}`}>
-            {note.tag}
-          </span>
+        <div className="fw-semibold">
+          {note.title || "(Untitled)"}
         </div>
 
         <div className={active ? "text-white-50 small" : "text-muted small"}>
-          {formatDateTime(note.updatedAt)}
+          {note.categories?.name}
+          {note.caregivers && (
+            <>
+              {" "}
+              &middot; {note.caregivers.firstName} {note.caregivers.lastName}
+            </>
+          )}
+        </div>
+
+        <div
+          className={active ? "text-white-50 small mt-1" : "text-muted small mt-1"}
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: "220px",
+          }}
+        >
+          {note.description}
+        </div>
+
+        <div className={active ? "text-white-50 small" : "text-muted small"}>
+          {formatDateTime(note.createdAt)}
         </div>
       </div>
 
@@ -49,6 +68,7 @@ export default function NoteItem({
           e.stopPropagation();
           onDelete();
         }}
+        aria-label={`Delete note ${note.title || ""}`}
       >
         Delete
       </button>

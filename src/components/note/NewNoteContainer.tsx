@@ -1,23 +1,23 @@
 import CustomSection from "../ui/CustomSection";
 import NoteForm from "./NoteForm";
+import type { Note, NoteCategory } from "./types";
 
 type Props = {
-  selectedNote: any;
-  formatDateTime: (ts: number) => string;
+  selectedNote: Note | null;
+  formatDateTime: (ts: string) => string;
 
   title: string;
-  content: string;
-  tag: string;
+  description: string;
+  categoryId: string;
 
-  setTitle: (v: string) => void;
-  setContent: (v: string) => void;
-  setTag: (v: any) => void;
+  setTitle: (value: string) => void;
+  setDescription: (value: string) => void;
+  setCategoryId: (value: string) => void;
 
   handleSave: () => void;
   handleDelete: (id: string) => void;
 
-  TAGS: string[];
-  tagBadgeClass: (tag: any) => string;
+  categories: NoteCategory[];
 };
 
 export default function NewNoteContainer({
@@ -30,7 +30,7 @@ export default function NewNoteContainer({
       title={selectedNote ? "Edit Note" : "New Note"}
       subheader={
         selectedNote
-          ? `Last updated: ${formatDateTime(selectedNote.updatedAt)}`
+          ? `Created: ${formatDateTime(selectedNote.createdAt)}`
           : "Not saved yet"
       }
     >

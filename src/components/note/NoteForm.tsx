@@ -1,87 +1,101 @@
 import Button from "../ui/Button";
+import type { Note, NoteCategory } from "./types";
 
 type Props = {
-  selectedNote: any;
+  selectedNote: Note | null;
 
   title: string;
-  content: string;
-  tag: string;
+  description: string;
+  categoryId: string;
 
-  setTitle: (v: string) => void;
-  setContent: (v: string) => void;
-  setTag: (v: any) => void;
+  setTitle: (value: string) => void;
+  setDescription: (value: string) => void;
+  setCategoryId: (value: string) => void;
 
   handleSave: () => void;
   handleDelete: (id: string) => void;
 
-  TAGS: string[];
-  tagBadgeClass: (tag: any) => string;
+  categories: NoteCategory[];
 };
 
 export default function NoteForm({
   selectedNote,
   title,
-  content,
-  tag,
+  description,
+  categoryId,
   setTitle,
-  setContent,
-  setTag,
+  setDescription,
+  setCategoryId,
   handleSave,
   handleDelete,
-  TAGS,
-  tagBadgeClass,
+  categories,
 }: Props) {
   return (
     <>
-      <div className="row g-3">
-        <div className="col-12 col-md-8">
-          <label className="form-label">Title</label>
-          <input
-            className="form-control"
-            placeholder="e.g., Doctor appointment"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
+      {/* Title */}
+      <div className="mb-3">
+        <label htmlFor="noteTitle" className="form-label">
+          Title
+        </label>
 
-        <div className="col-12 col-md-4">
-          <label className="form-label">Tag</label>
-
-          <select
-            className="form-select"
-            value={tag}
-            onChange={(e) => setTag(e.target.value)}
-          >
-            {TAGS.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-
-          <div className="mt-2">
-            <span className={`badge ${tagBadgeClass(tag)}`}>{tag}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-3">
-        <label className="form-label">Content</label>
-
-        <textarea
+        <input
+          id="noteTitle"
+          name="noteTitle"
           className="form-control"
-          rows={10}
-          placeholder="Write your note here..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          placeholder="e.g., Doctor visit summary"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
       </div>
 
-      <div className="d-flex justify-content-end align-items-center mt-3 gap-2">
+      {/* Category */}
+      <div className="mb-3">
+        <label htmlFor="noteCategory" className="form-label">
+          Category
+        </label>
+
+        <select
+          id="noteCategory"
+          name="noteCategory"
+          className="form-select"
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+        >
+          {categories.length === 0 && (
+            <option value="">No categories available</option>
+          )}
+
+          {categories.map((c) => (
+            <option key={c.categoryId} value={c.categoryId}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Description */}
+      <div className="mb-3">
+        <label htmlFor="noteDescription" className="form-label">
+          Content
+        </label>
+
+        <textarea
+          id="noteDescription"
+          name="noteDescription"
+          className="form-control"
+          rows={10}
+          placeholder="Write your note here…"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+
+      {/* Actions */}
+      <div className="d-flex justify-content-end align-items-center gap-2">
         {selectedNote && (
           <Button
             color="outline-danger"
-            onClick={() => handleDelete(selectedNote.id)}
+            onClick={() => handleDelete(selectedNote.noteId)}
           >
             Delete
           </Button>

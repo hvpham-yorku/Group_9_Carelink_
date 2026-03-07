@@ -1,18 +1,22 @@
-export type Tag = "Medical" | "Vitals" | "Mood" | "Nutrition" | "Activity" | "General";
-
-export type Note = {
-  id: string;
-  title: string;
-  content: string;
-  tag: Tag;
-  updatedAt: number;
+export type NoteCategory = {
+  categoryId: string;
+  name: string;
 };
 
-export const TAGS: Tag[] = [
-  "Medical",
-  "Vitals",
-  "Mood",
-  "Nutrition",
-  "Activity",
-  "General",
-];
+export type Caregiver = {
+  firstName: string;
+  lastName: string;
+};
+
+export type Note = {
+  noteId: string;
+  title: string;
+  description: string;
+  categoryId: string;
+  createdAt: string;
+  patientId?: string;
+  caregiverId?: string;
+  careTeamId?: string;
+  categories?: NoteCategory | null;
+  caregivers?: Caregiver | null;
+};

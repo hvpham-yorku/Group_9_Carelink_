@@ -1,12 +1,17 @@
 import NoteItem from "./NoteItem";
+import type { Note } from "./types";
+
+type TimelineGroup = {
+  day: string;
+  items: Note[];
+};
 
 type Props = {
-  group: any;
+  group: TimelineGroup;
   selectedId: string | null;
   setSelectedId: (id: string) => void;
   handleDelete: (id: string) => void;
-  tagBadgeClass: (tag: any) => string;
-  formatDateTime: (ts: number) => string;
+  formatDateTime: (ts: string) => string;
   formatDayLabel: (key: string) => string;
 };
 
@@ -15,7 +20,6 @@ export default function NoteList({
   selectedId,
   setSelectedId,
   handleDelete,
-  tagBadgeClass,
   formatDateTime,
   formatDayLabel,
 }: Props) {
@@ -26,17 +30,16 @@ export default function NoteList({
       </div>
 
       <div className="list-group">
-        {group.items.map((n: any) => {
-          const active = n.id === selectedId;
+        {group.items.map((note) => {
+          const active = note.noteId === selectedId;
 
           return (
             <NoteItem
-              key={n.id}
-              note={n}
+              key={note.noteId}
+              note={note}
               active={active}
-              onSelect={() => setSelectedId(n.id)}
-              onDelete={() => handleDelete(n.id)}
-              tagBadgeClass={tagBadgeClass}
+              onSelect={() => setSelectedId(note.noteId)}
+              onDelete={() => handleDelete(note.noteId)}
               formatDateTime={formatDateTime}
             />
           );
