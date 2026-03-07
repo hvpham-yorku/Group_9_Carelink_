@@ -1,0 +1,40 @@
+/* Navbar Active Patient dropdown styling */
+.navbar-select {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+}
+
+.navbar-select:focus {
+  box-shadow: none;
+  border: none;
+}
+
+.navbar-select option {
+  color: black;
+}
+
+/* NAVBAR DROPDOWN */
+
+.navbar-select {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+}
+
+.navbar-select:focus {
+  box-shadow: none;
+  border: none;
+}
+
+.navbar-select option {
+  color: black;
+}
+
+/* NAVBAR LINK HOVER */
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}

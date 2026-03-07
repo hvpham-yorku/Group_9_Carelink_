@@ -34,7 +34,7 @@ const Layout = () => {
     <>
       <div className="d-flex" style={{ backgroundColor: "#F2F7FF" }}>
         <SideBar username={username} />
-        <div className="container mt-4" style={{ marginLeft: "280px" }}>
+        <div className="container" style={{ paddingTop: "90px" }}>
           <Outlet />
         </div>
       </div>
