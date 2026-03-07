@@ -5,7 +5,7 @@ import { fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import Header from '../components/landingpage/Header';
-
+import Hero from '../components/landingpage/Hero';
 
 /* Tests for the Footer. */
 describe('Footer Component', () => {
@@ -103,5 +103,57 @@ describe('Header Component', () => {
     );
     const btn = screen.getByRole('button', { name: /sign in/i });
     expect(btn).toHaveClass('btn-primary', 'px-5');
+  });
+});
+
+/* Creates tests for the Hero Section */
+
+describe('Hero Component', () => {
+  
+  it('renders both parts of the main heading', () => {
+    render(<Hero />);
+    // Checking for the two-part heading
+    expect(screen.getByText(/Home Care Coordination,/i)).toBeInTheDocument();
+    expect(screen.getByText(/Simplified/i)).toBeInTheDocument();
+  });
+
+  it('renders the supportive sub-headline', () => {
+    render(<Hero />);
+    const subHeadline = screen.getByText(/CareLink centralizes daily care tasks/i);
+    expect(subHeadline).toBeInTheDocument();
+    expect(subHeadline).toHaveClass('text-secondary', 'fw-light');
+  });
+
+  it('contains a functional "Learn More" anchor link pointing to #about', () => {
+    render(<Hero />);
+    const learnMoreLink = screen.getByRole('link', { name: /learn more/i });
+    expect(learnMoreLink).toHaveAttribute('href', '#about');
+    // Verify it has the bold border classes you added
+    expect(learnMoreLink).toHaveClass('border-2', 'border-primary');
+  });
+
+  it('renders the primary CTA button', () => {
+    render(<Hero />);
+    const getStartedBtn = screen.getByRole('button', { name: /get started!/i });
+    expect(getStartedBtn).toBeInTheDocument();
+    expect(getStartedBtn).toHaveClass('btn-primary');
+  });
+
+  it('renders the hero image with correct accessibility alt text (or exists)', () => {
+    render(<Hero />);
+    const image = screen.getByRole('img');
+    expect(image).toBeInTheDocument();
+    expect(image).toHaveAttribute('src');
+    // Check for your Bootstrap sizing classes
+    expect(image).toHaveClass('w-75', 'shadow');
+  });
+
+  it('applies the correct background gradient style', () => {
+    const { container } = render(<Hero />);
+    const section = container.querySelector('.Hero');
+    // Verify the custom linear gradient is applied
+    expect(section).toHaveStyle({ 
+      background: 'linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%)' 
+    });
   });
 });
