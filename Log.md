@@ -140,3 +140,19 @@ Landing Page Development Tasks:
 Estimated Time: 14 hours
 
 Actual Time Spent: 12 hours
+
+### Neharika Sharma
+
+Dashboard Development Tasks:
+
+Neha worked on implementing and improving the CareLink Dashboard throughout Iteration 1 and Iteration 2. The dashboard serves as the main page caregivers see after logging into the system and provides a summary of important care information.
+
+During Iteration 1, the initial dashboard interface was implemented and structured into reusable components. Stub data was integrated to allow early testing of the dashboard layout and functionality, and additional improvements were made to the UI to make the page clearer and easier to navigate.
+
+During Iteration 2, the dashboard was connected to the backend using the useDashboardData hook so that real application data could be displayed instead of stub data. Additional features were added to improve the usefulness of the dashboard for caregivers, including displaying task completion statistics, medication tracking summaries, and recent caregiver activity.
+
+Further improvements included adding loading states and error handling for dashboard data retrieval, integrating the dashboard with the selected patient context, and adding navigation shortcuts so caregivers can quickly access important parts of the system.
+
+Estimated Time: 26 hours
+
+Actual Time Spent: 21 hours
