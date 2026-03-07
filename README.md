@@ -6,7 +6,31 @@ Carelink is a caretaker website designed to organize all resources needed to ens
 
 Carelink requires [Node.js](https://nodejs.org/) v24+ to run.
 
-Install the dependencies:
+### Installation (Fast way)
+
+Install dependencies:
+
+```sh
+npm install
+```
+
+Run the development Server:
+
+```sh
+npm run dev
+```
+
+Open the URL shown in terminal
+
+Run Test cases:
+
+```sh
+npm run test
+```
+
+### Installation (If fast way doesn't work)
+
+Install dependencies:
 
 ```sh
 npm i
@@ -28,10 +52,4 @@ To install test unit dependencies:
 npm i -D vitest
 npm i -D jsdom @testing-library/react @testing-library/jest-dom
 npm i -D vitest @testing-library/react @testing-library/jest-dom
-```
-
-To start the server:
-
-```sh
-npm run dev
 ```
