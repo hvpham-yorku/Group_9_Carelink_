@@ -40,7 +40,7 @@ export const patientService = {
       .from("careTeamMembers")
       .select("careTeamId, dateAssigned")
       .eq("caregiverId", caregiverId)
-      .order("dateAssigned", { ascending: false, nullsFirst: false }) // Fix here
+      .order("dateAssigned", { ascending: false, nullsFirst: false }) // bug fix for correct ordering when nulls are present
       .limit(1)
       .maybeSingle();
 
