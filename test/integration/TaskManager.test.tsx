@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  *
- * Integration tests for the TaskManager page and unit tests for its child components.
+ * Integration tests for the TaskManager page.
  * Covers task rendering, creation, toggling completion, editing, and deletion.
  * Mocks taskService, useAuth, and usePatient so no real network calls are made.
  */
@@ -16,13 +16,9 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Task } from "../src/types/Types";
-import TaskManager from "../src/pages/TaskManager";
-import TaskCard from "../src/components/task/TaskCard";
-import TaskEdit from "../src/components/task/TaskEdit";
-import TaskForm from "../src/components/task/TaskForm";
-import TaskList from "../src/components/task/TaskList";
-import { taskService } from "../src/services/taskService";
+import type { Task } from "../../src/types/Types";
+import TaskManager from "../../src/pages/TaskManager";
+import { taskService } from "../../src/services/taskService";
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
 
@@ -38,7 +34,7 @@ const MOCK_TASK: Task = {
   categoryId: "cat-1",
   title: "Sample Task",
   description: "Sample Description",
-  scheduledAt: "2026-03-06T10:00:00Z",
+  scheduledAt: "2026-03-06T10:00",
   categories: { name: "General" },
   taskLogs: [],
 };
@@ -53,18 +49,18 @@ const COMPLETED_TASK: Task = {
       caregiverId: "caregiver-1",
       completedAt: "2026-03-06T11:00:00Z",
       isCompleted: true,
-      caregivers: { firstName: "Alice" },
+      caregivers: { firstName: "Alice", lastName: "Smith" },
     },
   ],
 };
 
 // ─── Module mocks ─────────────────────────────────────────────────────────────
 
-vi.mock("../hooks/useAuth", () => ({
+vi.mock("../../src/hooks/useAuth", () => ({
   useAuth: () => ({ user: { id: "user-1" } }),
 }));
 
-vi.mock("../contexts/patient/usePatient", () => ({
+vi.mock("../../src/contexts/patient/usePatient", () => ({
   usePatient: () => ({
     selectedPatientId: "patient-1",
     careTeamId: "team-1",
@@ -72,7 +68,7 @@ vi.mock("../contexts/patient/usePatient", () => ({
   }),
 }));
 
-vi.mock("../services/taskService", () => ({
+vi.mock("../../src/services/taskService", () => ({
   taskService: {
     getTasksByPatient: vi.fn(),
     getCategories: vi.fn(),
@@ -90,11 +86,11 @@ describe("TaskManager page", () => {
   beforeEach(() => {
     vi.mocked(taskService.getTasksByPatient).mockResolvedValue([MOCK_TASK]);
     vi.mocked(taskService.getCategories).mockResolvedValue(MOCK_CATEGORIES);
-    vi.mocked(taskService.addTask).mockResolvedValue(undefined as unknown);
-    vi.mocked(taskService.markTaskAsDone).mockResolvedValue(
-      undefined as unknown,
-    );
+    vi.mocked(taskService.addTask).mockResolvedValue(undefined as any);
+    vi.mocked(taskService.markTaskAsDone).mockResolvedValue(undefined as any);
     vi.mocked(taskService.unmarkTaskAsDone).mockResolvedValue(undefined as any);
+    vi.mocked(taskService.updateTask).mockResolvedValue(undefined as any);
+    vi.mocked(taskService.deleteTask).mockResolvedValue(undefined as any);
   });
 
   afterEach(() => {
@@ -208,257 +204,51 @@ describe("TaskManager page", () => {
     render(<TaskManager />);
     await waitFor(() => screen.getByText("Sample Task"));
 
-    fireEvent.click(screen.getByRole("button")); // task card
+    fireEvent.click(
+      screen.getByText("Sample Task").closest('[role="button"]')!,
+    );
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: /save changes/i }),
       ).toBeInTheDocument(),
     );
   });
-});
 
-// ─── TaskForm component (unit) ────────────────────────────────────────────────
+  it("calls taskService.updateTask with the modified fields on save", async () => {
+    render(<TaskManager />);
+    await waitFor(() => screen.getByText("Sample Task"));
 
-describe("TaskForm component", () => {
-  it("renders category options from the categories prop", () => {
-    render(<TaskForm categories={MOCK_CATEGORIES} onAddTask={vi.fn()} />);
-    expect(screen.getByRole("option", { name: "General" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("option", { name: "Medication" }),
-    ).toBeInTheDocument();
-  });
-
-  it("calls onAddTask with title, description, time, and categoryId on submit", () => {
-    const onAddTask = vi.fn();
-    render(<TaskForm categories={MOCK_CATEGORIES} onAddTask={onAddTask} />);
+    fireEvent.click(
+      screen.getByText("Sample Task").closest('[role="button"]')!,
+    );
+    await waitFor(() => screen.getByRole("button", { name: /save changes/i }));
 
     fireEvent.change(screen.getByLabelText(/task title/i), {
-      target: { value: "Buy meds" },
-    });
-    fireEvent.change(screen.getByLabelText(/task description/i), {
-      target: { value: "Pharmacy run" },
-    });
-    fireEvent.change(screen.getByLabelText(/time/i), {
-      target: { value: "2026-03-06T09:15" },
-    });
-    fireEvent.change(screen.getByLabelText(/category/i), {
-      target: { value: "cat-2" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /add task/i }));
-
-    expect(onAddTask).toHaveBeenCalledWith(
-      "Buy meds",
-      "Pharmacy run",
-      "2026-03-06T09:15",
-      "cat-2",
-    );
-  });
-
-  it("clears all fields after submitting", () => {
-    const onAddTask = vi.fn();
-    render(<TaskForm categories={MOCK_CATEGORIES} onAddTask={onAddTask} />);
-
-    fireEvent.change(screen.getByLabelText(/task title/i), {
-      target: { value: "Buy meds" },
-    });
-    fireEvent.change(screen.getByLabelText(/task description/i), {
-      target: { value: "Pharmacy run" },
-    });
-    fireEvent.change(screen.getByLabelText(/time/i), {
-      target: { value: "2026-03-06T09:15" },
-    });
-    fireEvent.change(screen.getByLabelText(/category/i), {
-      target: { value: "cat-2" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /add task/i }));
-
-    expect(
-      (screen.getByLabelText(/task title/i) as HTMLInputElement).value,
-    ).toBe("");
-    expect(
-      (screen.getByLabelText(/task description/i) as HTMLTextAreaElement).value,
-    ).toBe("");
-    expect((screen.getByLabelText(/time/i) as HTMLInputElement).value).toBe("");
-  });
-
-  it("calls onCancel when the cancel button is clicked", () => {
-    const onCancel = vi.fn();
-    render(
-      <TaskForm
-        categories={MOCK_CATEGORIES}
-        onAddTask={vi.fn()}
-        onCancel={onCancel}
-      />,
-    );
-    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
-    expect(onCancel).toHaveBeenCalledTimes(1);
-  });
-});
-
-// ─── TaskCard component (unit) ────────────────────────────────────────────────
-
-describe("TaskCard component", () => {
-  it("renders task title, description, and category badge", () => {
-    render(<TaskCard task={MOCK_TASK} onToggle={vi.fn()} />);
-    expect(screen.getByText("Sample Task")).toBeInTheDocument();
-    expect(screen.getByText("Sample Description")).toBeInTheDocument();
-    expect(screen.getByText("General")).toBeInTheDocument();
-  });
-
-  it("fires onToggle when the checkbox is clicked", () => {
-    const onToggle = vi.fn();
-    render(<TaskCard task={MOCK_TASK} onToggle={onToggle} />);
-    fireEvent.click(screen.getByRole("checkbox"));
-    expect(onToggle).toHaveBeenCalledTimes(1);
-  });
-
-  it("fires onSelect when the card area is clicked", () => {
-    const onSelect = vi.fn();
-    render(
-      <TaskCard task={MOCK_TASK} onToggle={vi.fn()} onSelect={onSelect} />,
-    );
-    fireEvent.click(screen.getByRole("button"));
-    expect(onSelect).toHaveBeenCalledTimes(1);
-  });
-
-  it("applies strikethrough styling to the title of a completed task", () => {
-    render(<TaskCard task={COMPLETED_TASK} onToggle={vi.fn()} />);
-    expect(screen.getByText("Completed Task")).toHaveClass(
-      "text-decoration-line-through",
-    );
-  });
-
-  it("shows the name of the caregiver who completed the task", () => {
-    render(<TaskCard task={COMPLETED_TASK} onToggle={vi.fn()} />);
-    expect(screen.getByText(/alice/i)).toBeInTheDocument();
-  });
-});
-
-// ─── TaskList component (unit) ────────────────────────────────────────────────
-
-describe("TaskList component", () => {
-  const TASKS: Task[] = [
-    { ...MOCK_TASK, taskId: "tl-1", title: "Task A" },
-    {
-      ...MOCK_TASK,
-      taskId: "tl-2",
-      title: "Task B",
-      taskLogs: [
-        {
-          taskId: "tl-2",
-          caregiverId: "c1",
-          completedAt: "2026-03-06T11:00:00Z",
-          isCompleted: true,
-        },
-      ],
-    },
-  ];
-
-  it("renders every task in the list", () => {
-    render(
-      <TaskList tasks={TASKS} onToggleTask={vi.fn()} onSelectTask={vi.fn()} />,
-    );
-    expect(screen.getByText("Task A")).toBeInTheDocument();
-    expect(screen.getByText("Task B")).toBeInTheDocument();
-  });
-
-  it("calls onToggleTask with the correct taskId when a checkbox is toggled", () => {
-    const onToggleTask = vi.fn();
-    render(
-      <TaskList
-        tasks={TASKS}
-        onToggleTask={onToggleTask}
-        onSelectTask={vi.fn()}
-      />,
-    );
-    fireEvent.click(screen.getAllByRole("checkbox")[0]);
-    expect(onToggleTask).toHaveBeenCalledWith("tl-1");
-  });
-
-  it("calls onSelectTask with the correct task when a card is clicked", () => {
-    const onSelectTask = vi.fn();
-    render(
-      <TaskList
-        tasks={TASKS}
-        onToggleTask={vi.fn()}
-        onSelectTask={onSelectTask}
-      />,
-    );
-    fireEvent.click(screen.getAllByRole("button")[0]);
-    expect(onSelectTask).toHaveBeenCalledWith(TASKS[0]);
-  });
-});
-
-// ─── TaskEdit component (unit) ────────────────────────────────────────────────
-
-describe("TaskEdit component", () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it("pre-fills the form with the task's current title and description", () => {
-    render(
-      <TaskEdit
-        task={MOCK_TASK}
-        categories={MOCK_CATEGORIES}
-        onUpdateTask={vi.fn()}
-        onDeleteTask={vi.fn()}
-        onCancel={vi.fn()}
-      />,
-    );
-    expect(
-      (screen.getByLabelText(/task title/i) as HTMLInputElement).value,
-    ).toBe("Sample Task");
-    expect(
-      (screen.getByLabelText(/task description/i) as HTMLTextAreaElement).value,
-    ).toBe("Sample Description");
-  });
-
-  it("calls onUpdateTask with the modified task on save", () => {
-    const onUpdateTask = vi.fn();
-    render(
-      <TaskEdit
-        task={MOCK_TASK}
-        categories={MOCK_CATEGORIES}
-        onUpdateTask={onUpdateTask}
-        onDeleteTask={vi.fn()}
-        onCancel={vi.fn()}
-      />,
-    );
-    fireEvent.change(screen.getByLabelText(/task title/i), {
-      target: { value: "Updated Title" },
+      target: { value: "Updated Task" },
     });
     fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
-    expect(onUpdateTask).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Updated Title", taskId: "task-1" }),
+
+    await waitFor(() =>
+      expect(taskService.updateTask).toHaveBeenCalledWith(
+        "task-1",
+        expect.objectContaining({ title: "Updated Task" }),
+      ),
     );
   });
 
-  it("calls onDeleteTask with the task id when delete is clicked", () => {
-    const onDeleteTask = vi.fn();
-    render(
-      <TaskEdit
-        task={MOCK_TASK}
-        categories={MOCK_CATEGORIES}
-        onUpdateTask={vi.fn()}
-        onDeleteTask={onDeleteTask}
-        onCancel={vi.fn()}
-      />,
+  it("calls taskService.deleteTask when delete is clicked in the edit form", async () => {
+    render(<TaskManager />);
+    await waitFor(() => screen.getByText("Sample Task"));
+
+    fireEvent.click(
+      screen.getByText("Sample Task").closest('[role="button"]')!,
     );
+    await waitFor(() => screen.getByRole("button", { name: /delete task/i }));
+
     fireEvent.click(screen.getByRole("button", { name: /delete task/i }));
-    expect(onDeleteTask).toHaveBeenCalledWith("task-1");
-  });
 
-  it("calls onCancel when the cancel button is clicked", () => {
-    const onCancel = vi.fn();
-    render(
-      <TaskEdit
-        task={MOCK_TASK}
-        categories={MOCK_CATEGORIES}
-        onUpdateTask={vi.fn()}
-        onDeleteTask={vi.fn()}
-        onCancel={onCancel}
-      />,
+    await waitFor(() =>
+      expect(taskService.deleteTask).toHaveBeenCalledWith("task-1"),
     );
-    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
-    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 });
