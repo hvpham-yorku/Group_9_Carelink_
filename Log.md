@@ -158,7 +158,7 @@ Estimated Time: 26 hours
 
 Actual Time Spent: 21 hours
 
-## Saneea Khalid
+### Saneea Khalid
 Navigation Bar Development Tasks:
 Converted the original sidebar into a top navigation bar to improve the layout and make the interface easier to use. Implemented the patient switcher dropdown so caregivers can quickly switch between different patients. Adjusted the styling and positioning so the navigation integrates cleanly with the rest of the application interface.
 
