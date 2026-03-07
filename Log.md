@@ -125,3 +125,18 @@ Backend / Database integration Development Task:
 
 Estimated Time: 3 days
 Actual Time spent: 3 days
+
+### Adeena Ahmed
+
+Landing Page Development Tasks:
+  1. Create Landing Page NavBar
+  2. Create Hero Section
+  3. Create Footer Section
+  4. Create Call to Action Section
+  5. Create About Section
+  6. Create Sections which clearly explain the purpose of the platform and audience
+  7. Fix navigation routing for Signing in and out of the website
+
+Estimated Time: 14 hours
+
+Actual Time Spent: 12 hours
