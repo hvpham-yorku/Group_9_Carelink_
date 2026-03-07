@@ -107,7 +107,12 @@ This approach reflects real-world caregiving environments where responsibilities
 ### Tara
 Tara – Notes Page and Component Refactoring
 
-Tara worked on implementing and improving the Notes feature of the CareLink application. This included developing the notes page functionality and restructuring the page into reusable components to improve maintainability. She implemented the logic for creating and displaying notes and ensured notes were properly organized within the application. Tara also created and implemented test cases for the notes functionality and performed debugging to ensure the feature worked correctly when connected to the database.
+- Restructuring Notes based on the database version of Notes.
+- implemented  logic for creating and displaying notes and ensured notes were properly organized within the application.
+- created and implemented test cases for the notes functionality and performed debugging to ensure the feature worked correctly when connected to the database.
+- 8 different components for better navigation and simplicity.
+Estimated Time: 15 hours
+Actual Time spent: 10 hours
 
 ### Jose Urbina
 
@@ -124,6 +129,7 @@ Backend / Database integration Development Task:
 - Creating Database and Database integration
 
 Estimated Time: 3 days
+
 Actual Time spent: 3 days
 
 ### Adeena Ahmed
@@ -156,3 +162,17 @@ Further improvements included adding loading states and error handling for dashb
 Estimated Time: 26 hours
 
 Actual Time Spent: 21 hours
+
+### Saneea Khalid
+Navigation Bar Development Tasks:
+Converted the original sidebar into a top navigation bar to improve the layout and make the interface easier to use. Implemented the patient switcher dropdown so caregivers can quickly switch between different patients. Adjusted the styling and positioning so the navigation integrates cleanly with the rest of the application interface.
+
+Estimated Time: 6 hours
+Actual Time spent: 4 hours
+
+Patient Profile Development Tasks:
+
+Designed and implemented the Patient Profile page to display patient information retrieved from the database. Integrated the frontend with the backend patient service so that the correct patient data loads based on the selected patient. Added structured sections for patient details and updated placeholders so unavailable features display as “Not Available” for consistency.
+
+Estimated Time: 10 hours
+Actual Time spent: 6 hours
