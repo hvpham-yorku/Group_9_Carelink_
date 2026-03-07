@@ -14,10 +14,22 @@ Install dependencies:
 npm install
 ```
 
+or
+
+```sh
+npm i
+```
+
 Run the development Server:
 
 ```sh
 npm run dev
+```
+
+Copy: (keys can be found on jira backlog)
+
+```sh
+cp .env.example .env.local
 ```
 
 Open the URL shown in terminal
