@@ -157,3 +157,17 @@ Further improvements included adding loading states and error handling for dashb
 Estimated Time: 26 hours
 
 Actual Time Spent: 21 hours
+
+## Saneea Khalid
+Navigation Bar Development Tasks:
+Converted the original sidebar into a top navigation bar to improve the layout and make the interface easier to use. Implemented the patient switcher dropdown so caregivers can quickly switch between different patients. Adjusted the styling and positioning so the navigation integrates cleanly with the rest of the application interface.
+
+Estimated Time: 6 hours
+Actual Time spent: 4 hours
+
+Patient Profile Development Tasks:
+
+Designed and implemented the Patient Profile page to display patient information retrieved from the database. Integrated the frontend with the backend patient service so that the correct patient data loads based on the selected patient. Added structured sections for patient details and updated placeholders so unavailable features display as “Not Available” for consistency.
+
+Estimated Time: 10 hours
+Actual Time spent: 6 hours
