@@ -1,5 +1,14 @@
 import { supabase } from "../lib/supabase";
-import type { NewTask, TaskLogEntry } from "../types/Types";
+import type { TaskLogEntry } from "../types/Types";
+
+export interface NewTask {
+  title: string;
+  description?: string;
+  categoryId: string;
+  patientId: string;
+  careTeamId: string;
+  scheduledAt: string;
+}
 
 export const taskService = {
   // Fetch tasks filtered by a specific patient

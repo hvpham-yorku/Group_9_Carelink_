@@ -1,11 +1,6 @@
 import { useState, type FormEvent } from "react";
-import type { Task } from "../../types/Types";
+import type { Task, Category } from "../../types/Types";
 import { formatToDateTimeLocal } from "../../utils/formatters";
-
-interface Category {
-  categoryId: string;
-  name: string;
-}
 
 interface TaskEditProps {
   task: Task;

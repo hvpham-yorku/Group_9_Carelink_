@@ -4,18 +4,12 @@
  */
 
 /**
- * Tag Type Definition
+ * Category Type Definition
  */
-export type Tags =
-  | "Medical"
-  | "Vitals"
-  | "Mood"
-  | "Nutrition"
-  | "Activity"
-  | "General"
-  | "Medication"
-  | "Personal"
-  | "Therapy";
+export interface Category {
+  categoryId: string;
+  name: string;
+}
 
 /**
  * Task Type Definition
@@ -29,18 +23,10 @@ export interface Task {
   title: string;
   description: string;
   scheduledAt: string;
+
   // Supabase Join
   categories?: { name: string };
   taskLogs?: TaskLogEntry[];
-}
-
-export interface NewTask {
-  title: string;
-  description?: string;
-  categoryId: string;
-  patientId: string;
-  careTeamId: string;
-  scheduledAt: string;
 }
 
 export interface TaskLogEntry {
@@ -48,53 +34,90 @@ export interface TaskLogEntry {
   caregiverId: string;
   completedAt: string;
   isCompleted: boolean;
-  caregivers?: { firstName: string };
+  caregivers?: { firstName: string; lastName: string };
 }
 
 /**
  * Medication Type Definitions
  */
 export interface MedicationScheduleItemProps {
-  id: string;
+  prescriptionId: string;
+  careTeamId: string;
+  patientId: string;
   name: string;
   dosage: string;
   frequency: string;
   scheduledAt: string;
-  taken?: boolean;
-  takenAt?: string | null;
-  takenBy?: string | null;
-  onToggle?: () => void;
+  isActive: boolean;
+
+  // supabase join for prescriptions and medicationLogs
+  medicationLog?: {
+    caregiverId: string;
+    firstName: string;
+    lastName: string;
+    takenAt: string;
+    isCompleted: boolean;
+  };
+
+  onToggle: (prescriptionId: string, isCompleted: boolean) => void;
 }
 
 /**
  * Notes Type Definition
  */
 export interface Note {
-  id: string;
+  noteId: string;
+  careTeamId: string;
+  caregiverId: string;
+  patientId: string;
+  categoryId: string;
   title: string;
-  content: string;
-  tag: Tags;
+  description: string;
   createdAt: string;
-  updatedAt: number;
+  updatedAt: string;
+  // Supabase Joins
+  caregivers?: {
+    firstName: string;
+    lastName: string;
+  };
+  categories?: {
+    name: string;
+  };
 }
 
 /**
  * Patient Info Type Definition
  */
 export interface PatientInfo {
-  id: string;
+  patientId: string;
   firstName: string;
   lastName: string;
-  dob: string; // date of birth
+  dob: string;
   address: string;
-  phone: string;
+  phoneNumber: string;
+  email?: string;
+  gender?: string;
+  bloodType?: string;
+  height?: string;
+  weight?: string;
+  allergies?: string[];
+  conditions?: string[];
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelationship?: string;
+  physicianName?: string;
+  physicianPhone?: string;
+  physicianAddress?: string;
+  insuranceProvider?: string;
+  insurancePolicyNumber?: string;
+  careNotes?: string;
 }
 
 /**
  * Caregiver Info Type Definition
  */
 export interface CaregiverInfo {
-  id: string;
+  caregiverId: string;
   firstName: string;
   lastName: string;
   phone: string;
@@ -106,10 +129,20 @@ export interface CaregiverInfo {
  * Caregiver Teams Type Definition
  */
 export interface CaregiverTeam {
-  id: string;
-  caregiver: CaregiverInfo[];
-  patient: PatientInfo[];
+  careTeamId: string;
+  caregivers: CaregiverInfo[];
+  patients: PatientInfo[];
+  joinCode: string;
   caregiverRole: string;
+  dateAssigned: string;
+}
+
+export interface careTeamMember {
+  membershipId: string;
+  careTeamId: string;
+  caregiverId: string;
+  patientId: string;
+  role: string;
   dateAssigned: string;
 }
 

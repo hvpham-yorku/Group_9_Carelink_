@@ -14,11 +14,11 @@ const PatientList = ({ patients }: PatientListProps) => {
   return (
     <ul className="list-group list-group-flush">
       {patients.map((patient) => (
-        <li key={patient.id} className="list-group-item px-0">
+        <li key={patient.patientId} className="list-group-item px-0">
           <h6 className="mb-1">
             {patient.firstName} {patient.lastName}
           </h6>
-          <p className="mb-1 text-muted">DOB: {patient.dob}</p>
+          <p className="mb-1 text-muted">Date of Birth: {patient.dob}</p>
           <p className="mb-1 text-muted">{patient.phone}</p>
           <p className="mb-0 text-muted">{patient.address}</p>
         </li>

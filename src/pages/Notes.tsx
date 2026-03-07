@@ -2,52 +2,86 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import NotesHeader from "../components/note/NotesHeader";
 import CareTimelineContainer from "../components/note/CareTimelineContainer";
 import NewNoteContainer from "../components/note/NewNoteContainer";
-import type { Note, Tag } from "../components/note/types";
-import { TAGS } from "../components/note/types";
+import type { Note, NoteCategory } from "../components/note/types";
 import {
   dayKey,
   formatDateTime,
   formatDayLabel,
-  loadNotes,
-  makeId,
-  saveNotes,
-  tagBadgeClass,
 } from "../components/note/noteUtils";
 
+import { noteService } from "../services/noteService";
+import { useAuth } from "../hooks/useAuth";
+import { usePatient } from "../contexts/patient/usePatient";
+
 export default function Notes() {
-  const [notes, setNotes] = useState<Note[]>(() =>
-    loadNotes().sort((a, b) => b.updatedAt - a.updatedAt)
-  );
+  const { user } = useAuth();
+  const {
+    selectedPatientId,
+    careTeamId,
+    loading: contextLoading,
+  } = usePatient();
+
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [categories, setCategories] = useState<NoteCategory[]>([]);
+  const [loadingNotes, setLoadingNotes] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [tag, setTag] = useState<Tag>("General");
+  const [description, setDescription] = useState("");
+  const [categoryId, setCategoryId] = useState("");
 
   const [savedFlash, setSavedFlash] = useState(false);
   const saveTimerRef = useRef<number | null>(null);
 
   const selectedNote = useMemo(
-    () => notes.find((note) => note.id === selectedId) ?? null,
+    () => notes.find((note) => note.noteId === selectedId) ?? null,
     [notes, selectedId]
   );
 
   useEffect(() => {
-    saveNotes(notes);
-  }, [notes]);
+    if (!careTeamId) return;
+
+    noteService
+      .getCategories(careTeamId)
+      .then((data: NoteCategory[] | null) => {
+        const loadedCategories = data ?? [];
+        setCategories(loadedCategories);
+
+        if (loadedCategories.length > 0) {
+          setCategoryId(loadedCategories[0].categoryId);
+        }
+      })
+      .catch((err: unknown) => console.error("Failed to load categories:", err));
+  }, [careTeamId]);
+
+  useEffect(() => {
+    if (!selectedPatientId) {
+      setNotes([]);
+      setSelectedId(null);
+      return;
+    }
+
+    setLoadingNotes(true);
+
+    noteService
+      .getNotesByPatient(selectedPatientId)
+      .then((data: Note[] | null) => setNotes(data ?? []))
+      .catch((err: unknown) => console.error("Failed to load notes:", err))
+      .finally(() => setLoadingNotes(false));
+  }, [selectedPatientId]);
 
   useEffect(() => {
     if (!selectedNote) {
       setTitle("");
-      setContent("");
-      setTag("General");
+      setDescription("");
+      setCategoryId(categories[0]?.categoryId ?? "");
       return;
     }
 
-    setTitle(selectedNote.title);
-    setContent(selectedNote.content);
-    setTag(selectedNote.tag);
-  }, [selectedNote]);
+    setTitle(selectedNote.title ?? "");
+    setDescription(selectedNote.description ?? "");
+    setCategoryId(selectedNote.categoryId ?? categories[0]?.categoryId ?? "");
+  }, [selectedNote, categories]);
 
   useEffect(() => {
     return () => {
@@ -61,7 +95,7 @@ export default function Notes() {
     const map = new Map<string, Note[]>();
 
     for (const note of notes) {
-      const key = dayKey(note.updatedAt);
+      const key = dayKey(note.createdAt);
       const group = map.get(key) ?? [];
       group.push(note);
       map.set(key, group);
@@ -71,7 +105,7 @@ export default function Notes() {
 
     return keys.map((key) => ({
       day: key,
-      items: (map.get(key) ?? []).sort((a, b) => b.updatedAt - a.updatedAt),
+      items: map.get(key) ?? [],
     }));
   }, [notes]);
 
@@ -84,97 +118,107 @@ export default function Notes() {
 
     saveTimerRef.current = window.setTimeout(() => {
       setSavedFlash(false);
-    }, 5000);
+    }, 3000);
   }
 
   function handleNew() {
     setSelectedId(null);
     setTitle("");
-    setContent("");
-    setTag("General");
+    setDescription("");
+    setCategoryId(categories[0]?.categoryId ?? "");
   }
 
-  function handleSave() {
-    const trimmedTitle = title.trim();
-    const trimmedContent = content.trim();
+  async function handleSave() {
+    if (!description.trim() || !selectedPatientId || !user) return;
 
-    if (!trimmedTitle && !trimmedContent) return;
+    try {
+      if (selectedNote) {
+        const updated = await noteService.updateNote(selectedNote.noteId, {
+          title: title.trim(),
+          description: description.trim(),
+          categoryId,
+        });
 
-    if (selectedNote) {
-      const updatedNote: Note = {
-        ...selectedNote,
-        title: trimmedTitle || "(Untitled)",
-        content: trimmedContent,
-        tag,
-        updatedAt: Date.now(),
-      };
+        setNotes((prev) =>
+          prev.map((note) =>
+            note.noteId === selectedNote.noteId ? (updated as Note) : note
+          )
+        );
+      } else {
+        const created = await noteService.addNote({
+          patientId: selectedPatientId,
+          caregiverId: user.id,
+          careTeamId: careTeamId ?? "",
+          title: title.trim(),
+          description: description.trim(),
+          categoryId,
+        });
 
-      setNotes((prev) =>
-        prev
-          .map((note) => (note.id === selectedNote.id ? updatedNote : note))
-          .sort((a, b) => b.updatedAt - a.updatedAt)
-      );
+        setNotes((prev) => [created as Note, ...prev]);
+        setSelectedId((created as Note).noteId);
+      }
 
       flashSaved();
-      return;
-    }
-
-    const newNote: Note = {
-      id: makeId(),
-      title: trimmedTitle || "(Untitled)",
-      content: trimmedContent,
-      tag,
-      updatedAt: Date.now(),
-    };
-
-    setNotes((prev) => [newNote, ...prev].sort((a, b) => b.updatedAt - a.updatedAt));
-    setSelectedId(newNote.id);
-    flashSaved();
-  }
-
-  function handleDelete(id: string) {
-    setNotes((prev) => prev.filter((note) => note.id !== id));
-
-    if (selectedId === id) {
-      handleNew();
+    } catch (err) {
+      console.error("Failed to save note:", err);
     }
   }
+
+  async function handleDelete(noteId: string) {
+    try {
+      await noteService.deleteNote(noteId);
+      setNotes((prev) => prev.filter((note) => note.noteId !== noteId));
+
+      if (selectedId === noteId) {
+        handleNew();
+      }
+    } catch (err) {
+      console.error("Failed to delete note:", err);
+    }
+  }
+
+  const isLoading = contextLoading || loadingNotes;
 
   return (
-    <div className="py-3">
+    <div className="container py-3">
       <NotesHeader savedFlash={savedFlash} onNew={handleNew} />
 
-      <div className="row g-3">
-        <div className="col-12 col-lg-5">
-          <CareTimelineContainer
-            notes={notes}
-            timelineGroups={timelineGroups}
-            selectedId={selectedId}
-            setSelectedId={setSelectedId}
-            handleDelete={handleDelete}
-            tagBadgeClass={tagBadgeClass}
-            formatDateTime={formatDateTime}
-            formatDayLabel={formatDayLabel}
-          />
+      {!selectedPatientId && !contextLoading ? (
+        <div className="alert alert-info">
+          No patient selected. Please select a patient from the sidebar.
         </div>
+      ) : (
+        <div className="row g-3">
+          <div className="col-12 col-lg-5">
+            <CareTimelineContainer
+              notes={notes}
+              timelineGroups={timelineGroups}
+              selectedId={selectedId}
+              setSelectedId={setSelectedId}
+              handleDelete={handleDelete}
+              formatDateTime={formatDateTime}
+              formatDayLabel={formatDayLabel}
+              isLoading={isLoading}
+            />
+          </div>
 
-        <div className="col-12 col-lg-7">
-          <NewNoteContainer
-            selectedNote={selectedNote}
-            formatDateTime={formatDateTime}
-            title={title}
-            content={content}
-            tag={tag}
-            setTitle={setTitle}
-            setContent={setContent}
-            setTag={setTag}
-            handleSave={handleSave}
-            handleDelete={handleDelete}
-            TAGS={TAGS}
-            tagBadgeClass={tagBadgeClass}
-          />
+          <div className="col-12 col-lg-7">
+            <NewNoteContainer
+              selectedNote={selectedNote}
+              formatDateTime={formatDateTime}
+              title={title}
+              description={description}
+              categoryId={categoryId}
+              setTitle={setTitle}
+              setDescription={setDescription}
+              setCategoryId={setCategoryId}
+              handleSave={handleSave}
+              handleDelete={handleDelete}
+              categories={categories}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

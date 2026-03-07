@@ -1,74 +1,61 @@
-import React from "react";
+import type { MedicationScheduleItemProps } from "../../types/Types";
+import { formatToTime, formatToDateTimeLocal } from "../../utils/formatters";
 
-interface MedicationScheduleItemProps {
-  name: string;
-  dosage: string;
-  time: string;
-  taken?: boolean;
-  takenAt?: string | null;
-  takenBy?: string | null;
-  onToggle?: () => void;
-}
-
-const MedicationScheduleItem: React.FC<MedicationScheduleItemProps> = ({
+const MedicationScheduleItem = ({
   name,
   dosage,
-  time,
-  taken = false,
-  takenAt = null,
-  takenBy = null,
+  frequency,
+  scheduledAt,
+  medicationLog,
   onToggle,
-}) => {
+  prescriptionId,
+}: MedicationScheduleItemProps) => {
+  const isCompleted = medicationLog?.isCompleted ?? false;
+  const takenAt = medicationLog?.takenAt ?? null;
+  const takenBy = medicationLog
+    ? `${medicationLog.firstName} ${medicationLog.lastName}`
+    : null;
+
   return (
     <div
-      style={{
-        border: "1px solid #ddd",
-        padding: "12px",
-        borderRadius: "8px",
-        marginBottom: "10px",
-        background: taken ? "#dcebde" : "white", 
-      }}
+      className={`card mb-3 ${
+        isCompleted ? "bg-success-subtle border-success" : ""
+      }`}
     >
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-        <input
-          type="checkbox"
-          checked={taken}
-          onChange={onToggle}
-          style={{
-            marginTop: 4,
-            width: 18,
-            height: 18,
-            cursor: "pointer",
-            accentColor: "#3B82F6", 
-            flexShrink: 0,
-          }}
-        />
+      <div className="card-body d-flex align-items-center">
+        <div className="form-check me-3">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            checked={isCompleted}
+            onChange={() => onToggle(prescriptionId, isCompleted)}
+          />
+        </div>
 
-        <div style={{ flex: 1 }}>
-          <h4
-            style={{
-              margin: 0,
-              textDecoration: taken ? "line-through" : "none",
-              color: taken ? "#6e6e6e" : "#111",
-            }}
+        <div className="flex-grow-1">
+          <h5
+            className={`card-title ${
+              isCompleted ? "text-decoration-line-through text-muted" : ""
+            }`}
           >
-            {name} - {dosage}
-          </h4>
-
-          <p style={{ margin: "6px 0", color: taken ? "#777" : "#666" }}>
-            Scheduled: {time}
+            {name} &mdash; {dosage}
+          </h5>
+          <p className="card-text text-muted mb-1">
+            {frequency} &middot; Scheduled: {formatToTime(scheduledAt)}
           </p>
 
-          {taken && (
-            <div style={{ marginTop: 10, fontSize: 13 }}>
-              <div>
-                <b>Taken at:</b> {takenAt ?? "—"}
-              </div>
-              <div>
-                <b>By:</b> {takenBy ?? "—"}
-              </div>
+          {isCompleted && (takenAt || takenBy) && (
+            <div className="small text-success-emphasis mt-1">
+              {takenAt && <div>Taken at: {formatToDateTimeLocal(takenAt)}</div>}
+              {takenBy && <div>By: {takenBy}</div>}
             </div>
           )}
+        </div>
+
+        <div className="text-end">
+          <span className="badge text-bg-primary">
+            {formatToTime(scheduledAt)}
+          </span>
         </div>
       </div>
     </div>
