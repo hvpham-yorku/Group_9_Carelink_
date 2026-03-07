@@ -1,3 +1,8 @@
+/*
+    run npm install --save-dev @testing-library/react @testing-library/jest-dom jest
+    then run npm i --save-dev @types/jest
+*/
+
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import Footer from '../components/landingpage/Footer';
