@@ -107,7 +107,12 @@ This approach reflects real-world caregiving environments where responsibilities
 ### Tara
 Tara – Notes Page and Component Refactoring
 
-Tara worked on implementing and improving the Notes feature of the CareLink application. This included developing the notes page functionality and restructuring the page into reusable components to improve maintainability. She implemented the logic for creating and displaying notes and ensured notes were properly organized within the application. Tara also created and implemented test cases for the notes functionality and performed debugging to ensure the feature worked correctly when connected to the database.
+- Restructuring Notes based on the database version of Notes.
+- implemented  logic for creating and displaying notes and ensured notes were properly organized within the application.
+- created and implemented test cases for the notes functionality and performed debugging to ensure the feature worked correctly when connected to the database.
+- 8 different components for better navigation and simplicity.
+Estimated Time: 15 hours
+Actual Time spent: 10 hours
 
 ### Jose Urbina
 
