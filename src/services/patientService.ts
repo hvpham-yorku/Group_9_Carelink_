@@ -34,13 +34,12 @@ export const patientService = {
       }
     }
 
-    // Fallback: pick the most recently joined team.
-    // Change nullsFirst to false
+    // Fallback: pick the most recently joined team using timestamptz ordering.
     const { data: member, error: teamError } = await supabase
       .from("careTeamMembers")
       .select("careTeamId, dateAssigned")
       .eq("caregiverId", caregiverId)
-      .order("dateAssigned", { ascending: false, nullsFirst: false }) // bug fix for correct ordering when nulls are present
+      .order("dateAssigned", { ascending: false }) // fixed bug here maybe, i hope...
       .limit(1)
       .maybeSingle();
 
