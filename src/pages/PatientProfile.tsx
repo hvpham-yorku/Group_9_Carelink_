@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Mail,
   MapPin,
@@ -6,6 +7,8 @@ import {
   AlertCircle,
   UserRound,
   Stethoscope,
+  Shield,
+  FileText,
 } from "lucide-react";
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import type { PatientInfo } from "../types/Types";
@@ -14,6 +17,7 @@ import { patientService } from "../services/patientService";
 
 const PatientProfile = () => {
   const { selectedPatientId } = usePatient();
+  const navigate = useNavigate();
 
   const [patient, setPatient] = useState<PatientInfo | null>(null);
   const [loading, setLoading] = useState(false);
@@ -74,7 +78,7 @@ const PatientProfile = () => {
                 <MapPin size={18} className="text-muted mt-1" />
                 <div>
                   <div className="text-muted small">Address</div>
-                  <div>{patient.address || "—"}</div>
+                  <div>{patient.address || "Not Available"}</div>
                 </div>
               </div>
 
@@ -82,7 +86,7 @@ const PatientProfile = () => {
                 <Phone size={18} className="text-muted mt-1" />
                 <div>
                   <div className="text-muted small">Phone</div>
-                  <div>{patient.phoneNumber || "—"}</div>
+                  <div>{patient.phoneNumber || "Not Available"}</div>
                 </div>
               </div>
 
@@ -91,6 +95,36 @@ const PatientProfile = () => {
                 <div>
                   <div className="text-muted small">Email</div>
                   <div>{patient.email || "Not Available"}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="card border-0 shadow-sm mt-4"
+            style={{ borderRadius: "18px" }}
+          >
+            <div className="card-body p-4">
+              <h3 className="fw-semibold mb-4">Insurance</h3>
+
+              <div className="d-flex align-items-start gap-3">
+                <div
+                  className="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle"
+                  style={{ width: "44px", height: "44px" }}
+                >
+                  <Shield size={20} className="text-success" />
+                </div>
+
+                <div className="flex-grow-1">
+                  <div className="mb-3">
+                    <div className="text-muted small">Provider</div>
+                    <div>{patient.insuranceProvider || "Not Available"}</div>
+                  </div>
+
+                  <div>
+                    <div className="text-muted small">Policy Number</div>
+                    <div>{patient.insurancePolicyNumber || "Not Available"}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -136,7 +170,7 @@ const PatientProfile = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-muted">No allergies listed</div>
+                  <div className="text-muted">Not Available</div>
                 )}
               </div>
             </div>
@@ -213,8 +247,40 @@ const PatientProfile = () => {
               </div>
             </div>
           </div>
+
+          <div
+            className="card border-0 shadow-sm mt-4"
+            style={{ borderRadius: "18px" }}
+          >
+            <div className="card-body p-4">
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h3 className="fw-semibold mb-0">Care Notes</h3>
+
+                <button
+                  className="btn btn-sm btn-outline-primary"
+                  onClick={() => navigate("/notes")}
+                >
+                  View Notes
+                </button>
+              </div>
+
+              <div className="d-flex align-items-start gap-3">
+                <div
+                  className="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle"
+                  style={{ width: "44px", height: "44px" }}
+                >
+                  <FileText size={20} className="text-warning-emphasis" />
+                </div>
+
+                <div className="flex-grow-1">
+                  <div className="text-muted small mb-2">Latest Note</div>
+                  <div>{patient.careNotes || "Not Available"}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div> 
+      </div>
     </div>
   );
 };

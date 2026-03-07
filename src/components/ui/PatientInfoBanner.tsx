@@ -65,7 +65,7 @@ const PatientInfoBanner = ({ patient }: PatientInfoBannerProps) => {
             className="fw-semibold mt-1"
             style={{ color: "rgba(255,255,255,0.6)", fontStyle: "italic" }}
           >
-            {patient.emergencyContactName || "Coming soon"}
+            {patient.emergencyContactName || "Not Available"}
           </div>
         </div>
       </div>
