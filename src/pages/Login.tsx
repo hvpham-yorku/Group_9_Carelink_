@@ -20,7 +20,7 @@ const Login = () => {
   // Redirect if user is already logged in
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      navigate("/teams");
     }
   }, [user, navigate]);
 
@@ -43,8 +43,11 @@ const Login = () => {
   };
 
   return (
-    <div style={{ 
-    background: 'linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%)'}}>
+    <div
+      style={{
+        background: "linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%)",
+      }}
+    >
       <div className="container vh-100 d-flex justify-content-center align-items-center">
         <div className="col-md-6 col-lg-4 d-flex flex-column gap-3 p-4 shadow rounded">
           <form onSubmit={handleLogin}>

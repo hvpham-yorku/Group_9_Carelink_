@@ -34,14 +34,12 @@ export const patientService = {
       }
     }
 
-    // Fallback: pick the most recently joined team.
-    // nullsFirst: true ensures rows without a dateAssigned (inserts that didn't
-    // set it explicitly) sort to the top rather than the bottom in PostgREST.
+    // Fallback: pick the most recently joined team using timestamptz ordering.
     const { data: member, error: teamError } = await supabase
       .from("careTeamMembers")
       .select("careTeamId, dateAssigned")
       .eq("caregiverId", caregiverId)
-      .order("dateAssigned", { ascending: false, nullsFirst: true })
+      .order("dateAssigned", { ascending: false }) // fixed bug here maybe, i hope...
       .limit(1)
       .maybeSingle();
 
