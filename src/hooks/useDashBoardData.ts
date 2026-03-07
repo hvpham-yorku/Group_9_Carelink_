@@ -6,7 +6,7 @@ import { patientService } from "../services/patientService";
 import { taskService } from "../services/taskService";
 import { medicationService } from "../services/medicationService";
 import { noteService } from "../services/noteService";
-import { calculateAge, formatToTime, formatToDateTimeLocal } from "../utils/formatters";
+import { calculateAge, formatToTime } from "../utils/formatters";
 
 type StatCard = {
   title: string;
