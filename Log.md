@@ -124,6 +124,7 @@ Backend / Database integration Development Task:
 - Creating Database and Database integration
 
 Estimated Time: 3 days
+
 Actual Time spent: 3 days
 
 ### Adeena Ahmed
