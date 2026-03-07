@@ -63,16 +63,20 @@ const PatientProfile = () => {
 
   return (
     <div className="container py-4">
-      <PatientInfoBanner patient={patient} />
+      <div className="mb-4">
+        <PatientInfoBanner patient={patient} />
+      </div>
 
       <div className="row g-4">
         <div className="col-lg-4">
           <div
-            className="card border-0 shadow-sm"
+            className="card border-0 shadow"
             style={{ borderRadius: "18px" }}
           >
             <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4">Contact Information</h3>
+              <h3 className="fw-semibold mb-4 text-dark">
+                Contact Information
+              </h3>
 
               <div className="d-flex gap-3 mb-4">
                 <MapPin size={18} className="text-muted mt-1" />
@@ -101,11 +105,11 @@ const PatientProfile = () => {
           </div>
 
           <div
-            className="card border-0 shadow-sm mt-4"
+            className="card border-0 shadow mt-4"
             style={{ borderRadius: "18px" }}
           >
             <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4">Insurance</h3>
+              <h3 className="fw-semibold mb-4 text-dark">Insurance</h3>
 
               <div className="d-flex align-items-start gap-3">
                 <div
@@ -133,11 +137,13 @@ const PatientProfile = () => {
 
         <div className="col-lg-8">
           <div
-            className="card border-0 shadow-sm"
+            className="card border-0 shadow"
             style={{ borderRadius: "18px" }}
           >
             <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4">Medical Information</h3>
+              <h3 className="fw-semibold mb-4 text-dark">
+                Medical Information
+              </h3>
 
               <div className="mb-3">
                 <div className="text-muted small">Blood Type</div>
@@ -177,11 +183,11 @@ const PatientProfile = () => {
           </div>
 
           <div
-            className="card border-0 shadow-sm mt-4"
+            className="card border-0 shadow mt-4"
             style={{ borderRadius: "18px" }}
           >
             <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4">Emergency Contact</h3>
+              <h3 className="fw-semibold mb-4 text-dark">Emergency Contact</h3>
 
               <div className="d-flex align-items-start gap-3">
                 <div
@@ -214,11 +220,11 @@ const PatientProfile = () => {
           </div>
 
           <div
-            className="card border-0 shadow-sm mt-4"
+            className="card border-0 shadow mt-4"
             style={{ borderRadius: "18px" }}
           >
             <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4">Primary Physician</h3>
+              <h3 className="fw-semibold mb-4 text-dark">Primary Physician</h3>
 
               <div className="d-flex align-items-start gap-3">
                 <div
@@ -249,12 +255,12 @@ const PatientProfile = () => {
           </div>
 
           <div
-            className="card border-0 shadow-sm mt-4"
+            className="card border-0 shadow mt-4"
             style={{ borderRadius: "18px" }}
           >
             <div className="card-body p-4">
               <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="fw-semibold mb-0">Care Notes</h3>
+                <h3 className="fw-semibold mb-0 text-dark">Care Notes</h3>
 
                 <button
                   className="btn btn-sm btn-outline-primary"
@@ -280,7 +286,7 @@ const PatientProfile = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div>      
     </div>
   );
 };
