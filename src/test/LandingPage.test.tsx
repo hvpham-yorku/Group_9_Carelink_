@@ -6,6 +6,8 @@ import { vi } from 'vitest';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import Header from '../components/landingpage/Header';
 import Hero from '../components/landingpage/Hero';
+import Section2 from '../components/landingpage/Section2';
+
 
 /* Tests for the Footer. */
 describe('Footer Component', () => {
@@ -106,7 +108,7 @@ describe('Header Component', () => {
   });
 });
 
-/* Creates tests for the Hero Section */
+/* Tests for the Hero Section */
 
 describe('Hero Component', () => {
   
@@ -155,5 +157,46 @@ describe('Hero Component', () => {
     expect(section).toHaveStyle({ 
       background: 'linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%)' 
     });
+  });
+});
+
+/* Tests for Section 2 */
+
+describe('Section2 Component', () => {
+  
+  it('renders the main heading correctly', () => {
+    render(<Section2 />);
+    const heading = screen.getByRole('heading', { level: 2, name: /Home Care Needs Better Tools/i });
+    expect(heading).toBeInTheDocument();
+  });
+
+  it('contains the "about" ID for anchor navigation', () => {
+    const { container } = render(<Section2 />);
+    const section = container.querySelector('#about');
+    expect(section).toBeInTheDocument();
+  });
+
+  it('renders the paragraph with correct typography and spacing classes', () => {
+    render(<Section2 />);
+    // Since h5 is used as a paragraph here
+    const textBlock = screen.getByRole('heading', { level: 5 });
+    
+    expect(textBlock).toHaveClass('text-secondary', 'fw-light', 'fs-5', 'lh-base');
+    expect(textBlock.textContent).toContain('Large hospital EHR systems');
+  });
+
+  it('uses the correct Bootstrap grid column classes for centering', () => {
+    const { container } = render(<Section2 />);
+    const column = container.querySelector('.col-11');
+    
+    // Verifying the responsive column widths you set
+    expect(column).toHaveClass('col-md-8');
+    expect(column).toHaveClass('col-lg-5');
+  });
+
+  it('applies the light background color to the section', () => {
+    const { container } = render(<Section2 />);
+    const section = container.querySelector('section');
+    expect(section).toHaveClass('bg-light');
   });
 });
