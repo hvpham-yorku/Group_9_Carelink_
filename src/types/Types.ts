@@ -4,18 +4,12 @@
  */
 
 /**
- * Tag Type Definition
+ * Category Type Definition
  */
-export type Tags =
-  | "Medical"
-  | "Vitals"
-  | "Mood"
-  | "Nutrition"
-  | "Activity"
-  | "General"
-  | "Medication"
-  | "Personal"
-  | "Therapy";
+export interface Category {
+  categoryId: string;
+  name: string;
+}
 
 /**
  * Task Type Definition
@@ -29,18 +23,10 @@ export interface Task {
   title: string;
   description: string;
   scheduledAt: string;
+
   // Supabase Join
   categories?: { name: string };
   taskLogs?: TaskLogEntry[];
-}
-
-export interface NewTask {
-  title: string;
-  description?: string;
-  categoryId: string;
-  patientId: string;
-  careTeamId: string;
-  scheduledAt: string;
 }
 
 export interface TaskLogEntry {
@@ -48,7 +34,7 @@ export interface TaskLogEntry {
   caregiverId: string;
   completedAt: string;
   isCompleted: boolean;
-  caregivers?: { firstName: string };
+  caregivers?: { firstName: string; lastName: string };
 }
 
 /**
