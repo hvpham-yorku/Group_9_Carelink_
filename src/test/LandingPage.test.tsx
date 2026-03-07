@@ -7,7 +7,11 @@ import { MemoryRouter, useNavigate } from 'react-router-dom';
 import Header from '../components/landingpage/Header';
 import Hero from '../components/landingpage/Hero';
 import Section2 from '../components/landingpage/Section2';
-
+import Section3 from '../components/landingpage/Section3';
+import Section4 from '../components/landingpage/Section4';
+import Section5 from '../components/landingpage/Section5';
+import Section6 from '../components/landingpage/Section6';
+import LandingPage from '../pages/LandingPage';
 
 /* Tests for the Footer. */
 describe('Footer Component', () => {
@@ -198,5 +202,260 @@ describe('Section2 Component', () => {
     const { container } = render(<Section2 />);
     const section = container.querySelector('section');
     expect(section).toHaveClass('bg-light');
+  });
+});
+
+/* Tests for Section 3 */
+
+describe('Section3 - Features Component', () => {
+
+  it('renders the main section heading and sub-headline', () => {
+    render(<Section3 />);
+    expect(screen.getByText(/Built for Home Care Teams/i)).toBeInTheDocument();
+    expect(screen.getByText(/Features designed with real nurses/i)).toBeInTheDocument();
+  });
+
+  it('renders exactly 6 feature cards', () => {
+    const { container } = render(<Section3 />);
+    // We look for the 'col' class inside the features row
+    const columns = container.querySelectorAll('.col');
+    expect(columns.length).toBe(6);
+  });
+
+  it('renders specific feature titles correctly', () => {
+    render(<Section3 />);
+    const features = [
+      'Patient-Centric Workspace',
+      'Shift Handoff Notes',
+      'Tasks & Medications',
+      'Role-Based Access',
+      'Multiple Patients & Locations',
+      'Low Learning Curve'
+    ];
+
+    features.forEach(title => {
+      expect(screen.getByText(title)).toBeInTheDocument();
+    });
+  });
+
+  it('applies the correct shadow and border classes to cards', () => {
+    const { container } = render(<Section3 />);
+    const firstCard = container.querySelector('.card');
+    
+    // Verifying your design choices
+    expect(firstCard).toHaveClass('shadow-sm');
+    expect(firstCard).toHaveClass('border-0');
+    expect(firstCard).toHaveClass('h-100'); // Ensures cards are same height
+  });
+
+  it('contains the "features" ID for navbar scrolling', () => {
+    const { container } = render(<Section3 />);
+    const section = container.querySelector('#features');
+    expect(section).toBeInTheDocument();
+  });
+
+  it('renders icons within the colored background containers', () => {
+    const { container } = render(<Section3 />);
+    // Check for the bg-opacity-10 class you used for the icon circles
+    const iconContainers = container.querySelectorAll('.bg-opacity-10');
+    expect(iconContainers.length).toBe(6);
+  });
+});
+
+/* Tests for Section 4 */
+
+describe('Section4 - Benefits Component', () => {
+
+  it('renders the section with the correct background and ID', () => {
+    const { container } = render(<Section4 />);
+    const section = container.querySelector('section');
+    expect(section?.getAttribute('id')).toBe('benefits');
+    expect(section).toHaveClass('bg-primary');
+  });
+
+  it('renders the benefit heading in white text', () => {
+    render(<Section4 />);
+    const heading = screen.getByText(/The CareLink Difference/i);
+    expect(heading).toBeInTheDocument();
+    expect(heading.parentElement).toHaveClass('text-white');
+  });
+
+  it('renders all three benefit items with icons', () => {
+    const { container } = render(<Section4 />);
+    
+    const benefitTitles = [
+      'Reduce Missed Care Actions',
+      'Improve Shift Continuity',
+      'Single Source of Truth'
+    ];
+
+    benefitTitles.forEach(title => {
+      expect(screen.getByText(title)).toBeInTheDocument();
+    });
+
+    // Check that we have 3 CheckCircle2 icons (rendered as SVGs)
+    const icons = container.querySelectorAll('svg');
+    expect(icons.length).toBe(3);
+  });
+
+  it('renders the benefit descriptions with low opacity for visual hierarchy', () => {
+    render(<Section4 />);
+    const description = screen.getByText(/Visual indicators and shared task lists/i);
+    expect(description).toHaveClass('opacity-75', 'fw-light');
+  });
+
+  it('renders the featured image with shadow and rounded corners', () => {
+    render(<Section4 />);
+    const img = screen.getByRole('img');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveClass('shadow-lg', 'rounded', 'img-fluid');
+    expect(img).toHaveStyle({ objectFit: 'cover' });
+  });
+
+  it('uses Bootstrap grid for side-by-side layout on medium screens+', () => {
+    const { container } = render(<Section4 />);
+    const columns = container.querySelectorAll('.col-md-6');
+    expect(columns.length).toBe(2);
+  });
+});
+
+/* Tests for Section 5 */
+
+describe('Section5 - Target Audience Component', () => {
+
+  it('renders the section with the correct anchor ID', () => {
+    const { container } = render(<Section5 />);
+    const section = container.querySelector('section');
+    // Using standard .id check to avoid "Property does not exist" errors
+    expect(section?.id).toBe('who-its-for');
+  });
+
+  it('renders the main heading and lead text', () => {
+    render(<Section5 />);
+    expect(screen.getByText(/Who CareLink Is For/i)).toBeInTheDocument();
+    expect(screen.getByText(/Designed for everyone involved/i)).toBeInTheDocument();
+  });
+
+  it('renders exactly 6 audience cards', () => {
+    const { container } = render(<Section5 />);
+    // Check for the column divs that hold the cards
+    const columns = container.querySelectorAll('.col');
+    expect(columns.length).toBe(6);
+  });
+
+  it('verifies all specific audience titles exist', () => {
+    render(<Section5 />);
+    const audiences = [
+      'Home-Care Nurses',
+      'Personal Support Workers (PSWs)',
+      'Professional Caregiving Agencies',
+      'Family Caregivers',
+      'Care Supervisors & Nurse Managers',
+      'Small to Mid-Sized Organizations'
+    ];
+
+    audiences.forEach(title => {
+      expect(screen.getByText(title)).toBeInTheDocument();
+    });
+  });
+
+  it('applies the correct Bootstrap styling to the cards', () => {
+    const { container } = render(<Section5 />);
+    const firstCard = container.querySelector('.card');
+    
+    // Verifying your specific styling choices: bg-light and shadow-sm
+    expect(firstCard?.classList.contains('bg-light')).toBe(true);
+    expect(firstCard?.classList.contains('shadow-sm')).toBe(true);
+    expect(firstCard?.classList.contains('h-100')).toBe(true);
+  });
+
+  it('uses a responsive grid layout', () => {
+    const { container } = render(<Section5 />);
+    const gridRow = container.querySelector('.row-cols-lg-3');
+    // This confirms the 3-column layout is set for large screens
+    expect(gridRow).not.toBeNull();
+  });
+});
+
+/* Tests for Section 6 */
+
+// 1. Mock the useNavigate hook
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: vi.fn(),
+  };
+});
+
+describe('Section6 - Final CTA Component', () => {
+
+  it('renders the call-to-action heading and subtitle', () => {
+    render(
+      <MemoryRouter>
+        <Section6 />
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/Ready to Improve Your Care Coordination/i)).toBeInTheDocument();
+    expect(screen.getByText(/Join home care teams who trust CareLink/i)).toBeInTheDocument();
+  });
+
+  it('applies the correct branded linear gradient background', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <Section6 />
+      </MemoryRouter>
+    );
+    const section = container.querySelector('section');
+    // Verifying the specific CSS gradient matches your Hero section
+    expect(section).toHaveStyle({ 
+      background: 'linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%)' 
+    });
+  });
+
+  it('navigates to /dashboard when the Get Started button is clicked', () => {
+    const mockNavigate = vi.fn();
+    (useNavigate as any).mockReturnValue(mockNavigate);
+
+    render(
+      <MemoryRouter>
+        <Section6 />
+      </MemoryRouter>
+    );
+
+    const ctaButton = screen.getByRole('button', { name: /get started!/i });
+    fireEvent.click(ctaButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('uses the correct Bootstrap sizing for a large CTA button', () => {
+    render(
+      <MemoryRouter>
+        <Section6 />
+      </MemoryRouter>
+    );
+    const btn = screen.getByRole('button', { name: /get started!/i });
+    expect(btn).toHaveClass('btn-primary', 'btn-lg', 'px-5');
+  });
+});
+
+/* Test LandingPage.tsx */
+
+describe('LandingPage Integration', () => {
+
+  it('contains the smooth scroll behavior in the document structure', () => {
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>
+    );
+    
+    // Check if the IDs targeted by the Navbar all exist on one page
+    const ids = ['about', 'features', 'benefits', 'who-its-for'];
+    ids.forEach(id => {
+      const element = document.getElementById(id);
+      expect(element).not.toBeNull();
+    });
   });
 });
