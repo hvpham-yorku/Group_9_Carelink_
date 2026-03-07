@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Mail, MapPin, Phone, AlertCircle, UserRound } from "lucide-react";
+import {
+  Mail,
+  MapPin,
+  Phone,
+  AlertCircle,
+  UserRound,
+  Stethoscope,
+} from "lucide-react";
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import type { PatientInfo } from "../types/Types";
 import { usePatient } from "../contexts/patient/usePatient";
@@ -153,19 +160,54 @@ const PatientProfile = () => {
                 <div className="flex-grow-1">
                   <div className="mb-3">
                     <div className="text-muted small">Name</div>
-                    <div>{patient.emergencyContactName || "Coming soon"}</div>
+                    <div>{patient.emergencyContactName || "Not Available"}</div>
                   </div>
 
                   <div className="mb-3">
                     <div className="text-muted small">Relationship</div>
                     <div>
-                      {patient.emergencyContactRelationship || "Coming soon"}
+                      {patient.emergencyContactRelationship || "Not Available"}
                     </div>
                   </div>
 
                   <div>
                     <div className="text-muted small">Phone</div>
-                    <div>{patient.emergencyContactPhone || "Coming soon"}</div>
+                    <div>{patient.emergencyContactPhone || "Not Available"}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="card border-0 shadow-sm mt-4"
+            style={{ borderRadius: "18px" }}
+          >
+            <div className="card-body p-4">
+              <h3 className="fw-semibold mb-4">Primary Physician</h3>
+
+              <div className="d-flex align-items-start gap-3">
+                <div
+                  className="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle"
+                  style={{ width: "44px", height: "44px" }}
+                >
+                  <Stethoscope size={20} className="text-primary" />
+                </div>
+
+                <div className="flex-grow-1">
+                  <div className="mb-3">
+                    <div className="text-muted small">Name</div>
+                    <div>{patient.physicianName || "Not Available"}</div>
+                  </div>
+
+                  <div className="mb-3">
+                    <div className="text-muted small">Phone</div>
+                    <div>{patient.physicianPhone || "Not Available"}</div>
+                  </div>
+
+                  <div>
+                    <div className="text-muted small">Address</div>
+                    <div>{patient.physicianAddress || "Not Available"}</div>
                   </div>
                 </div>
               </div>
