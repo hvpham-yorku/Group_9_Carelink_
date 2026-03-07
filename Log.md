@@ -102,7 +102,26 @@ Under this system, caregivers can join different teams and collaborate with othe
 
 This approach reflects real-world caregiving environments where responsibilities are often shared among multiple individuals and where coordination between caregivers is essential. Prioritizing this structure during ITR 2 helped ensure that the system architecture supports collaborative caregiving and can scale to accommodate more complex care networks in future iterations.
 
-### Task Assignment and Time estimations:
+## Development Tasks
+
+### Tara
 Tara – Notes Page and Component Refactoring
 
 Tara worked on implementing and improving the Notes feature of the CareLink application. This included developing the notes page functionality and restructuring the page into reusable components to improve maintainability. She implemented the logic for creating and displaying notes and ensured notes were properly organized within the application. Tara also created and implemented test cases for the notes functionality and performed debugging to ensure the feature worked correctly when connected to the database.
+
+### Jose Urbina
+
+Task Management Development Tasks:
+- Ability to edit existing tasks
+- Ability to delete existing tasks
+
+Estimated Time: 16 hours
+Actual Time spent: 5 hours
+
+Backend / Database integration Development Task:
+- Business Logic layer
+- Persistence Layer
+- Creating Database and Database integration
+
+Estimated Time: 3 days
+Actual Time spent: 3 days
