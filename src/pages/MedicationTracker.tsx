@@ -132,52 +132,71 @@ const MedicationTracker = () => {
     setEditingMedication(null);
   };
 
-const handleSaveMedication = async (data: {
-  name: string;
-  dosage: string;
-  frequency: string;
-  scheduledAt: string;
-}) => {
-  if (!selectedPatientId) return;
+  const handleSaveMedication = async (data: {
+    name: string;
+    dosage: string;
+    frequency: string;
+    scheduledAt: string;
+  }) => {
+    if (!selectedPatientId) return;
 
-  try {
-    let formattedScheduledAt: string | undefined = undefined;
+    try {
+      let formattedScheduledAt: string | undefined = undefined;
 
-    if (data.scheduledAt) {
-      const today = new Date();
-      const [hours, minutes] = data.scheduledAt.split(":");
+      if (data.scheduledAt) {
+        const today = new Date();
+        const [hours, minutes] = data.scheduledAt.split(":");
 
-      today.setHours(Number(hours), Number(minutes), 0, 0);
-      formattedScheduledAt = today.toISOString();
-    }
+        today.setHours(Number(hours), Number(minutes), 0, 0);
+        formattedScheduledAt = today.toISOString();
+      }
 
-    if (editingMedication) {
-      await medicationService.updatePrescription(
-        editingMedication.prescriptionId,
-        {
+      if (editingMedication) {
+        await medicationService.updatePrescription(
+          editingMedication.prescriptionId,
+          {
+            name: data.name,
+            dosage: data.dosage,
+            frequency: data.frequency,
+            scheduledAt: formattedScheduledAt,
+          },
+        );
+      } else {
+        await medicationService.addPrescription({
+          patientId: selectedPatientId,
+          careTeamId: prescriptions[0]?.careTeamId ?? "",
           name: data.name,
           dosage: data.dosage,
           frequency: data.frequency,
           scheduledAt: formattedScheduledAt,
-        },
-      );
-    } else {
-      await medicationService.addPrescription({
-        patientId: selectedPatientId,
-        careTeamId: prescriptions[0]?.careTeamId ?? "",
-        name: data.name,
-        dosage: data.dosage,
-        frequency: data.frequency,
-        scheduledAt: formattedScheduledAt,
-      });
-    }
+        });
+      }
 
-    await fetchPrescriptions(selectedPatientId);
-    handleCloseModal();
-  } catch (err) {
-    console.error("Failed to save medication:", err);
-  }
-};
+      await fetchPrescriptions(selectedPatientId);
+      handleCloseModal();
+    } catch (err) {
+      console.error("Failed to save medication:", err);
+    }
+  };
+
+  const handleArchiveMedication = async () => {
+    if (!selectedMedication || !selectedPatientId) return;
+
+    const confirmed = window.confirm(
+      `Archive ${selectedMedication.name}? This will remove it from active medications.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await medicationService.archivePrescription(
+        selectedMedication.prescriptionId,
+      );
+      await fetchPrescriptions(selectedPatientId);
+    } catch (err) {
+      console.error("Failed to archive medication:", err);
+    }
+  };
 
   const takenCount = prescriptions.filter(
     (p) => p.medicationLog?.isCompleted,
@@ -323,7 +342,12 @@ const handleSaveMedication = async (data: {
                       : "Select a medication to view details"
                   }
                 >
-                  <MedicationDetailsCard medication={selectedMedication} />
+                  <MedicationDetailsCard
+                    medication={selectedMedication}
+                    onArchive={
+                      selectedMedication ? handleArchiveMedication : undefined
+                    }
+                  />
                 </CustomSection>
               </div>
             </div>
