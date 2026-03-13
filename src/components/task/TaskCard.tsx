@@ -4,9 +4,6 @@
   Props:
   - title: the title of the task
   - description: a brief description of the task
-
-  Syntax:
-  <TaskCard title description category time completed onToggle />
 */
 import type { Task } from "../../types/Types";
 import { formatToTime, formatToDateTimeLocal } from "../../utils/formatters";
@@ -56,8 +53,8 @@ const TaskCard = ({ task, onToggle, onSelect }: TaskCardProps) => {
               type="checkbox"
               name="taskCheck"
               checked={isCompleted}
-              onChange={(e) => {
-                e.stopPropagation();
+              onClick={(e) => e.stopPropagation()}
+              onChange={() => {
                 onToggle();
               }}
             />
