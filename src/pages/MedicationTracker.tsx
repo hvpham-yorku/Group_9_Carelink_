@@ -132,42 +132,52 @@ const MedicationTracker = () => {
     setEditingMedication(null);
   };
 
-  const handleSaveMedication = async (data: {
-    name: string;
-    dosage: string;
-    frequency: string;
-    scheduledAt: string;
-  }) => {
-    if (!selectedPatientId) return;
+const handleSaveMedication = async (data: {
+  name: string;
+  dosage: string;
+  frequency: string;
+  scheduledAt: string;
+}) => {
+  if (!selectedPatientId) return;
 
-    try {
-      if (editingMedication) {
-        await medicationService.updatePrescription(
-          editingMedication.prescriptionId,
-          {
-            name: data.name,
-            dosage: data.dosage,
-            frequency: data.frequency,
-            scheduledAt: data.scheduledAt,
-          },
-        );
-      } else {
-        await medicationService.addPrescription({
-          patientId: selectedPatientId,
-          careTeamId: prescriptions[0]?.careTeamId ?? "",
+  try {
+    let formattedScheduledAt: string | undefined = undefined;
+
+    if (data.scheduledAt) {
+      const today = new Date();
+      const [hours, minutes] = data.scheduledAt.split(":");
+
+      today.setHours(Number(hours), Number(minutes), 0, 0);
+      formattedScheduledAt = today.toISOString();
+    }
+
+    if (editingMedication) {
+      await medicationService.updatePrescription(
+        editingMedication.prescriptionId,
+        {
           name: data.name,
           dosage: data.dosage,
           frequency: data.frequency,
-          scheduledAt: data.scheduledAt,
-        });
-      }
-
-      await fetchPrescriptions(selectedPatientId);
-      handleCloseModal();
-    } catch (err) {
-      console.error("Failed to save medication:", err);
+          scheduledAt: formattedScheduledAt,
+        },
+      );
+    } else {
+      await medicationService.addPrescription({
+        patientId: selectedPatientId,
+        careTeamId: prescriptions[0]?.careTeamId ?? "",
+        name: data.name,
+        dosage: data.dosage,
+        frequency: data.frequency,
+        scheduledAt: formattedScheduledAt,
+      });
     }
-  };
+
+    await fetchPrescriptions(selectedPatientId);
+    handleCloseModal();
+  } catch (err) {
+    console.error("Failed to save medication:", err);
+  }
+};
 
   const takenCount = prescriptions.filter(
     (p) => p.medicationLog?.isCompleted,
