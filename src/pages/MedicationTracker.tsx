@@ -4,6 +4,7 @@ import { Pill, CheckCircle2, AlertCircle, Clock, Plus } from "lucide-react";
 import MedicationScheduleItem from "../components/medication/MedicationScheduleItem";
 import ActiveMedicationCard from "../components/medication/ActiveMedicationCard";
 import MedicationDetailsCard from "../components/medication/MedicationDetailsCard";
+import MedicationFormModal from "../components/medication/MedicationFormModal";
 
 import CustomSection from "../components/ui/CustomSection";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
@@ -26,6 +27,11 @@ const MedicationTracker = () => {
   const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<
     string | null
   >(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMedication, setEditingMedication] = useState<Prescription | null>(
+    null,
+  );
 
   const fetchPrescriptions = async (patientId: string) => {
     setLoadingMeds(true);
@@ -108,6 +114,61 @@ const MedicationTracker = () => {
     }
   };
 
+  const handleAddMedication = () => {
+    setEditingMedication(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditMedication = (prescriptionId: string) => {
+    const medicationToEdit =
+      prescriptions.find((med) => med.prescriptionId === prescriptionId) ?? null;
+
+    setEditingMedication(medicationToEdit);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingMedication(null);
+  };
+
+  const handleSaveMedication = async (data: {
+    name: string;
+    dosage: string;
+    frequency: string;
+    scheduledAt: string;
+  }) => {
+    if (!selectedPatientId) return;
+
+    try {
+      if (editingMedication) {
+        await medicationService.updatePrescription(
+          editingMedication.prescriptionId,
+          {
+            name: data.name,
+            dosage: data.dosage,
+            frequency: data.frequency,
+            scheduledAt: data.scheduledAt,
+          },
+        );
+      } else {
+        await medicationService.addPrescription({
+          patientId: selectedPatientId,
+          careTeamId: prescriptions[0]?.careTeamId ?? "",
+          name: data.name,
+          dosage: data.dosage,
+          frequency: data.frequency,
+          scheduledAt: data.scheduledAt,
+        });
+      }
+
+      await fetchPrescriptions(selectedPatientId);
+      handleCloseModal();
+    } catch (err) {
+      console.error("Failed to save medication:", err);
+    }
+  };
+
   const takenCount = prescriptions.filter(
     (p) => p.medicationLog?.isCompleted,
   ).length;
@@ -127,17 +188,17 @@ const MedicationTracker = () => {
 
   const isLoading = contextLoading || loadingMeds;
 
-  const handleEditMedication = (prescriptionId: string) => {
-  console.log("Edit medication:", prescriptionId);
-};
-
   return (
     <div className="container py-3">
       <CustomTitleBanner
         title="Medication Tracker"
         subheader="Track today's medication schedule for your patient"
       >
-        <Button color="primary" icon={<Plus size={16} />}>
+        <Button
+          color="primary"
+          icon={<Plus size={16} />}
+          onClick={handleAddMedication}
+        >
           Add Medication
         </Button>
       </CustomTitleBanner>
@@ -226,15 +287,19 @@ const MedicationTracker = () => {
                     <div className="d-flex flex-column gap-3">
                       {prescriptions.map((med) => (
                         <ActiveMedicationCard
-  key={med.prescriptionId}
-  name={med.name}
-  dosage={med.dosage}
-  frequency={med.frequency}
-  isSelected={selectedPrescriptionId === med.prescriptionId}
-  isCompleted={!!med.medicationLog?.isCompleted}
-  onClick={() => setSelectedPrescriptionId(med.prescriptionId)}
-  onEdit={() => handleEditMedication(med.prescriptionId)}
-/>
+                          key={med.prescriptionId}
+                          name={med.name}
+                          dosage={med.dosage}
+                          frequency={med.frequency}
+                          isSelected={
+                            selectedPrescriptionId === med.prescriptionId
+                          }
+                          isCompleted={!!med.medicationLog?.isCompleted}
+                          onClick={() =>
+                            setSelectedPrescriptionId(med.prescriptionId)
+                          }
+                          onEdit={() => handleEditMedication(med.prescriptionId)}
+                        />
                       ))}
                     </div>
                   )}
@@ -255,6 +320,22 @@ const MedicationTracker = () => {
           </div>
         </>
       )}
+
+      <MedicationFormModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveMedication}
+        initialData={
+          editingMedication
+            ? {
+                name: editingMedication.name,
+                dosage: editingMedication.dosage,
+                frequency: editingMedication.frequency,
+                scheduledAt: editingMedication.scheduledAt,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 };

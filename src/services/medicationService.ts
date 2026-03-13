@@ -2,7 +2,7 @@
 import { supabase } from "../lib/supabase";
 
 export const medicationService = {
-  // Fetch all active prescriptions for a patient, with latest medication log joined
+  // Fetch all active prescriptions for a patient, with medication logs joined
   async getPrescriptionsByPatient(patientId: string) {
     const { data, error } = await supabase
       .from("prescriptions")
@@ -25,7 +25,7 @@ export const medicationService = {
     return data;
   },
 
-  // Mark a dose as taken — inserts a log entry
+  // Mark a dose as taken by inserting a log entry
   async markAsTaken(prescriptionId: string, caregiverId: string) {
     const { data, error } = await supabase
       .from("medicationLogs")
@@ -49,7 +49,7 @@ export const medicationService = {
     return data;
   },
 
-  // Unmark a dose — sets isCompleted to false on the active log row, keeping history
+  // Unmark a dose by setting active completed logs to false
   async unmarkAsTaken(prescriptionId: string) {
     const { error } = await supabase
       .from("medicationLogs")
@@ -61,17 +61,28 @@ export const medicationService = {
     return true;
   },
 
-  // Add a new Prescription
+  // Add a new prescription
   async addPrescription(prescription: {
     patientId: string;
-    medicationName: string;
+    careTeamId: string;
+    name: string;
     dosage: string;
     frequency: string;
-    instructions?: string;
+    scheduledAt?: string;
   }) {
     const { data, error } = await supabase
       .from("prescriptions")
-      .insert([prescription])
+      .insert([
+        {
+          patientId: prescription.patientId,
+          careTeamId: prescription.careTeamId,
+          name: prescription.name,
+          dosage: prescription.dosage,
+          frequency: prescription.frequency,
+          scheduledAt: prescription.scheduledAt || null,
+          isActive: true,
+        },
+      ])
       .select()
       .single();
 
@@ -79,18 +90,22 @@ export const medicationService = {
     return data;
   },
 
-  // Update dosage, frequency, or instructions
+  // Update an existing prescription
   async updatePrescription(
     prescriptionId: string,
     updates: {
-      medicationName?: string;
+      name?: string;
       dosage?: string;
       frequency?: string;
+      scheduledAt?: string;
     },
   ) {
     const { data, error } = await supabase
       .from("prescriptions")
-      .update(updates)
+      .update({
+        ...updates,
+        scheduledAt: updates.scheduledAt || null,
+      })
       .eq("prescriptionId", prescriptionId)
       .select()
       .single();
@@ -99,7 +114,7 @@ export const medicationService = {
     return data;
   },
 
-  // Archive/Delete Prescription (Instead of hard delete)
+  // Archive prescription instead of deleting it
   async archivePrescription(prescriptionId: string) {
     const { error } = await supabase
       .from("prescriptions")
