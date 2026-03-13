@@ -27,7 +27,11 @@
     </Button>
 */
 
-import type { ReactNode } from "react";
+import type {
+  ReactNode,
+  MouseEventHandler,
+  FormEventHandler,
+} from "react";
 
 interface ButtonProps {
   color?:
@@ -41,12 +45,11 @@ interface ButtonProps {
     | "outline-danger";
 
   children: ReactNode;
-
   icon?: ReactNode;
   iconPosition?: "left" | "right";
 
-  onClick?: () => void;
-  onSubmit?: () => void;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  onSubmit?: FormEventHandler<HTMLButtonElement>;
 }
 
 const Button = ({
@@ -65,9 +68,7 @@ const Button = ({
       onSubmit={onSubmit}
     >
       {icon && iconPosition === "left" && icon}
-
       <span>{children}</span>
-
       {icon && iconPosition === "right" && icon}
     </button>
   );

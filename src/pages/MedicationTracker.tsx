@@ -127,6 +127,10 @@ const MedicationTracker = () => {
 
   const isLoading = contextLoading || loadingMeds;
 
+  const handleEditMedication = (prescriptionId: string) => {
+  console.log("Edit medication:", prescriptionId);
+};
+
   return (
     <div className="container py-3">
       <CustomTitleBanner
@@ -222,18 +226,15 @@ const MedicationTracker = () => {
                     <div className="d-flex flex-column gap-3">
                       {prescriptions.map((med) => (
                         <ActiveMedicationCard
-                          key={med.prescriptionId}
-                          name={med.name}
-                          dosage={med.dosage}
-                          frequency={med.frequency}
-                          isSelected={
-                            selectedPrescriptionId === med.prescriptionId
-                          }
-                          isCompleted={!!med.medicationLog?.isCompleted}
-                          onClick={() =>
-                            setSelectedPrescriptionId(med.prescriptionId)
-                          }
-                        />
+  key={med.prescriptionId}
+  name={med.name}
+  dosage={med.dosage}
+  frequency={med.frequency}
+  isSelected={selectedPrescriptionId === med.prescriptionId}
+  isCompleted={!!med.medicationLog?.isCompleted}
+  onClick={() => setSelectedPrescriptionId(med.prescriptionId)}
+  onEdit={() => handleEditMedication(med.prescriptionId)}
+/>
                       ))}
                     </div>
                   )}

@@ -1,4 +1,6 @@
-import { Pill } from "lucide-react";
+import { Pill, Pencil } from "lucide-react";
+import type { MouseEvent } from "react";
+import Button from "../ui/Button";
 
 interface ActiveMedicationCardProps {
   name: string;
@@ -7,6 +9,7 @@ interface ActiveMedicationCardProps {
   isSelected: boolean;
   isCompleted: boolean;
   onClick: () => void;
+  onEdit?: () => void;
 }
 
 const ActiveMedicationCard = ({
@@ -16,18 +19,19 @@ const ActiveMedicationCard = ({
   isSelected,
   isCompleted,
   onClick,
+  onEdit,
 }: ActiveMedicationCardProps) => {
   return (
-    <button
-      type="button"
+    <div
       onClick={onClick}
-      className="text-start w-100 bg-white"
       style={{
         borderRadius: "16px",
         border: isSelected ? "1px solid #b6d4fe" : "1px solid #e9ecef",
         padding: "1rem",
         boxShadow: isSelected ? "0 0 0 3px rgba(13,110,253,0.08)" : "none",
         transition: "all 0.2s ease",
+        cursor: "pointer",
+        background: "#fff",
       }}
     >
       <div className="d-flex justify-content-between align-items-start gap-3">
@@ -54,11 +58,25 @@ const ActiveMedicationCard = ({
           </div>
         </div>
 
-        {isCompleted && (
-          <span className="badge text-bg-success rounded-pill">Taken</span>
-        )}
+        <div className="d-flex align-items-center gap-2">
+          {isCompleted && (
+            <span className="badge text-bg-success rounded-pill">Taken</span>
+          )}
+
+          {onEdit && (
+            <Button
+              color="outline-secondary"
+              onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
+              <Pencil size={14} />
+            </Button>
+          )}
+        </div>
       </div>
-    </button>
+    </div>
   );
 };
 
