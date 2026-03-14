@@ -1,5 +1,5 @@
 import { Pill, Pencil } from "lucide-react";
-import type { MouseEvent } from "react";
+import type { MouseEvent, KeyboardEvent } from "react";
 import Button from "../ui/Button";
 
 interface ActiveMedicationCardProps {
@@ -23,7 +23,16 @@ const ActiveMedicationCard = ({
 }: ActiveMedicationCardProps) => {
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Select ${name}`}
       onClick={onClick}
+      onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       style={{
         borderRadius: "16px",
         border: isSelected ? "1px solid #b6d4fe" : "1px solid #e9ecef",
@@ -66,6 +75,7 @@ const ActiveMedicationCard = ({
           {onEdit && (
             <Button
               color="outline-secondary"
+              aria-label={`Edit ${name}`}
               onClick={(e: MouseEvent<HTMLButtonElement>) => {
                 e.stopPropagation();
                 onEdit();

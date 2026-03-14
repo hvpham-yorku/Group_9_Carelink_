@@ -12,6 +12,7 @@ import StatCard from "../components/ui/StatCard";
 import Button from "../components/ui/Button";
 
 import { medicationService } from "../services/medicationService";
+import { teamService } from "../services/teamService";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 import type { MedicationScheduleItemProps } from "../types/Types";
@@ -162,9 +163,13 @@ const MedicationTracker = () => {
           },
         );
       } else {
+        const resolvedCareTeamId =
+          prescriptions[0]?.careTeamId ||
+          (await teamService.getCareTeamIdByPatient(selectedPatientId));
+
         await medicationService.addPrescription({
           patientId: selectedPatientId,
-          careTeamId: prescriptions[0]?.careTeamId ?? "",
+          careTeamId: resolvedCareTeamId,
           name: data.name,
           dosage: data.dosage,
           frequency: data.frequency,

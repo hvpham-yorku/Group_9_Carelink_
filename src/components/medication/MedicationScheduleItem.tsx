@@ -29,6 +29,7 @@ const MedicationScheduleItem = ({
       <div className="p-3 p-md-4 d-flex align-items-start gap-3">
         <div className="pt-1">
           <input
+            aria-label={`Mark ${name} as taken`}
             className="form-check-input"
             type="checkbox"
             checked={isCompleted}
