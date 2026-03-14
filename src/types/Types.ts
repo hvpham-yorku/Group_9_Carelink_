@@ -40,6 +40,18 @@ export interface TaskLogEntry {
 /**
  * Medication Type Definitions
  */
+export interface MedicationLogEntry {
+  medicationLogId?: string;
+  prescriptionId: string;
+  caregiverId: string;
+  takenAt: string;
+  isCompleted: boolean;
+  caregivers?: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
 export interface MedicationScheduleItemProps {
   prescriptionId: string;
   careTeamId: string;

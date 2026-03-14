@@ -12,19 +12,29 @@ const CustomTitleBanner = ({
   children,
 }: CustomTitleBannerProps) => {
   return (
-    <>
-      <section className="rounded bg-white shadow-sm mb-4">
-        <div className="container d-flex justify-content-between align-items-center pt-3 pb-3">
-          <div className="">
-            <h1>{title}</h1>
+    <section
+      className="bg-white shadow-sm mb-4"
+      style={{
+        borderRadius: "22px",
+        border: "1px solid #e9ecef",
+      }}
+    >
+      <div className="container d-flex justify-content-between align-items-center px-4 py-4 flex-wrap gap-3">
+        <div>
+          <h1 className="mb-1 fw-bold" style={{ fontSize: "1.8rem" }}>
+            {title}
+          </h1>
 
-            {subheader && <span className="text-muted">{subheader}</span>}
-          </div>
-
-          <div className="">{children}</div>
+          {subheader && (
+            <p className="text-muted mb-0" style={{ fontSize: "0.95rem" }}>
+              {subheader}
+            </p>
+          )}
         </div>
-      </section>
-    </>
+
+        {children && <div className="d-flex align-items-center">{children}</div>}
+      </div>
+    </section>
   );
 };
 
