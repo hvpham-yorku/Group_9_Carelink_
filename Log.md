@@ -164,25 +164,30 @@ Estimated Time: 26 hours
 Actual Time Spent: 21 hours
 
 ### Saneea Khalid
+
 Navigation Bar Development Tasks:
+
 Converted the original sidebar into a top navigation bar to improve the layout and make the interface easier to use. Implemented the patient switcher dropdown so caregivers can quickly switch between different patients. Adjusted the styling and positioning so the navigation integrates cleanly with the rest of the application interface.
 
 Estimated Time: 6 hours
 Actual Time spent: 4 hours
 
 Patient Profile Development Tasks:
+
 Designed and implemented the Patient Profile page to display patient information retrieved from the database. Integrated the frontend with the backend patient service so that the correct patient data loads based on the selected patient. Added structured sections for patient details and updated placeholders so unavailable features display as “Not Available” for consistency.
 
 Estimated Time: 10 hours
 Actual Time spent: 6 hours
 
 Medication Tracker Development Tasks:
+
 Completed the Medication Tracker page by connecting it to the database so medication records load dynamically for the selected patient. Implemented the main medication interface using reusable components, including active medication cards, medication detail cards, medication schedule items, and the add/edit medication form modal. Added support for creating, viewing, and updating medication information within the page so caregivers can manage prescriptions more easily. Updated the medication UI to match the rest of the application and improved the overall page flow and usability.
 
 Estimated Time: 12 hours
 Actual Time Spent: 8 hours
 
 Medication Component Testing Tasks:
+
 Created and updated component tests for the Medication Tracker features to verify that the medication interface renders correctly and responds properly to user interaction. Added tests for core medication components such as the ActiveMedicationCard, MedicationDetailsCard, MedicationFormModal, and MedicationScheduleItem. Used testing tools to confirm component behaviour, modal interactions, displayed medication data, and click handling so the medication page is more stable and reliable.
 
 Estimated Time: 6 hours
