@@ -121,7 +121,17 @@ Task Management Development Tasks:
 - Ability to delete existing tasks
 
 Estimated Time: 16 hours
+
 Actual Time spent: 5 hours
+
+Teams Page Tasks:
+- Ability to join different teams
+- Switch between patients in a Team
+- View Members of the team
+
+Estimated Time: 2 days
+
+Actual Time spent: 1 day
 
 Backend / Database integration Development Task:
 - Business Logic layer
