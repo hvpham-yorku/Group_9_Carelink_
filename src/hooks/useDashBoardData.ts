@@ -18,6 +18,7 @@ type StatCard = {
 type ActivityItem = {
   icon: string;
   text: string;
+  time?: string;
 };
 
 type MedItem = {
@@ -51,6 +52,7 @@ type DashboardDataShape = {
   patient: DashboardPatient;
   stats: StatCard[];
   recentActivity: ActivityItem[];
+  recentNotes: ActivityItem[];
   todaysMeds: MedItem[];
   upcomingAppointments: AppointmentItem[];
 };
@@ -65,13 +67,7 @@ export const useDashboardData = () => {
 
   useEffect(() => {
     const fetchDashboard = async () => {
-      if (!user) {
-        setData(null);
-        setLoading(false);
-        return;
-      }
-
-      if (!selectedPatientId) {
+      if (!user || !selectedPatientId) {
         setData(null);
         setLoading(false);
         return;
@@ -105,13 +101,11 @@ export const useDashboardData = () => {
           `${patientProfile?.firstName ?? ""} ${patientProfile?.lastName ?? ""}`.trim() ||
           "Selected Patient";
 
-        const age =
-          patientProfile?.dob ? calculateAge(patientProfile.dob) : null;
-
+        const age = patientProfile?.dob ? calculateAge(patientProfile.dob) : null;
         const patientMeta = age !== null ? `Age ${age}` : "Patient";
 
-        const completedTasks = tasks.filter(
-          (task: any) => task.taskLogs?.some((log: any) => log.isCompleted),
+        const completedTasks = tasks.filter((task: any) =>
+          task.taskLogs?.some((log: any) => log.isCompleted),
         ).length;
 
         const totalTasks = tasks.length;
@@ -150,40 +144,33 @@ export const useDashboardData = () => {
           {
             title: "Care Notes",
             primary: `${recentNotesCount}`,
-            secondary: "recent updates",
+            secondary:
+              recentNotesCount > 0 ? "recent notes" : "No notes yet",
             route: "/notes",
           },
         ];
 
-        const noteActivities: ActivityItem[] = notes.slice(0, 2).map((note: any) => ({
-          icon: "📝",
-          text: `Note added: ${note.title || "Untitled note"}${note.caregivers?.firstName ? ` by ${note.caregivers.firstName}` : ""
-            }`,
-        }));
-
-        const taskActivities: ActivityItem[] = tasks
-          .filter((task: any) => task.taskLogs?.some((log: any) => log.isCompleted))
-          .slice(0, 2)
+        const recentActivity: ActivityItem[] = tasks
+          .filter((task: any) =>
+            task.taskLogs?.some((log: any) => log.isCompleted),
+          )
+          .slice(0, 4)
           .map((task: any) => ({
             icon: "✅",
             text: `Task completed: ${task.title}`,
+            time:
+              task.taskLogs?.find((log: any) => log.isCompleted)?.completedAt ??
+              task.updatedAt ??
+              task.createdAt ??
+              "",
           }));
 
-        const medicationActivities: ActivityItem[] = prescriptions
-          .filter((prescription: any) =>
-            prescription.medicationLogs?.some((log: any) => log.isCompleted),
-          )
-          .slice(0, 2)
-          .map((prescription: any) => ({
-            icon: "💊",
-            text: `Medication logged: ${prescription.name ?? prescription.medicationName ?? "Medication"}`,
-          }));
-
-        const recentActivity = [
-          ...taskActivities,
-          ...medicationActivities,
-          ...noteActivities,
-        ].slice(0, 4);
+        const recentNotes: ActivityItem[] = notes.slice(0, 4).map((note: any) => ({
+          icon: "📝",
+          text: `${note.title || note.description || "Untitled note"}${note.caregivers?.firstName ? ` by ${note.caregivers.firstName}` : ""
+            }`,
+          time: note.createdAt ?? note.updatedAt ?? "",
+        }));
 
         const todaysMeds: MedItem[] = prescriptions.slice(0, 5).map((prescription: any) => {
           const taken = prescription.medicationLogs?.some(
@@ -216,6 +203,7 @@ export const useDashboardData = () => {
           patient,
           stats,
           recentActivity,
+          recentNotes,
           todaysMeds,
           upcomingAppointments,
         });
