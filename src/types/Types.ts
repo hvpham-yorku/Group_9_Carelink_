@@ -132,9 +132,11 @@ export interface CaregiverInfo {
   caregiverId: string;
   firstName: string;
   lastName: string;
-  phone: string;
+  phoneNumber: string;
   email: string;
   jobTitle: string;
+  teamRole?: string; // new field ------------------------------
+  teamDateAssigned?: string; // new field ------------------------------
 }
 
 /**
@@ -144,11 +146,13 @@ export interface CaregiverTeam {
   careTeamId: string;
   caregivers: CaregiverInfo[];
   patients: PatientInfo[];
+  teamName?: string; // new field ------------------------------
   joinCode: string;
-  caregiverRole: string;
-  dateAssigned: string;
+  caregiverRole?: string; // marked for deletion ------------------------------
+  dateAssigned: string; // marked for deletion ------------------------------
 }
 
+// marked for deletion ------------------------------
 export interface careTeamMember {
   membershipId: string;
   careTeamId: string;
