@@ -1,4 +1,4 @@
-import type { PatientInfo, CaregiverInfo, CaregiverTeam } from "../types/Types";
+import type { PatientInfo, CaregiverInfo, CaregiverTeam } from "../types/teams";
 
 // patient ids
 const patientId1 = crypto.randomUUID();
@@ -85,6 +85,5 @@ export let careTeams: CaregiverTeam[] = [
     patients: teamPatients,
     teamName: "Stub Team 1",
     joinCode: "TEST1234",
-    dateAssigned: new Date().toISOString(),
   },
 ];
