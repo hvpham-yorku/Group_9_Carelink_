@@ -1,4 +1,4 @@
-import type { CaregiverInfo, PatientInfo } from "../types/Types";
+import type { CaregiverInfo, PatientInfo } from "../../../types/Types";
 
 export interface TeamRepo {
   getName(teamId: string): Promise<string>;

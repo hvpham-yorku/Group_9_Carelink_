@@ -1,7 +1,7 @@
-import type { TeamRepo } from "../../data_repo_interfaces/TeamRepo";
-import type { CaregiverInfo, PatientInfo } from "../../types/Types";
+import type { TeamRepo } from "./TeamRepo";
+import type { CaregiverInfo, PatientInfo } from "../../../types/Types";
 
-import { careTeams } from "../data";
+import { careTeams } from "../../data";
 
 export class StubTeamRepo implements TeamRepo {
   async getName(teamId: string): Promise<string> {
