@@ -17,6 +17,8 @@ import PatientList from "../components/team/PatientList";
 import TeamList from "../components/team/TeamList";
 import JoinTeamForm from "../components/team/JoinTeamForm";
 import ModalForm from "../components/team/ModalForm";
+import StatCard from "../components/ui/StatCard";
+import { Users, UsersRound } from "lucide-react";
 
 const TEAM_KEY = "carelink_selectedTeamId";
 const STUB_MODE = import.meta.env.VITE_STUB_MODE === "stub";
@@ -122,40 +124,57 @@ const Teams = () => {
           subheader="Code: 5BE3CB"
         />
 
-        <div className="row mb-2">
-          <div className="col-md-6">
-            <CustomSection
-              title="Join a Team"
-              subheader="Enter a team code to join"
-            >
-              <JoinTeamForm onJoinTeam={handleJoinTeam} />
-              {joinError && (
-                <div
-                  className="alert alert-danger mt-2 py-2 px-3 mb-0"
-                  role="alert"
-                >
-                  {joinError}
-                </div>
-              )}
-            </CustomSection>
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-md-6 col-xl-4">
+            <StatCard
+              title="Team Members"
+              value={caregivers.length}
+              description="Number of caregivers on this team"
+              icon={<Users className="fs-3 text-primary" />}
+            />
           </div>
 
-          <div className="col-md-6">
+          <div className="col-12 col-md-6 col-xl-4">
+            <StatCard
+              title="Patients"
+              value={patients.length}
+              description="Number of patients on this team"
+              icon={<UsersRound className="fs-3 text-primary" />}
+            />
+          </div>
+
+          <div className="col-12 col-md-12 col-xl-4">
             <CustomSection
-              title="Add a Patient to Your Team"
-              subheader="Create a new Patient and add them to your team"
+              title="Team Options"
+              subheader="Add patients or join another team"
             >
-              <button
-                className="btn btn-success mb-2"
-                data-bs-toggle="modal"
-                data-bs-target="#addPatientModal"
-              >
-                Add Patient
-              </button>
+              <div className="d-flex flex-column flex-sm-row gap-2 mb-3">
+                <button
+                  className="btn btn-success"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addPatientModal"
+                >
+                  Add Patient
+                </button>
+
+                <button
+                  className="btn btn-success"
+                  data-bs-toggle="modal"
+                  data-bs-target="#joinTeamModal"
+                >
+                  Join a Team
+                </button>
+              </div>
 
               <ModalForm
                 modalId="addPatientModal"
                 onSubmit={handleAddPatient}
+              />
+
+              <JoinTeamForm
+                modalId="joinTeamModal"
+                onJoinTeam={handleJoinTeam}
+                error={joinError}
               />
             </CustomSection>
           </div>

@@ -42,13 +42,7 @@ const ModalForm = ({ modalId, onSubmit }: ModalFormProps) => {
   };
 
   return (
-    <div
-      className="modal fade"
-      id={modalId}
-      tabIndex={-1}
-      aria-labelledby={`${modalId}Label`}
-      aria-hidden="true"
-    >
+    <div className="modal fade" id={modalId}>
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">

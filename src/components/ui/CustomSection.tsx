@@ -43,7 +43,7 @@ const CustomSection = ({
 }: CustomSectionProps) => {
   return (
     <section
-      className="bg-white shadow-sm mb-4"
+      className="bg-white shadow-sm"
       style={{
         borderRadius: "18px",
         border: "1px solid #e9ecef",

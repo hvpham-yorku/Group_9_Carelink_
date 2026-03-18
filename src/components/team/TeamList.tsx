@@ -11,18 +11,25 @@ const TeamList = ({ caregivers }: TeamListProps) => {
 
   return (
     <ul className="list-group list-group-flush">
-      {caregivers.map((caregiver) => (
-        <li key={caregiver.caregiverId} className="list-group-item px-0">
-          <h6 className="mb-1">
-            {caregiver.firstName} {caregiver.lastName}
-          </h6>
-          <p className="mb-1 text-muted">{caregiver.teamRole}</p>
-          <p className="mb-0 text-muted">
-            {caregiver.jobTitle} | {caregiver.email}
-          </p>
-          <p className="mb-0 text-muted">
-            Date Assigned: {caregiver.teamDateAssigned}
-          </p>
+      {caregivers.map((caregivers) => (
+        <li key={caregivers.caregiverId} className="list-group-item py-2">
+          <div className="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+              <div className="fw-semibold">
+                {caregivers.firstName} {caregivers.lastName}
+              </div>
+              <small className="text-muted">
+                {caregivers.teamRole} • {caregivers.jobTitle}
+              </small>
+            </div>
+
+            <div className="text-end">
+              <div className="small">{caregivers.email}</div>
+              <small className="text-muted">
+                {caregivers.teamDateAssigned}
+              </small>
+            </div>
+          </div>
         </li>
       ))}
     </ul>
