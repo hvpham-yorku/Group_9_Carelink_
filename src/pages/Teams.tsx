@@ -17,8 +17,10 @@ import PatientList from "../components/team/PatientList";
 import TeamList from "../components/team/TeamList";
 import JoinTeamForm from "../components/team/JoinTeamForm";
 import ModalForm from "../components/team/ModalForm";
-import StatCard from "../components/ui/StatCard";
-import { Users, UsersRound } from "lucide-react";
+import CategoryForm from "../components/team/CategoryForm";
+import type { NewCategoryFormData } from "../components/team/CategoryForm";
+// import StatCard from "../components/ui/StatCard";
+// import { Users, UsersRound } from "lucide-react";
 
 const TEAM_KEY = "carelink_selectedTeamId";
 const STUB_MODE = import.meta.env.VITE_STUB_MODE === "stub";
@@ -104,6 +106,15 @@ const Teams = () => {
     }
   };
 
+  const handleAddCategory = async (data: NewCategoryFormData) => {
+    if (!teamId) return;
+    try {
+      await repositories.team.addCategory(teamId, data.name);
+    } catch (error) {
+      console.error("Failed to add category:", error);
+    }
+  };
+
   return (
     <>
       <div className="container">
@@ -125,25 +136,16 @@ const Teams = () => {
         />
 
         <div className="row g-3 mb-4">
-          <div className="col-12 col-md-6 col-xl-4">
-            <StatCard
-              title="Team Members"
-              value={caregivers.length}
-              description="Number of caregivers on this team"
-              icon={<Users className="fs-3 text-primary" />}
-            />
+          <div className="col-md-6">
+            <CustomSection
+              title="Switch Teams"
+              subheader="Switch to a different Team"
+            >
+              Coming soon
+            </CustomSection>
           </div>
 
-          <div className="col-12 col-md-6 col-xl-4">
-            <StatCard
-              title="Patients"
-              value={patients.length}
-              description="Number of patients on this team"
-              icon={<UsersRound className="fs-3 text-primary" />}
-            />
-          </div>
-
-          <div className="col-12 col-md-12 col-xl-4">
+          <div className="col-md-6">
             <CustomSection
               title="Team Options"
               subheader="Add patients or join another team"
@@ -164,6 +166,14 @@ const Teams = () => {
                 >
                   Join a Team
                 </button>
+
+                <button
+                  className="btn btn-success"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addCategoryModal"
+                >
+                  Add Category
+                </button>
               </div>
 
               <ModalForm
@@ -175,6 +185,11 @@ const Teams = () => {
                 modalId="joinTeamModal"
                 onJoinTeam={handleJoinTeam}
                 error={joinError}
+              />
+
+              <CategoryForm
+                modalId="addCategoryModal"
+                onSubmit={handleAddCategory}
               />
             </CustomSection>
           </div>
