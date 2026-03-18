@@ -1,5 +1,5 @@
 import type { TeamRepo } from "./TeamRepo";
-import type { CaregiverInfo, PatientInfo } from "../../../types/Types";
+import type { CaregiverInfo, PatientInfo } from "../../../types/teams";
 
 import { careTeams } from "../../data";
 

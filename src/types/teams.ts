@@ -5,9 +5,9 @@ export interface PatientInfo {
   patientId: string;
   firstName: string;
   lastName: string;
-  dob: string;
-  address: string;
-  phoneNumber: string;
+  dob?: string;
+  address?: string;
+  phoneNumber?: string;
   email?: string;
   gender?: string;
   bloodType?: string;
