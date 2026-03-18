@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 // Services
 import { repositories } from "../data/index";
+import { careTeams } from "../data/data";
 import { patientService } from "../services/patientService";
 import { useAuth } from "../hooks/useAuth";
 
@@ -18,11 +19,13 @@ import JoinTeamForm from "../components/team/JoinTeamForm";
 import ModalForm from "../components/team/ModalForm";
 
 const TEAM_KEY = "carelink_selectedTeamId";
+const STUB_MODE = import.meta.env.VITE_STUB_MODE === "stub";
 
 const Teams = () => {
   const { user } = useAuth();
 
   const [teamId, setTeamId] = useState<string | null>(null);
+  const [teamName, setTeamName] = useState<string | null>(null);
   const [caregivers, setCaregivers] = useState<CaregiverInfo[]>([]);
   const [patients, setPatients] = useState<PatientInfo[]>([]);
   const [joinCode, setJoinCode] = useState<string | null>(null);
@@ -34,26 +37,36 @@ const Teams = () => {
 
     const loadTeamData = async () => {
       try {
-        const storedTeamId = localStorage.getItem(TEAM_KEY);
-        const context = await patientService.getInitialContext(
-          user.id,
-          storedTeamId,
-        );
+        let resolvedTeamId: string | null;
+
+        if (STUB_MODE) {
+          resolvedTeamId = careTeams[0]?.careTeamId ?? null;
+        } else {
+          const storedTeamId = localStorage.getItem(TEAM_KEY);
+          const context = await patientService.getInitialContext(
+            user.id,
+            storedTeamId,
+          );
+          if (!isActive) return;
+          resolvedTeamId = context?.careTeamId ?? null;
+        }
+
         if (!isActive) return;
+        setTeamId(resolvedTeamId);
+        if (!resolvedTeamId) return;
 
-        setTeamId(context?.careTeamId ?? null);
-        if (!context?.careTeamId) return;
-
-        const [caregiverData, patientData, code] = await Promise.all([
-          repositories.team.getCaregivers(context.careTeamId),
-          repositories.team.getPatients(context.careTeamId),
-          repositories.team.getJoinCode(context.careTeamId),
+        const [caregiverData, patientData, code, name] = await Promise.all([
+          repositories.team.getCaregivers(resolvedTeamId),
+          repositories.team.getPatients(resolvedTeamId),
+          repositories.team.getJoinCode(resolvedTeamId),
+          repositories.team.getName(resolvedTeamId),
         ]);
 
         if (!isActive) return;
         setCaregivers(caregiverData);
         setPatients(patientData);
         setJoinCode(code);
+        setTeamName(name);
       } catch (error) {
         console.error("Failed to load team data:", error);
       }
@@ -93,7 +106,7 @@ const Teams = () => {
     <>
       <div className="container">
         <CustomTitleBanner
-          title="Care Team"
+          title={teamName ?? "Care Team"}
           subheader="Manage Your Team or Join One"
         >
           {joinCode && (
@@ -104,8 +117,8 @@ const Teams = () => {
           )}
         </CustomTitleBanner>
 
-        <CustomSection
-          title="Join for full Project Demo"
+        <CustomTitleBanner
+          title="Join for Full Project Demo"
           subheader="Code: 5BE3CB"
         />
 

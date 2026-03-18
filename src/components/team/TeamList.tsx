@@ -18,9 +18,11 @@ const TeamList = ({ caregivers }: TeamListProps) => {
           </h6>
           <p className="mb-1 text-muted">{caregiver.teamRole}</p>
           <p className="mb-0 text-muted">
-            {caregiver.phoneNumber} | {caregiver.jobTitle}
+            {caregiver.jobTitle} | {caregiver.email}
           </p>
-          <p className="mb-0 text-muted">{caregiver.teamDateAssigned}</p>
+          <p className="mb-0 text-muted">
+            Date Assigned: {caregiver.teamDateAssigned}
+          </p>
         </li>
       ))}
     </ul>

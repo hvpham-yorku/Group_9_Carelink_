@@ -1,6 +1,8 @@
 import type { TeamRepo } from "./TeamRepo";
 import type { CaregiverInfo, PatientInfo } from "../../../types/teams";
+
 import { supabase } from "../../../lib/supabase";
+import { formatToDateTimeLocal } from "../../../utils/formatters";
 
 export class ApiTeamRepo implements TeamRepo {
   async getName(teamId: string): Promise<string | null> {
@@ -47,7 +49,7 @@ export class ApiTeamRepo implements TeamRepo {
       ...(item.caregivers as any),
       caregiverId: item.caregiverId,
       teamRole: item.role,
-      teamDateAssigned: item.dateAssigned,
+      teamDateAssigned: formatToDateTimeLocal(item.dateAssigned),
     }));
 
     return formattedData;
@@ -75,7 +77,10 @@ export class ApiTeamRepo implements TeamRepo {
     return formattedData;
   }
 
-  async joinTeamWithCode(caregiverId: string, joinCode: string) {
+  async joinTeamWithCode(
+    caregiverId: string,
+    joinCode: string,
+  ): Promise<string> {
     const { data: team, error: teamError } = await supabase
       .from("careTeams")
       .select("careTeamId")
@@ -116,7 +121,7 @@ export class ApiTeamRepo implements TeamRepo {
       address?: string;
       phoneNumber?: string;
     },
-  ) {
+  ): Promise<unknown> {
     const { data, error } = await supabase.rpc("add_patient_to_team", {
       p_first_name: patientData.firstName,
       p_last_name: patientData.lastName,

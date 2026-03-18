@@ -12,7 +12,7 @@ const caregiverId3 = crypto.randomUUID();
 // care team id
 const careTeamId1 = crypto.randomUUID();
 
-export let teamPatients: PatientInfo[] = [
+export const teamPatients: PatientInfo[] = [
   {
     patientId: patientId1,
     firstName: "John",
@@ -45,7 +45,7 @@ export let teamPatients: PatientInfo[] = [
   },
 ];
 
-export let teamCaregivers: CaregiverInfo[] = [
+export const teamCaregivers: CaregiverInfo[] = [
   {
     caregiverId: caregiverId1,
     firstName: "Alice",
@@ -78,7 +78,7 @@ export let teamCaregivers: CaregiverInfo[] = [
   },
 ];
 
-export let careTeams: CaregiverTeam[] = [
+export const careTeams: CaregiverTeam[] = [
   {
     careTeamId: careTeamId1,
     caregivers: teamCaregivers,

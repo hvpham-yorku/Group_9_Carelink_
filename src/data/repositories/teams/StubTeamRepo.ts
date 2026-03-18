@@ -17,7 +17,6 @@ export class StubTeamRepo implements TeamRepo {
 
   async getCaregivers(teamId: string): Promise<CaregiverInfo[]> {
     const team = careTeams.find((t) => t.careTeamId === teamId);
-
     return team ? team.caregivers : [];
   }
 
@@ -30,13 +29,23 @@ export class StubTeamRepo implements TeamRepo {
     caregiverId: string,
     joinCode: string,
   ): Promise<string> {
-    throw new Error("joinTeamWithCode not supported in stub mode");
+    const code = joinCode;
+    const caregiver = caregiverId;
+
+    throw new Error(
+      `joinTeamWithCode not supported in stub mode {code: ${code}, caregiverId: ${caregiver}}`,
+    );
   }
 
   async addPatientToTeam(
     teamId: string,
     patientData: NewPatientData,
   ): Promise<unknown> {
-    throw new Error("addPatientToTeam not supported in stub mode");
+    const team = teamId;
+    const patient = patientData;
+
+    throw new Error(
+      `addPatientToTeam not supported in stub mode {teamId: ${team}, patientData: ${JSON.stringify(patient)}}`,
+    );
   }
 }
