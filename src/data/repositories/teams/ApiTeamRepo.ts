@@ -112,6 +112,10 @@ export class ApiTeamRepo implements TeamRepo {
     return team.careTeamId;
   }
 
+  /*
+   * Team Editing Methods ------------------------------------------------
+   */
+
   async addPatientToTeam(
     teamId: string,
     patientData: {
@@ -133,5 +137,46 @@ export class ApiTeamRepo implements TeamRepo {
 
     if (error) throw error;
     return data;
+  }
+
+  async updateTeamName(teamId: string, newName: string): Promise<void> {
+    const { error } = await supabase
+      .from("careTeams")
+      .update({ teamName: newName })
+      .eq("careTeamId", teamId);
+
+    if (error) throw error;
+  }
+
+  async addCategory(teamId: string, categoryName: string): Promise<void> {
+    const { error } = await supabase
+      .from("categories")
+      .insert({ careTeamId: teamId, name: categoryName });
+
+    if (error) throw error;
+  }
+
+  async editCaregiverRole(
+    teamId: string,
+    caregiverId: string,
+    newRole: string,
+  ): Promise<void> {
+    const { error } = await supabase
+      .from("careTeamMembers")
+      .update({ role: newRole })
+      .eq("careTeamId", teamId)
+      .eq("caregiverId", caregiverId);
+
+    if (error) throw error;
+  }
+
+  async removeCaregiver(teamId: string, caregiverId: string): Promise<void> {
+    const { error } = await supabase
+      .from("careTeamMembers")
+      .delete()
+      .eq("careTeamId", teamId)
+      .eq("caregiverId", caregiverId);
+
+    if (error) throw error;
   }
 }

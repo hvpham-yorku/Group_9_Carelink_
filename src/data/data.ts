@@ -1,4 +1,9 @@
-import type { PatientInfo, CaregiverInfo, CaregiverTeam } from "../types/teams";
+import type {
+  PatientInfo,
+  CaregiverInfo,
+  CaregiverTeam,
+  Category,
+} from "../types/teams";
 
 // patient ids
 const patientId1 = crypto.randomUUID();
@@ -12,7 +17,7 @@ const caregiverId3 = crypto.randomUUID();
 // care team id
 const careTeamId1 = crypto.randomUUID();
 
-export const teamPatients: PatientInfo[] = [
+export let teamPatients: PatientInfo[] = [
   {
     patientId: patientId1,
     firstName: "John",
@@ -45,7 +50,7 @@ export const teamPatients: PatientInfo[] = [
   },
 ];
 
-export const teamCaregivers: CaregiverInfo[] = [
+export let teamCaregivers: CaregiverInfo[] = [
   {
     caregiverId: caregiverId1,
     firstName: "Alice",
@@ -78,12 +83,23 @@ export const teamCaregivers: CaregiverInfo[] = [
   },
 ];
 
-export const careTeams: CaregiverTeam[] = [
+export let careTeams: CaregiverTeam[] = [
   {
     careTeamId: careTeamId1,
     caregivers: teamCaregivers,
     patients: teamPatients,
     teamName: "Stub Team 1",
     joinCode: "TEST1234",
+  },
+];
+
+export let categories: Category[] = [
+  {
+    categoryId: crypto.randomUUID(),
+    name: "Medication",
+  },
+  {
+    categoryId: crypto.randomUUID(),
+    name: "Appointments",
   },
 ];

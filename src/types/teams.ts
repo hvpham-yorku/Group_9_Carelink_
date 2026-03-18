@@ -50,3 +50,11 @@ export interface CaregiverTeam {
   teamName: string; // new field ------------------------------
   joinCode: string;
 }
+
+/**
+ * Category Type Definition
+ */
+export interface Category {
+  categoryId: string;
+  name: string;
+}
