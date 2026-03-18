@@ -3,7 +3,7 @@ import type { CaregiverInfo, PatientInfo } from "../../../types/teams";
 import { supabase } from "../../../lib/supabase";
 
 export class ApiTeamRepo implements TeamRepo {
-  async getName(teamId: string): Promise<string> {
+  async getName(teamId: string): Promise<string | null> {
     const { data, error } = await supabase
       .from("careTeams")
       .select("teamName")
@@ -15,7 +15,7 @@ export class ApiTeamRepo implements TeamRepo {
     return data.teamName;
   }
 
-  async getJoinCode(teamId: string): Promise<string> {
+  async getJoinCode(teamId: string): Promise<string | null> {
     const { data, error } = await supabase
       .from("careTeams")
       .select("joinCode")
@@ -27,10 +27,7 @@ export class ApiTeamRepo implements TeamRepo {
     return data.joinCode;
   }
 
-  async getCaregivers(
-    teamId: string,
-    caregiverId: string,
-  ): Promise<CaregiverInfo[]> {
+  async getCaregivers(teamId: string): Promise<CaregiverInfo[]> {
     const { data, error } = await supabase
       .from("careTeamMembers")
       .select(
@@ -42,19 +39,13 @@ export class ApiTeamRepo implements TeamRepo {
         `,
       )
       .eq("careTeamId", teamId)
-      .is("patientId", null)
-      .eq("caregiverId", caregiverId);
+      .is("patientId", null);
 
     if (error) throw error;
 
-    // const formattedData = data as unknown as CaregiverInfo[];
-    const formattedData: CaregiverInfo[] = data.map((item) => ({
+    const formattedData: CaregiverInfo[] = (data || []).map((item) => ({
+      ...(item.caregivers as any),
       caregiverId: item.caregiverId,
-      firstName: item.caregivers[0].firstName,
-      lastName: item.caregivers[0].lastName,
-      phoneNumber: item.caregivers[0].phoneNumber,
-      email: item.caregivers[0].email,
-      jobTitle: item.caregivers[0].jobTitle,
       teamRole: item.role,
       teamDateAssigned: item.dateAssigned,
     }));
@@ -62,32 +53,24 @@ export class ApiTeamRepo implements TeamRepo {
     return formattedData;
   }
 
-  async getPatients(teamId: string, patientId: string): Promise<PatientInfo[]> {
+  async getPatients(teamId: string): Promise<PatientInfo[]> {
     const { data, error } = await supabase
       .from("careTeamMembers")
-      // add in blood_type when switching to new schema
       .select(
         `
-            patientId,
-            role,
-            patients (firstName, lastName, gender)
+            patients (patientId, firstName, lastName, dob, address, phoneNumber)
           `,
       )
       .eq("careTeamId", teamId)
-      .is("caregiverId", null)
-      .eq("patientId", patientId);
+      .is("caregiverId", null);
 
     if (error) throw error;
 
-    // const formattedData = data as unknown as PatientInfo[];
-    const formattedData: PatientInfo[] = data.map((item) => ({
-      patientId: item.patientId,
-      firstName: item.patients[0].firstName,
-      lastName: item.patients[0].lastName,
-      gender: item.patients[0].gender,
-      // bloodType: item.patients[0].bloodType,
-      teamRole: item.role,
-    }));
+    const formattedData: PatientInfo[] = (data || [])
+      .filter((item) => item.patients)
+      .map((item) => ({
+        ...(item.patients as unknown as PatientInfo),
+      }));
 
     return formattedData;
   }

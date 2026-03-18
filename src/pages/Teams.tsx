@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 
 // Services
-import { teamService } from "../services/teamService";
+import { repositories } from "../data/index";
 import { patientService } from "../services/patientService";
 import { useAuth } from "../hooks/useAuth";
 
 // Types
-import type { CaregiverInfo, PatientInfo } from "../types/Types";
+import type { CaregiverInfo, PatientInfo } from "../types/teams";
 import type { NewPatientFormData } from "../components/team/ModalForm";
 
 // Components
@@ -17,44 +17,20 @@ import TeamList from "../components/team/TeamList";
 import JoinTeamForm from "../components/team/JoinTeamForm";
 import ModalForm from "../components/team/ModalForm";
 
+const TEAM_KEY = "carelink_selectedTeamId";
+
 const Teams = () => {
   const { user } = useAuth();
+
   const [teamId, setTeamId] = useState<string | null>(null);
-  const [joinCode, setJoinCode] = useState<string | null>(null);
   const [caregivers, setCaregivers] = useState<CaregiverInfo[]>([]);
   const [patients, setPatients] = useState<PatientInfo[]>([]);
+  const [joinCode, setJoinCode] = useState<string | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
-
-  // map raw Supabase
-  const mapCaregivers = (rows: any[]): CaregiverInfo[] =>
-    rows.map((row) => ({
-      caregiverId: row.caregiverId as string,
-      firstName: (row.caregivers?.firstName as string) ?? "",
-      lastName: (row.caregivers?.lastName as string) ?? "",
-      email: (row.caregivers?.email as string) ?? "",
-      phone: (row.caregivers?.phone as string) ?? "",
-      jobTitle: (row.caregivers?.jobTitle as string) ?? "",
-      role: (row.role as string) ?? "",
-      dateAssigned: (row.dateAssigned as string) ?? "",
-    }));
-
-  // map raw Supabase join rows to flat PatientInfo[]
-  const mapPatients = (rows: any[]): PatientInfo[] =>
-    rows.map((row) => ({
-      patientId: row.patientId as string,
-      firstName: (row.patients?.firstName as string) ?? "",
-      lastName: (row.patients?.lastName as string) ?? "",
-      dob: (row.patients?.dob as string) ?? "",
-      address: (row.patients?.address as string) ?? "",
-      phoneNumber: (row.patients?.phoneNumber as string) ?? "",
-    }));
 
   useEffect(() => {
     if (!user) return;
-
     let isActive = true;
-
-    const TEAM_KEY = "carelink_selectedTeamId";
 
     const loadTeamData = async () => {
       try {
@@ -66,18 +42,17 @@ const Teams = () => {
         if (!isActive) return;
 
         setTeamId(context?.careTeamId ?? null);
-
         if (!context?.careTeamId) return;
 
-        const [caregiverRows, patientRows, code] = await Promise.all([
-          teamService.getCaregivers(context.careTeamId),
-          teamService.getPatients(context.careTeamId),
-          teamService.getTeamJoinCode(context.careTeamId),
+        const [caregiverData, patientData, code] = await Promise.all([
+          repositories.team.getCaregivers(context.careTeamId),
+          repositories.team.getPatients(context.careTeamId),
+          repositories.team.getJoinCode(context.careTeamId),
         ]);
 
         if (!isActive) return;
-        setCaregivers(mapCaregivers(caregiverRows));
-        setPatients(mapPatients(patientRows));
+        setCaregivers(caregiverData);
+        setPatients(patientData);
         setJoinCode(code);
       } catch (error) {
         console.error("Failed to load team data:", error);
@@ -91,30 +66,24 @@ const Teams = () => {
     };
   }, [user]);
 
-  const handleJoinTeam = async (joinCode: string) => {
+  const handleJoinTeam = async (code: string) => {
     if (!user) return;
     setJoinError(null);
     try {
-      const newTeamId = await teamService.joinTeamWithCode(user.id, joinCode);
-      // Persist so this team is restored on the next page refresh
-      localStorage.setItem("carelink_selectedTeamId", newTeamId);
+      const newTeamId = await repositories.team.joinTeamWithCode(user.id, code);
+      localStorage.setItem(TEAM_KEY, newTeamId);
       window.location.reload();
-    } catch (error: any) {
-      // change to "any" if error does show
-      setJoinError(error?.message ?? "Failed to join team");
+    } catch (error: unknown) {
+      setJoinError((error as Error)?.message ?? "Failed to join team");
     }
   };
 
   const handleAddPatient = async (data: NewPatientFormData) => {
     if (!teamId) return;
     try {
-      await teamService.addPatientToTeam(teamId, {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        dob: data.dob,
-      });
-      const patientRows = await teamService.getPatients(teamId);
-      setPatients(mapPatients(patientRows));
+      await repositories.team.addPatientToTeam(teamId, data);
+      const patientData = await repositories.team.getPatients(teamId);
+      setPatients(patientData);
     } catch (error) {
       console.error("Failed to add patient:", error);
     }

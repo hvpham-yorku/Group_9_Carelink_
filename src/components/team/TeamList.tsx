@@ -1,4 +1,4 @@
-import type { CaregiverInfo } from "../../types/Types";
+import type { CaregiverInfo } from "../../types/teams";
 
 interface TeamListProps {
   caregivers: CaregiverInfo[];
@@ -16,10 +16,11 @@ const TeamList = ({ caregivers }: TeamListProps) => {
           <h6 className="mb-1">
             {caregiver.firstName} {caregiver.lastName}
           </h6>
-          <p className="mb-1 text-muted">{caregiver.jobTitle}</p>
+          <p className="mb-1 text-muted">{caregiver.teamRole}</p>
           <p className="mb-0 text-muted">
-            {caregiver.phone} | {caregiver.email}
+            {caregiver.phoneNumber} | {caregiver.jobTitle}
           </p>
+          <p className="mb-0 text-muted">{caregiver.teamDateAssigned}</p>
         </li>
       ))}
     </ul>

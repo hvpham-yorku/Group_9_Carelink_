@@ -1,4 +1,4 @@
-import type { TeamRepo } from "./TeamRepo";
+import type { TeamRepo, NewPatientData } from "./TeamRepo";
 import type { CaregiverInfo, PatientInfo } from "../../../types/teams";
 
 import { careTeams } from "../../data";
@@ -15,24 +15,28 @@ export class StubTeamRepo implements TeamRepo {
     return team ? team.joinCode : "Join Code Not Found";
   }
 
-  async getCaregivers(
-    teamId: string,
-    caregiverId: string,
-  ): Promise<CaregiverInfo[]> {
+  async getCaregivers(teamId: string): Promise<CaregiverInfo[]> {
     const team = careTeams.find((t) => t.careTeamId === teamId);
-    const caregivers = team
-      ? team.caregivers.filter((c) => c.caregiverId === caregiverId)
-      : [];
 
-    return caregivers ? caregivers : [];
+    return team ? team.caregivers : [];
   }
 
-  async getPatients(teamId: string, patientId: string): Promise<PatientInfo[]> {
+  async getPatients(teamId: string): Promise<PatientInfo[]> {
     const team = careTeams.find((t) => t.careTeamId === teamId);
-    const patients = team
-      ? team.patients.filter((p) => p.patientId === patientId)
-      : [];
+    return team ? team.patients : [];
+  }
 
-    return patients ? patients : [];
+  async joinTeamWithCode(
+    caregiverId: string,
+    joinCode: string,
+  ): Promise<string> {
+    throw new Error("joinTeamWithCode not supported in stub mode");
+  }
+
+  async addPatientToTeam(
+    teamId: string,
+    patientData: NewPatientData,
+  ): Promise<unknown> {
+    throw new Error("addPatientToTeam not supported in stub mode");
   }
 }

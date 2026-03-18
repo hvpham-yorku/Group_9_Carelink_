@@ -1,4 +1,4 @@
-import type { PatientInfo } from "../../types/Types";
+import type { PatientInfo } from "../../types/teams";
 
 interface PatientListProps {
   patients: PatientInfo[];
@@ -18,9 +18,8 @@ const PatientList = ({ patients }: PatientListProps) => {
           <h6 className="mb-1">
             {patient.firstName} {patient.lastName}
           </h6>
-          <p className="mb-1 text-muted">Date of Birth: {patient.dob}</p>
-          <p className="mb-1 text-muted">{patient.phone}</p>
-          <p className="mb-0 text-muted">{patient.address}</p>
+          <p className="mb-1 text-muted">{patient.gender}</p>
+          <p className="mb-1 text-muted">Dob: {patient.dob}</p>
         </li>
       ))}
     </ul>
