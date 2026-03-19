@@ -1,4 +1,8 @@
-import type { CaregiverInfo, PatientInfo } from "../../../types/teams";
+import type {
+  CaregiverInfo,
+  PatientInfo,
+  Category,
+} from "../../../types/teams";
 
 export interface NewPatientData {
   firstName: string;
@@ -12,6 +16,7 @@ export interface TeamRepo {
   getJoinCode(teamId: string): Promise<string | null>;
   getCaregivers(teamId: string): Promise<CaregiverInfo[]>;
   getPatients(teamId: string): Promise<PatientInfo[]>;
+  getCategories(teamId: string): Promise<Category[]>;
   joinTeamWithCode(caregiverId: string, joinCode: string): Promise<string>;
 
   // editing team info methods

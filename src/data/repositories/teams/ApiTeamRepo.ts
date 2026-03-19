@@ -1,5 +1,9 @@
 import type { TeamRepo, NewPatientData } from "./TeamRepo";
-import type { CaregiverInfo, PatientInfo } from "../../../types/teams";
+import type {
+  CaregiverInfo,
+  PatientInfo,
+  Category,
+} from "../../../types/teams";
 
 import { supabase } from "../../../lib/supabase";
 import { formatToDateTimeLocal } from "../../../utils/formatters";
@@ -90,6 +94,21 @@ export class ApiTeamRepo implements TeamRepo {
       });
 
     return formattedData;
+  }
+
+  async getCategories(teamId: string): Promise<Category[]> {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("category_id, name")
+      .eq("team_id", teamId)
+      .order("name", { ascending: true });
+
+    if (error) throw error;
+
+    return (data ?? []).map((row) => ({
+      categoryId: row.category_id,
+      name: row.name,
+    }));
   }
 
   async joinTeamWithCode(

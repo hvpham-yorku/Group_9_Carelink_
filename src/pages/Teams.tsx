@@ -8,6 +8,7 @@ import { usePatient } from "../contexts/patient/usePatient";
 // Types
 import type { CaregiverInfo, PatientInfo } from "../types/teams";
 import type { NewPatientFormData } from "../components/team/ModalForm";
+import type { Category } from "../types/Types";
 
 // Components
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
@@ -16,10 +17,7 @@ import PatientList from "../components/team/PatientList";
 import TeamList from "../components/team/TeamList";
 import JoinTeamForm from "../components/team/JoinTeamForm";
 import ModalForm from "../components/team/ModalForm";
-import CategoryForm from "../components/team/CategoryForm";
-import type { NewCategoryFormData } from "../components/team/CategoryForm";
-// import StatCard from "../components/ui/StatCard";
-// import { Users, UsersRound } from "lucide-react";
+import EditTeamNameForm from "../components/team/EditTeam";
 
 const Teams = () => {
   const { user } = useAuth();
@@ -29,6 +27,7 @@ const Teams = () => {
   const [teamName, setTeamName] = useState<string | null>(null);
   const [caregivers, setCaregivers] = useState<CaregiverInfo[]>([]);
   const [patients, setPatients] = useState<PatientInfo[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [joinCode, setJoinCode] = useState<string | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
 
@@ -38,12 +37,14 @@ const Teams = () => {
 
     const loadTeamData = async () => {
       try {
-        const [caregiverData, patientData, code, name] = await Promise.all([
-          repositories.team.getCaregivers(careTeamId),
-          repositories.team.getPatients(careTeamId),
-          repositories.team.getJoinCode(careTeamId),
-          repositories.team.getName(careTeamId),
-        ]);
+        const [caregiverData, patientData, code, name, categoryData] =
+          await Promise.all([
+            repositories.team.getCaregivers(careTeamId),
+            repositories.team.getPatients(careTeamId),
+            repositories.team.getJoinCode(careTeamId),
+            repositories.team.getName(careTeamId),
+            repositories.team.getCategories(careTeamId),
+          ]);
 
         if (!isActive) return;
         setTeamId(careTeamId);
@@ -51,6 +52,7 @@ const Teams = () => {
         setPatients(patientData);
         setJoinCode(code);
         setTeamName(name);
+        setCategories(categoryData);
       } catch (error) {
         console.error("Failed to load team data:", error);
       }
@@ -86,12 +88,50 @@ const Teams = () => {
     }
   };
 
-  const handleAddCategory = async (data: NewCategoryFormData) => {
+  const handleAddCategory = async (name: string) => {
     if (!teamId) return;
     try {
-      await repositories.team.addCategory(teamId, data.name);
+      await repositories.team.addCategory(teamId, name);
+      const categoryData = await repositories.team.getCategories(teamId);
+      setCategories(categoryData);
     } catch (error) {
       console.error("Failed to add category:", error);
+    }
+  };
+
+  const handleUpdateTeamName = async (newName: string) => {
+    if (!teamId) return;
+    try {
+      await repositories.team.updateTeamName(teamId, newName);
+      setTeamName(newName);
+    } catch (error) {
+      console.error("Failed to update team name:", error);
+    }
+  };
+
+  const handleUpdateRole = async (caregiverId: string, newRole: string) => {
+    if (!teamId) return;
+    try {
+      await repositories.team.editCaregiverRole(teamId, caregiverId, newRole);
+      setCaregivers((prev) =>
+        prev.map((c) =>
+          c.caregiverId === caregiverId ? { ...c, teamRole: newRole } : c,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to update role:", error);
+    }
+  };
+
+  const handleRemoveCaregiver = async (caregiverId: string) => {
+    if (!teamId) return;
+    try {
+      await repositories.team.removeCaregiver(teamId, caregiverId);
+      setCaregivers((prev) =>
+        prev.filter((c) => c.caregiverId !== caregiverId),
+      );
+    } catch (error) {
+      console.error("Failed to remove caregiver:", error);
     }
   };
 
@@ -144,6 +184,14 @@ const Teams = () => {
                 <button
                   className="btn btn-success"
                   data-bs-toggle="modal"
+                  data-bs-target="#editTeamNameModal"
+                >
+                  Edit Team Details
+                </button>
+
+                <button
+                  className="btn btn-success"
+                  data-bs-toggle="modal"
                   data-bs-target="#addPatientModal"
                 >
                   Add Patient
@@ -155,14 +203,6 @@ const Teams = () => {
                   data-bs-target="#joinTeamModal"
                 >
                   Join a Team
-                </button>
-
-                <button
-                  className="btn btn-success"
-                  data-bs-toggle="modal"
-                  data-bs-target="#addCategoryModal"
-                >
-                  Add Category
                 </button>
               </div>
 
@@ -177,9 +217,16 @@ const Teams = () => {
                 error={joinError}
               />
 
-              <CategoryForm
-                modalId="addCategoryModal"
-                onSubmit={handleAddCategory}
+              <EditTeamNameForm
+                key={teamName}
+                modalId="editTeamNameModal"
+                currentName={teamName}
+                caregivers={caregivers}
+                categories={categories}
+                onUpdateName={handleUpdateTeamName}
+                onUpdateRole={handleUpdateRole}
+                onRemoveCaregiver={handleRemoveCaregiver}
+                onAddCategory={handleAddCategory}
               />
             </CustomSection>
           </div>

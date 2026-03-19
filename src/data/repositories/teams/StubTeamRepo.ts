@@ -1,5 +1,6 @@
 import type { TeamRepo, NewPatientData } from "./TeamRepo";
 import type { CaregiverInfo, PatientInfo } from "../../../types/teams";
+import type { Category } from "../../../types/Types";
 
 import { careTeams, teamPatients, categories } from "../../data";
 
@@ -65,6 +66,11 @@ export class StubTeamRepo implements TeamRepo {
     } else {
       throw new Error(`Team not found {teamId: ${teamId}}`);
     }
+  }
+
+  async getCategories(teamId: string): Promise<Category[]> {
+    const team = careTeams.find((t) => t.careTeamId === teamId);
+    return team ? [...categories] : [];
   }
 
   async addCategory(teamId: string, categoryName: string): Promise<void> {
