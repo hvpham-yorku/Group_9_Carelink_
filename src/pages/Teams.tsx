@@ -6,9 +6,8 @@ import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 
 // Types
-import type { CaregiverInfo, PatientInfo } from "../types/teams";
+import type { CaregiverInfo, PatientInfo, Category } from "../types/teams";
 import type { NewPatientFormData } from "../components/team/ModalForm";
-import type { Category } from "../types/Types";
 
 // Components
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
