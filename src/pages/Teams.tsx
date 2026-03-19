@@ -45,9 +45,6 @@ const Teams = () => {
           repositories.team.getName(careTeamId),
         ]);
 
-        console.log(patientData);
-        console.log(caregiverData);
-
         if (!isActive) return;
         setTeamId(careTeamId);
         setCaregivers(caregiverData);
