@@ -5,6 +5,7 @@ import { repositories } from "../data/index";
 import { careTeams } from "../data/data";
 import { patientService } from "../services/patientService";
 import { useAuth } from "../hooks/useAuth";
+import { usePatient } from "../contexts/patient/usePatient";
 
 // Types
 import type { CaregiverInfo, PatientInfo } from "../types/teams";
@@ -22,11 +23,11 @@ import type { NewCategoryFormData } from "../components/team/CategoryForm";
 // import StatCard from "../components/ui/StatCard";
 // import { Users, UsersRound } from "lucide-react";
 
-const TEAM_KEY = "carelink_selectedTeamId";
 const STUB_MODE = import.meta.env.VITE_STUB_MODE === "stub";
 
 const Teams = () => {
   const { user } = useAuth();
+  const { teams, careTeamId, setCareTeamId } = usePatient();
 
   const [teamId, setTeamId] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string | null>(null);
@@ -46,10 +47,9 @@ const Teams = () => {
         if (STUB_MODE) {
           resolvedTeamId = careTeams[0]?.careTeamId ?? null;
         } else {
-          const storedTeamId = localStorage.getItem(TEAM_KEY);
           const context = await patientService.getInitialContext(
             user.id,
-            storedTeamId,
+            careTeamId,
           );
           if (!isActive) return;
           resolvedTeamId = context?.careTeamId ?? null;
@@ -88,7 +88,7 @@ const Teams = () => {
     setJoinError(null);
     try {
       const newTeamId = await repositories.team.joinTeamWithCode(user.id, code);
-      localStorage.setItem(TEAM_KEY, newTeamId);
+      setCareTeamId(newTeamId);
       window.location.reload();
     } catch (error: unknown) {
       setJoinError((error as Error)?.message ?? "Failed to join team");
@@ -141,7 +141,17 @@ const Teams = () => {
               title="Switch Teams"
               subheader="Switch to a different Team"
             >
-              Coming soon
+              <select
+                value={careTeamId || ""}
+                onChange={(e) => setCareTeamId(e.target.value)}
+                className="form-select"
+              >
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
             </CustomSection>
           </div>
 
