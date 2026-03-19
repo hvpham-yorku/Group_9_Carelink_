@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { supabase } from "../../lib/supabase";
+import { careTeams } from "../../data/data";
 
 import { PatientContext } from "./PatientContext";
 import type { Patient, Team } from "./PatientContext";
+
+const STUB_MODE = import.meta.env.VITE_STUB_MODE === "stub";
 
 export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -18,6 +21,19 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (STUB_MODE) {
+      const stubTeams: Team[] = careTeams.map((t) => ({
+        id: t.careTeamId,
+        name: t.teamName,
+      }));
+      setTeams(stubTeams);
+      if (stubTeams.length > 0 && !careTeamId) {
+        setCareTeamId(stubTeams[0].id);
+      }
+      setLoading(false);
+      return;
+    }
+
     async function loadTeams() {
       if (!user) return;
 
@@ -53,6 +69,20 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [careTeamId, user]);
 
   useEffect(() => {
+    if (STUB_MODE) {
+      const stubTeam = careTeams.find((t) => t.careTeamId === careTeamId);
+      const stubPatients: Patient[] = (stubTeam?.patients ?? []).map((p) => ({
+        patientId: p.patientId,
+        firstName: p.firstName,
+        lastName: p.lastName,
+      }));
+      setPatients(stubPatients);
+      setSelectedPatientId(
+        stubPatients.length > 0 ? stubPatients[0].patientId : null,
+      );
+      return;
+    }
+
     async function updatePatients() {
       if (!careTeamId) {
         setPatients([]);
@@ -68,11 +98,13 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (error) throw error;
 
-        const formattedPatients: Patient[] = data.map((item: any) => ({
-          patientId: item.patientId,
-          firstName: item.patients.firstName,
-          lastName: item.patients.lastName,
-        }));
+        const formattedPatients: Patient[] = (data ?? [])
+          .filter((item: any) => item.patients)
+          .map((item: any) => ({
+            patientId: item.patientId,
+            firstName: item.patients.firstName,
+            lastName: item.patients.lastName,
+          }));
 
         setPatients(formattedPatients);
 

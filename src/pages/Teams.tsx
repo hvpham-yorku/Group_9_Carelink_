@@ -81,7 +81,7 @@ const Teams = () => {
     return () => {
       isActive = false;
     };
-  }, [user]);
+  }, [careTeamId, user]);
 
   const handleJoinTeam = async (code: string) => {
     if (!user) return;
@@ -89,7 +89,7 @@ const Teams = () => {
     try {
       const newTeamId = await repositories.team.joinTeamWithCode(user.id, code);
       setCareTeamId(newTeamId);
-      window.location.reload();
+      //window.location.reload();
     } catch (error: unknown) {
       setJoinError((error as Error)?.message ?? "Failed to join team");
     }
