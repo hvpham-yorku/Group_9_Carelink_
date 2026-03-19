@@ -126,6 +126,7 @@ CREATE TABLE public.patients (
   insurance_provider text,
   policy_number text,
   group_number text,
+  is_active boolean NOT NULL DEFAULT true,
   CONSTRAINT patients_pkey PRIMARY KEY (patient_id)
 );
 CREATE TABLE public.task_logs (

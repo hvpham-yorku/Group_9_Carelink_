@@ -1,4 +1,4 @@
-import type { TeamRepo } from "./TeamRepo";
+import type { TeamRepo, NewPatientData } from "./TeamRepo";
 import type { CaregiverInfo, PatientInfo } from "../../../types/teams";
 
 import { supabase } from "../../../lib/supabase";
@@ -7,72 +7,87 @@ import { formatToDateTimeLocal } from "../../../utils/formatters";
 export class ApiTeamRepo implements TeamRepo {
   async getName(teamId: string): Promise<string | null> {
     const { data, error } = await supabase
-      .from("careTeams")
-      .select("teamName")
-      .eq("careTeamId", teamId)
+      .from("teams")
+      .select("team_name")
+      .eq("team_id", teamId)
       .single();
 
     if (error) throw error;
 
-    return data.teamName;
+    return data.team_name;
   }
 
   async getJoinCode(teamId: string): Promise<string | null> {
     const { data, error } = await supabase
-      .from("careTeams")
-      .select("joinCode")
-      .eq("careTeamId", teamId)
+      .from("teams")
+      .select("join_code")
+      .eq("team_id", teamId)
       .single();
 
     if (error) throw error;
 
-    return data.joinCode;
+    return data.join_code;
   }
 
   async getCaregivers(teamId: string): Promise<CaregiverInfo[]> {
     const { data, error } = await supabase
-      .from("careTeamMembers")
+      .from("team_members")
       .select(
         `
-            caregiverId,
-            role,
-            dateAssigned,
-            caregivers (firstName, lastName, phoneNumber, email, jobTitle)
-        `,
+        caregiver_id,
+        role,
+        date_assigned,
+        caregivers (first_name, last_name, phone_number, email, job_title)
+    `,
       )
-      .eq("careTeamId", teamId)
-      .is("patientId", null);
+      .eq("team_id", teamId)
+      .is("patient_id", null);
 
     if (error) throw error;
 
-    const formattedData: CaregiverInfo[] = (data || []).map((item) => ({
-      ...(item.caregivers as any),
-      caregiverId: item.caregiverId,
-      teamRole: item.role,
-      teamDateAssigned: formatToDateTimeLocal(item.dateAssigned),
-    }));
+    const formattedData: CaregiverInfo[] = (data || []).map((item) => {
+      const cg = item.caregivers as any;
+      return {
+        caregiverId: item.caregiver_id,
+        firstName: cg.first_name,
+        lastName: cg.last_name,
+        phoneNumber: cg.phone_number,
+        email: cg.email,
+        jobTitle: cg.job_title,
+        teamRole: item.role,
+        teamDateAssigned: formatToDateTimeLocal(item.date_assigned),
+      };
+    });
 
     return formattedData;
   }
 
   async getPatients(teamId: string): Promise<PatientInfo[]> {
     const { data, error } = await supabase
-      .from("careTeamMembers")
+      .from("team_members")
       .select(
         `
-            patients (patientId, firstName, lastName, dob, address, phoneNumber)
+            patient_id,
+            patients (patient_id, first_name, last_name, dob, gender)
           `,
       )
-      .eq("careTeamId", teamId)
-      .is("caregiverId", null);
+      .eq("team_id", teamId)
+      .not("patient_id", "is", null);
 
     if (error) throw error;
 
     const formattedData: PatientInfo[] = (data || [])
       .filter((item) => item.patients)
-      .map((item) => ({
-        ...(item.patients as unknown as PatientInfo),
-      }));
+      .map((item) => {
+        const p = item.patients as any;
+        return {
+          patientId: p.patient_id,
+          firstName: p.first_name,
+          lastName: p.last_name,
+          dob: p.dob,
+          gender: p.gender,
+        };
+      });
 
     return formattedData;
   }
@@ -82,34 +97,34 @@ export class ApiTeamRepo implements TeamRepo {
     joinCode: string,
   ): Promise<string> {
     const { data: team, error: teamError } = await supabase
-      .from("careTeams")
-      .select("careTeamId")
-      .eq("joinCode", joinCode)
+      .from("teams")
+      .select("team_id")
+      .eq("join_code", joinCode)
       .single();
 
     if (teamError || !team) throw new Error("Invalid Join Code");
 
     const { data: existing } = await supabase
-      .from("careTeamMembers")
-      .select("membershipId")
-      .eq("careTeamId", team.careTeamId)
-      .eq("caregiverId", caregiverId)
+      .from("team_members")
+      .select("member_id")
+      .eq("team_id", team.team_id)
+      .eq("caregiver_id", caregiverId)
       .maybeSingle();
 
     if (existing) throw new Error("You are already a member of this team");
 
-    const { error: joinError } = await supabase.from("careTeamMembers").insert([
+    const { error: joinError } = await supabase.from("team_members").insert([
       {
-        careTeamId: team.careTeamId,
-        caregiverId: caregiverId,
+        team_id: team.team_id,
+        caregiver_id: caregiverId,
         role: "caregiver",
-        dateAssigned: new Date().toISOString(),
+        date_assigned: new Date().toISOString(),
       },
     ]);
 
     if (joinError) throw joinError;
 
-    return team.careTeamId;
+    return team.team_id;
   }
 
   /*
@@ -118,21 +133,14 @@ export class ApiTeamRepo implements TeamRepo {
 
   async addPatientToTeam(
     teamId: string,
-    patientData: {
-      firstName: string;
-      lastName: string;
-      dob: string;
-      address?: string;
-      phoneNumber?: string;
-    },
+    patientData: NewPatientData,
   ): Promise<unknown> {
     const { data, error } = await supabase.rpc("add_patient_to_team", {
       p_first_name: patientData.firstName,
       p_last_name: patientData.lastName,
       p_dob: patientData.dob,
+      p_gender: patientData.gender, // Add this line
       p_team_id: teamId,
-      p_address: patientData.address || null,
-      p_phone_number: patientData.phoneNumber || null,
     });
 
     if (error) throw error;
@@ -141,9 +149,9 @@ export class ApiTeamRepo implements TeamRepo {
 
   async updateTeamName(teamId: string, newName: string): Promise<void> {
     const { error } = await supabase
-      .from("careTeams")
-      .update({ teamName: newName })
-      .eq("careTeamId", teamId);
+      .from("teams")
+      .update({ team_name: newName })
+      .eq("team_id", teamId);
 
     if (error) throw error;
   }
@@ -151,7 +159,7 @@ export class ApiTeamRepo implements TeamRepo {
   async addCategory(teamId: string, categoryName: string): Promise<void> {
     const { error } = await supabase
       .from("categories")
-      .insert({ careTeamId: teamId, name: categoryName });
+      .insert({ team_id: teamId, name: categoryName, color: "#000000" });
 
     if (error) throw error;
   }
@@ -162,20 +170,20 @@ export class ApiTeamRepo implements TeamRepo {
     newRole: string,
   ): Promise<void> {
     const { error } = await supabase
-      .from("careTeamMembers")
+      .from("team_members")
       .update({ role: newRole })
-      .eq("careTeamId", teamId)
-      .eq("caregiverId", caregiverId);
+      .eq("team_id", teamId)
+      .eq("caregiver_id", caregiverId);
 
     if (error) throw error;
   }
 
   async removeCaregiver(teamId: string, caregiverId: string): Promise<void> {
     const { error } = await supabase
-      .from("careTeamMembers")
+      .from("team_members")
       .delete()
-      .eq("careTeamId", teamId)
-      .eq("caregiverId", caregiverId);
+      .eq("team_id", teamId)
+      .eq("caregiver_id", caregiverId);
 
     if (error) throw error;
   }

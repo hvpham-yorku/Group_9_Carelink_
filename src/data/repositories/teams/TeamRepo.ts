@@ -4,8 +4,7 @@ export interface NewPatientData {
   firstName: string;
   lastName: string;
   dob: string;
-  address?: string;
-  phoneNumber?: string;
+  gender?: string;
 }
 
 export interface TeamRepo {

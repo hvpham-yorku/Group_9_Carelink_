@@ -10,8 +10,7 @@ export interface NewPatientFormData {
   firstName: string;
   lastName: string;
   dob: string;
-  address: string;
-  phoneNumber: string;
+  gender: string;
 }
 
 interface ModalFormProps {
@@ -23,8 +22,7 @@ const EMPTY_FORM: NewPatientFormData = {
   firstName: "",
   lastName: "",
   dob: "",
-  address: "",
-  phoneNumber: "",
+  gender: "",
 };
 
 const ModalForm = ({ modalId, onSubmit }: ModalFormProps) => {
@@ -107,35 +105,25 @@ const ModalForm = ({ modalId, onSubmit }: ModalFormProps) => {
               </div>
 
               <div>
-                <label htmlFor={`${modalId}Address`} className="form-label">
-                  Address:
+                <label htmlFor={`${modalId}Gender`} className="form-label">
+                  Gender:
                 </label>
-                <input
-                  id={`${modalId}Address`}
-                  name="address"
-                  type="text"
-                  className="form-control"
-                  value={form.address}
-                  onChange={handleChange}
-                  placeholder="Enter address"
+                <select
+                  id={`${modalId}Gender`}
+                  name="gender"
+                  className="form-select"
+                  value={form.gender}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, gender: e.target.value }))
+                  }
                   required
-                />
-              </div>
-
-              <div>
-                <label htmlFor={`${modalId}Phone`} className="form-label">
-                  Phone Number:
-                </label>
-                <input
-                  id={`${modalId}Phone`}
-                  name="phoneNumber"
-                  type="tel"
-                  className="form-control"
-                  value={form.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="Enter phone number"
-                  required
-                />
+                >
+                  <option value="" disabled>
+                    Select gender
+                  </option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
               </div>
             </div>
 

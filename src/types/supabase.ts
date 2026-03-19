@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.4"
   }
   graphql_public: {
     Tables: {
@@ -39,474 +39,639 @@ export type Database = {
   }
   public: {
     Tables: {
-      appointments: {
+      allergies: {
         Row: {
-          appointmentId: string
-          caregiverId: string
-          careTeamId: string
-          completedTime: string | null
-          description: string | null
-          patientId: string
-          scheduledAt: string
+          allergy_id: number
+          allergy_name: string
+          patient_id: string
         }
         Insert: {
-          appointmentId?: string
-          caregiverId: string
-          careTeamId: string
-          completedTime?: string | null
-          description?: string | null
-          patientId: string
-          scheduledAt: string
+          allergy_id?: number
+          allergy_name: string
+          patient_id: string
         }
         Update: {
-          appointmentId?: string
-          caregiverId?: string
-          careTeamId?: string
-          completedTime?: string | null
-          description?: string | null
-          patientId?: string
-          scheduledAt?: string
+          allergy_id?: number
+          allergy_name?: string
+          patient_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "appointments_caregiverId_fkey"
-            columns: ["caregiverId"]
-            isOneToOne: false
-            referencedRelation: "caregivers"
-            referencedColumns: ["caregiverId"]
-          },
-          {
-            foreignKeyName: "appointments_careTeamId_fkey"
-            columns: ["careTeamId"]
-            isOneToOne: false
-            referencedRelation: "careTeams"
-            referencedColumns: ["careTeamId"]
-          },
-          {
-            foreignKeyName: "appointments_patientId_fkey"
-            columns: ["patientId"]
+            foreignKeyName: "allergies_patient_id_fkey"
+            columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
-            referencedColumns: ["patientId"]
+            referencedColumns: ["patient_id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          appointment_id: string
+          caregiver_id: string
+          completed_at: string | null
+          created_at: string | null
+          description: string | null
+          is_completed: boolean | null
+          location: string | null
+          patient_id: string
+          scheduled_at: string | null
+          team_id: string
+          title: string | null
+        }
+        Insert: {
+          appointment_id?: string
+          caregiver_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          is_completed?: boolean | null
+          location?: string | null
+          patient_id: string
+          scheduled_at?: string | null
+          team_id: string
+          title?: string | null
+        }
+        Update: {
+          appointment_id?: string
+          caregiver_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          is_completed?: boolean | null
+          location?: string | null
+          patient_id?: string
+          scheduled_at?: string | null
+          team_id?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_caregiver_id_fkey"
+            columns: ["caregiver_id"]
+            isOneToOne: false
+            referencedRelation: "caregivers"
+            referencedColumns: ["caregiver_id"]
+          },
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["patient_id"]
+          },
+          {
+            foreignKeyName: "appointments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["team_id"]
           },
         ]
       }
       caregivers: {
         Row: {
-          caregiverId: string
+          caregiver_id: string
           email: string
-          firstName: string | null
-          jobTitle: string | null
-          lastName: string | null
-          phoneNumber: string | null
+          first_name: string
+          job_title: string | null
+          last_name: string
+          phone_number: string | null
         }
         Insert: {
-          caregiverId?: string
+          caregiver_id?: string
           email: string
-          firstName?: string | null
-          jobTitle?: string | null
-          lastName?: string | null
-          phoneNumber?: string | null
+          first_name: string
+          job_title?: string | null
+          last_name: string
+          phone_number?: string | null
         }
         Update: {
-          caregiverId?: string
+          caregiver_id?: string
           email?: string
-          firstName?: string | null
-          jobTitle?: string | null
-          lastName?: string | null
-          phoneNumber?: string | null
-        }
-        Relationships: []
-      }
-      careTeamMembers: {
-        Row: {
-          caregiverId: string | null
-          careTeamId: string
-          dateAssigned: string | null
-          membershipId: string
-          patientId: string | null
-          role: string | null
-        }
-        Insert: {
-          caregiverId?: string | null
-          careTeamId: string
-          dateAssigned?: string | null
-          membershipId?: string
-          patientId?: string | null
-          role?: string | null
-        }
-        Update: {
-          caregiverId?: string | null
-          careTeamId?: string
-          dateAssigned?: string | null
-          membershipId?: string
-          patientId?: string | null
-          role?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "careteammembers_caregiverid_fkey"
-            columns: ["caregiverId"]
-            isOneToOne: false
-            referencedRelation: "caregivers"
-            referencedColumns: ["caregiverId"]
-          },
-          {
-            foreignKeyName: "careteammembers_careteamid_fkey"
-            columns: ["careTeamId"]
-            isOneToOne: false
-            referencedRelation: "careTeams"
-            referencedColumns: ["careTeamId"]
-          },
-          {
-            foreignKeyName: "careteammembers_patientid_fkey"
-            columns: ["patientId"]
-            isOneToOne: false
-            referencedRelation: "patients"
-            referencedColumns: ["patientId"]
-          },
-        ]
-      }
-      careTeams: {
-        Row: {
-          careTeamId: string
-          joinCode: string | null
-          teamName: string | null
-        }
-        Insert: {
-          careTeamId?: string
-          joinCode?: string | null
-          teamName?: string | null
-        }
-        Update: {
-          careTeamId?: string
-          joinCode?: string | null
-          teamName?: string | null
+          first_name?: string
+          job_title?: string | null
+          last_name?: string
+          phone_number?: string | null
         }
         Relationships: []
       }
       categories: {
         Row: {
-          careTeamId: string
-          categoryId: string
+          category_id: string
+          color: string
           name: string
+          team_id: string
         }
         Insert: {
-          careTeamId: string
-          categoryId?: string
+          category_id?: string
+          color: string
           name: string
+          team_id: string
         }
         Update: {
-          careTeamId?: string
-          categoryId?: string
+          category_id?: string
+          color?: string
           name?: string
+          team_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "categories_careTeamId_fkey"
-            columns: ["careTeamId"]
+            foreignKeyName: "categories_team_id_fkey"
+            columns: ["team_id"]
             isOneToOne: false
-            referencedRelation: "careTeams"
-            referencedColumns: ["careTeamId"]
+            referencedRelation: "teams"
+            referencedColumns: ["team_id"]
           },
         ]
       }
-      medicationLogs: {
+      emergency_contacts: {
         Row: {
-          caregiverId: string | null
-          isCompleted: boolean
-          medicationLogId: string
-          prescriptionId: string | null
-          takenAt: string | null
+          contact_id: string
+          email: string | null
+          first_name: string
+          last_name: string
+          patient_id: string
+          phone_number: string | null
+          relationship: string | null
         }
         Insert: {
-          caregiverId?: string | null
-          isCompleted?: boolean
-          medicationLogId?: string
-          prescriptionId?: string | null
-          takenAt?: string | null
+          contact_id?: string
+          email?: string | null
+          first_name: string
+          last_name: string
+          patient_id: string
+          phone_number?: string | null
+          relationship?: string | null
         }
         Update: {
-          caregiverId?: string | null
-          isCompleted?: boolean
-          medicationLogId?: string
-          prescriptionId?: string | null
-          takenAt?: string | null
+          contact_id?: string
+          email?: string | null
+          first_name?: string
+          last_name?: string
+          patient_id?: string
+          phone_number?: string | null
+          relationship?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "medicationLogs_caregiverId_fkey"
-            columns: ["caregiverId"]
+            foreignKeyName: "emergency_contacts_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["patient_id"]
+          },
+        ]
+      }
+      medication_logs: {
+        Row: {
+          caregiver_id: string
+          is_completed: boolean | null
+          medication_id: string
+          medication_log_id: string
+          taken_at: string | null
+        }
+        Insert: {
+          caregiver_id: string
+          is_completed?: boolean | null
+          medication_id: string
+          medication_log_id?: string
+          taken_at?: string | null
+        }
+        Update: {
+          caregiver_id?: string
+          is_completed?: boolean | null
+          medication_id?: string
+          medication_log_id?: string
+          taken_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_logs_caregiver_id_fkey"
+            columns: ["caregiver_id"]
             isOneToOne: false
             referencedRelation: "caregivers"
-            referencedColumns: ["caregiverId"]
+            referencedColumns: ["caregiver_id"]
           },
           {
-            foreignKeyName: "medicationLogs_prescriptionId_fkey"
-            columns: ["prescriptionId"]
+            foreignKeyName: "medication_logs_medication_id_fkey"
+            columns: ["medication_id"]
             isOneToOne: false
-            referencedRelation: "prescriptions"
-            referencedColumns: ["prescriptionId"]
+            referencedRelation: "medications"
+            referencedColumns: ["medication_id"]
+          },
+        ]
+      }
+      medication_schedule: {
+        Row: {
+          medication_id: string
+          schedule_id: string
+          scheduled_at: string | null
+        }
+        Insert: {
+          medication_id: string
+          schedule_id?: string
+          scheduled_at?: string | null
+        }
+        Update: {
+          medication_id?: string
+          schedule_id?: string
+          scheduled_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_schedule_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["medication_id"]
+          },
+        ]
+      }
+      medications: {
+        Row: {
+          caregiver_id: string
+          dosage: string | null
+          frequency: string | null
+          instructions: string | null
+          is_active: boolean | null
+          medication_id: string
+          name: string | null
+          patient_id: string
+          purpose: string | null
+          team_id: string
+        }
+        Insert: {
+          caregiver_id: string
+          dosage?: string | null
+          frequency?: string | null
+          instructions?: string | null
+          is_active?: boolean | null
+          medication_id?: string
+          name?: string | null
+          patient_id: string
+          purpose?: string | null
+          team_id: string
+        }
+        Update: {
+          caregiver_id?: string
+          dosage?: string | null
+          frequency?: string | null
+          instructions?: string | null
+          is_active?: boolean | null
+          medication_id?: string
+          name?: string | null
+          patient_id?: string
+          purpose?: string | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medications_caregiver_id_fkey"
+            columns: ["caregiver_id"]
+            isOneToOne: false
+            referencedRelation: "caregivers"
+            referencedColumns: ["caregiver_id"]
+          },
+          {
+            foreignKeyName: "medications_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["patient_id"]
+          },
+          {
+            foreignKeyName: "medications_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["team_id"]
           },
         ]
       }
       notes: {
         Row: {
-          caregiverId: string
-          careTeamId: string
-          categoryId: string
-          createdAt: string | null
+          caregiver_id: string
+          category_id: string
+          created_at: string | null
           description: string | null
-          noteId: string
-          patientId: string
+          note_id: string
+          patient_id: string
+          team_id: string
           title: string | null
-          updatedAt: string | null
+          updated_at: string | null
         }
         Insert: {
-          caregiverId: string
-          careTeamId: string
-          categoryId: string
-          createdAt?: string | null
+          caregiver_id: string
+          category_id: string
+          created_at?: string | null
           description?: string | null
-          noteId?: string
-          patientId: string
+          note_id?: string
+          patient_id: string
+          team_id: string
           title?: string | null
-          updatedAt?: string | null
+          updated_at?: string | null
         }
         Update: {
-          caregiverId?: string
-          careTeamId?: string
-          categoryId?: string
-          createdAt?: string | null
+          caregiver_id?: string
+          category_id?: string
+          created_at?: string | null
           description?: string | null
-          noteId?: string
-          patientId?: string
+          note_id?: string
+          patient_id?: string
+          team_id?: string
           title?: string | null
-          updatedAt?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "notes_caregiverId_fkey"
-            columns: ["caregiverId"]
+            foreignKeyName: "notes_caregiver_id_fkey"
+            columns: ["caregiver_id"]
             isOneToOne: false
             referencedRelation: "caregivers"
-            referencedColumns: ["caregiverId"]
+            referencedColumns: ["caregiver_id"]
           },
           {
-            foreignKeyName: "notes_careTeamId_fkey"
-            columns: ["careTeamId"]
-            isOneToOne: false
-            referencedRelation: "careTeams"
-            referencedColumns: ["careTeamId"]
-          },
-          {
-            foreignKeyName: "notes_categoryId_fkey"
-            columns: ["categoryId"]
+            foreignKeyName: "notes_category_id_fkey"
+            columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
-            referencedColumns: ["categoryId"]
+            referencedColumns: ["category_id"]
           },
           {
-            foreignKeyName: "notes_patientId_fkey"
-            columns: ["patientId"]
+            foreignKeyName: "notes_patient_id_fkey"
+            columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
-            referencedColumns: ["patientId"]
+            referencedColumns: ["patient_id"]
+          },
+          {
+            foreignKeyName: "notes_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["team_id"]
+          },
+        ]
+      }
+      patient_conditions: {
+        Row: {
+          condition_id: string
+          condition_name: string
+          is_active: boolean | null
+          patient_id: string
+        }
+        Insert: {
+          condition_id?: string
+          condition_name: string
+          is_active?: boolean | null
+          patient_id: string
+        }
+        Update: {
+          condition_id?: string
+          condition_name?: string
+          is_active?: boolean | null
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_conditions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["patient_id"]
           },
         ]
       }
       patients: {
         Row: {
           address: string | null
+          blood_type: string | null
+          dietary_requirements: string | null
           dob: string
-          firstName: string
-          lastName: string
-          patientId: string
-          phoneNumber: string | null
+          email: string | null
+          first_name: string
+          gender: string
+          group_number: string | null
+          height: string | null
+          insurance_provider: string | null
+          is_active: boolean
+          last_name: string
+          patient_id: string
+          phone_number: string | null
+          policy_number: string | null
+          weight: string | null
         }
         Insert: {
           address?: string | null
+          blood_type?: string | null
+          dietary_requirements?: string | null
           dob: string
-          firstName: string
-          lastName: string
-          patientId?: string
-          phoneNumber?: string | null
+          email?: string | null
+          first_name: string
+          gender: string
+          group_number?: string | null
+          height?: string | null
+          insurance_provider?: string | null
+          is_active?: boolean
+          last_name: string
+          patient_id?: string
+          phone_number?: string | null
+          policy_number?: string | null
+          weight?: string | null
         }
         Update: {
           address?: string | null
+          blood_type?: string | null
+          dietary_requirements?: string | null
           dob?: string
-          firstName?: string
-          lastName?: string
-          patientId?: string
-          phoneNumber?: string | null
+          email?: string | null
+          first_name?: string
+          gender?: string
+          group_number?: string | null
+          height?: string | null
+          insurance_provider?: string | null
+          is_active?: boolean
+          last_name?: string
+          patient_id?: string
+          phone_number?: string | null
+          policy_number?: string | null
+          weight?: string | null
         }
         Relationships: []
       }
-      prescriptions: {
+      task_logs: {
         Row: {
-          careTeamId: string
-          dosage: string
-          frequency: string | null
-          isActive: boolean
-          name: string
-          patientId: string
-          prescriptionId: string
-          scheduledAt: string | null
+          caregiver_id: string
+          completed_at: string | null
+          id: string
+          is_completed: boolean | null
+          task_id: string
         }
         Insert: {
-          careTeamId: string
-          dosage: string
-          frequency?: string | null
-          isActive?: boolean
-          name: string
-          patientId: string
-          prescriptionId?: string
-          scheduledAt?: string | null
+          caregiver_id: string
+          completed_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          task_id: string
         }
         Update: {
-          careTeamId?: string
-          dosage?: string
-          frequency?: string | null
-          isActive?: boolean
-          name?: string
-          patientId?: string
-          prescriptionId?: string
-          scheduledAt?: string | null
+          caregiver_id?: string
+          completed_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          task_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "prescriptions_careTeamId_fkey"
-            columns: ["careTeamId"]
-            isOneToOne: false
-            referencedRelation: "careTeams"
-            referencedColumns: ["careTeamId"]
-          },
-          {
-            foreignKeyName: "prescriptions_patientId_fkey"
-            columns: ["patientId"]
-            isOneToOne: false
-            referencedRelation: "patients"
-            referencedColumns: ["patientId"]
-          },
-        ]
-      }
-      taskLogs: {
-        Row: {
-          caregiverId: string | null
-          completedAt: string | null
-          isCompleted: boolean
-          taskId: string | null
-          taskLogId: string
-        }
-        Insert: {
-          caregiverId?: string | null
-          completedAt?: string | null
-          isCompleted?: boolean
-          taskId?: string | null
-          taskLogId?: string
-        }
-        Update: {
-          caregiverId?: string | null
-          completedAt?: string | null
-          isCompleted?: boolean
-          taskId?: string | null
-          taskLogId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "taskLogs_caregiverId_fkey"
-            columns: ["caregiverId"]
+            foreignKeyName: "task_logs_caregiver_id_fkey"
+            columns: ["caregiver_id"]
             isOneToOne: false
             referencedRelation: "caregivers"
-            referencedColumns: ["caregiverId"]
+            referencedColumns: ["caregiver_id"]
           },
           {
-            foreignKeyName: "taskLogs_taskId_fkey"
-            columns: ["taskId"]
+            foreignKeyName: "task_logs_task_id_fkey"
+            columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
-            referencedColumns: ["taskId"]
+            referencedColumns: ["task_id"]
           },
         ]
       }
       tasks: {
         Row: {
-          careTeamId: string
-          categoryId: string | null
+          category_id: string
           description: string | null
-          patientId: string
-          scheduledAt: string | null
-          taskId: string
+          patient_id: string
+          scheduled_at: string | null
+          task_id: string
+          team_id: string
           title: string | null
         }
         Insert: {
-          careTeamId: string
-          categoryId?: string | null
+          category_id: string
           description?: string | null
-          patientId: string
-          scheduledAt?: string | null
-          taskId?: string
+          patient_id: string
+          scheduled_at?: string | null
+          task_id?: string
+          team_id: string
           title?: string | null
         }
         Update: {
-          careTeamId?: string
-          categoryId?: string | null
+          category_id?: string
           description?: string | null
-          patientId?: string
-          scheduledAt?: string | null
-          taskId?: string
+          patient_id?: string
+          scheduled_at?: string | null
+          task_id?: string
+          team_id?: string
           title?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_careTeamId_fkey"
-            columns: ["careTeamId"]
-            isOneToOne: false
-            referencedRelation: "careTeams"
-            referencedColumns: ["careTeamId"]
-          },
-          {
-            foreignKeyName: "tasks_categoryId_fkey"
-            columns: ["categoryId"]
+            foreignKeyName: "tasks_category_id_fkey"
+            columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
-            referencedColumns: ["categoryId"]
+            referencedColumns: ["category_id"]
           },
           {
-            foreignKeyName: "tasks_patientId_fkey"
-            columns: ["patientId"]
+            foreignKeyName: "tasks_patient_id_fkey"
+            columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
-            referencedColumns: ["patientId"]
+            referencedColumns: ["patient_id"]
+          },
+          {
+            foreignKeyName: "tasks_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["team_id"]
           },
         ]
+      }
+      team_members: {
+        Row: {
+          caregiver_id: string | null
+          date_assigned: string | null
+          member_id: string
+          patient_id: string | null
+          role: string | null
+          team_id: string | null
+        }
+        Insert: {
+          caregiver_id?: string | null
+          date_assigned?: string | null
+          member_id?: string
+          patient_id?: string | null
+          role?: string | null
+          team_id?: string | null
+        }
+        Update: {
+          caregiver_id?: string | null
+          date_assigned?: string | null
+          member_id?: string
+          patient_id?: string | null
+          role?: string | null
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_caregiver_id_fkey"
+            columns: ["caregiver_id"]
+            isOneToOne: false
+            referencedRelation: "caregivers"
+            referencedColumns: ["caregiver_id"]
+          },
+          {
+            foreignKeyName: "team_members_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["patient_id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["team_id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          join_code: string
+          team_id: string
+          team_name: string
+        }
+        Insert: {
+          join_code: string
+          team_id?: string
+          team_name: string
+        }
+        Update: {
+          join_code?: string
+          team_id?: string
+          team_name?: string
+        }
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      add_patient_to_team:
-        | {
-            Args: {
-              p_dob: string
-              p_first_name: string
-              p_last_name: string
-              p_team_id: string
-            }
-            Returns: Json
-          }
-        | {
-            Args: {
-              p_address?: string
-              p_dob: string
-              p_first_name: string
-              p_last_name: string
-              p_phone_number?: string
-              p_team_id: string
-            }
-            Returns: Json
-          }
+      add_patient_to_team: {
+        Args: {
+          p_dob: string
+          p_first_name: string
+          p_last_name: string
+          p_team_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

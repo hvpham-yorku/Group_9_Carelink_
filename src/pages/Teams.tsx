@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 
 // Services
 import { repositories } from "../data/index";
-import { careTeams } from "../data/data";
-import { patientService } from "../services/patientService";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 
@@ -23,8 +21,6 @@ import type { NewCategoryFormData } from "../components/team/CategoryForm";
 // import StatCard from "../components/ui/StatCard";
 // import { Users, UsersRound } from "lucide-react";
 
-const STUB_MODE = import.meta.env.VITE_STUB_MODE === "stub";
-
 const Teams = () => {
   const { user } = useAuth();
   const { teams, careTeamId, setCareTeamId } = usePatient();
@@ -37,36 +33,23 @@ const Teams = () => {
   const [joinError, setJoinError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!careTeamId) return;
     let isActive = true;
 
     const loadTeamData = async () => {
       try {
-        let resolvedTeamId: string | null;
-
-        if (STUB_MODE) {
-          resolvedTeamId = careTeams[0]?.careTeamId ?? null;
-        } else {
-          const context = await patientService.getInitialContext(
-            user.id,
-            careTeamId,
-          );
-          if (!isActive) return;
-          resolvedTeamId = context?.careTeamId ?? null;
-        }
-
-        if (!isActive) return;
-        setTeamId(resolvedTeamId);
-        if (!resolvedTeamId) return;
-
         const [caregiverData, patientData, code, name] = await Promise.all([
-          repositories.team.getCaregivers(resolvedTeamId),
-          repositories.team.getPatients(resolvedTeamId),
-          repositories.team.getJoinCode(resolvedTeamId),
-          repositories.team.getName(resolvedTeamId),
+          repositories.team.getCaregivers(careTeamId),
+          repositories.team.getPatients(careTeamId),
+          repositories.team.getJoinCode(careTeamId),
+          repositories.team.getName(careTeamId),
         ]);
 
+        console.log(patientData);
+        console.log(caregiverData);
+
         if (!isActive) return;
+        setTeamId(careTeamId);
         setCaregivers(caregiverData);
         setPatients(patientData);
         setJoinCode(code);
@@ -81,7 +64,7 @@ const Teams = () => {
     return () => {
       isActive = false;
     };
-  }, [careTeamId, user]);
+  }, [careTeamId]);
 
   const handleJoinTeam = async (code: string) => {
     if (!user) return;
@@ -160,7 +143,7 @@ const Teams = () => {
               title="Team Options"
               subheader="Add patients or join another team"
             >
-              <div className="d-flex flex-column flex-sm-row gap-2 mb-3">
+              <div className="d-flex flex-column flex-sm-row gap-2">
                 <button
                   className="btn btn-success"
                   data-bs-toggle="modal"

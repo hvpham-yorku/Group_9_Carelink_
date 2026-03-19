@@ -22,7 +22,7 @@ const Layout = () => {
     authService
       .getProfile(user.id)
       .then((profile) => {
-        setUsername(`${profile.firstName} ${profile.lastName}`);
+        setUsername(`${profile.first_name} ${profile.last_name}`);
       })
       .catch(() => {
         // fall back to email prefix

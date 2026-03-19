@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { supabase } from "../../lib/supabase";
 import { careTeams } from "../../data/data";
+import { repositories } from "../../data/index";
 
 import { PatientContext } from "./PatientContext";
 import type { Patient, Team } from "./PatientContext";
@@ -19,6 +20,7 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
     null,
   );
   const [loading, setLoading] = useState(true);
+  const initialTeamSet = useRef(false);
 
   useEffect(() => {
     if (STUB_MODE) {
@@ -27,7 +29,8 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
         name: t.teamName,
       }));
       setTeams(stubTeams);
-      if (stubTeams.length > 0 && !careTeamId) {
+      if (stubTeams.length > 0 && !initialTeamSet.current) {
+        initialTeamSet.current = true;
         setCareTeamId(stubTeams[0].id);
       }
       setLoading(false);
@@ -41,21 +44,22 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoading(true);
 
         const { data, error } = await supabase
-          .from("careTeamMembers")
-          .select(`careTeamId, careTeams(teamName)`)
-          .eq("caregiverId", user.id)
-          .order("dateAssigned", { ascending: false });
+          .from("team_members")
+          .select(`team_id, teams(team_name)`)
+          .eq("caregiver_id", user.id)
+          .order("date_assigned", { ascending: false });
 
         if (error) throw error;
 
         const formattedTeams: Team[] = data.map((item: any) => ({
-          id: item.careTeamId,
-          name: item.careTeams.teamName,
+          id: item.team_id,
+          name: item.teams.team_name,
         }));
 
         setTeams(formattedTeams);
 
-        if (formattedTeams.length > 0 && !careTeamId) {
+        if (formattedTeams.length > 0 && !initialTeamSet.current) {
+          initialTeamSet.current = true;
           setCareTeamId(formattedTeams[0].id);
         }
       } catch (error) {
@@ -66,57 +70,36 @@ export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     loadTeams();
-  }, [careTeamId, user]);
+  }, [user]);
 
   useEffect(() => {
-    if (STUB_MODE) {
-      const stubTeam = careTeams.find((t) => t.careTeamId === careTeamId);
-      const stubPatients: Patient[] = (stubTeam?.patients ?? []).map((p) => ({
-        patientId: p.patientId,
-        firstName: p.firstName,
-        lastName: p.lastName,
-      }));
-      setPatients(stubPatients);
-      setSelectedPatientId(
-        stubPatients.length > 0 ? stubPatients[0].patientId : null,
-      );
+    if (!careTeamId) {
+      setPatients([]);
+      setSelectedPatientId(null);
       return;
     }
 
-    async function updatePatients() {
-      if (!careTeamId) {
-        setPatients([]);
-        return;
-      }
+    let isActive = true;
 
-      try {
-        const { data, error } = await supabase
-          .from("careTeamMembers")
-          .select(`patientId, patients(firstName, lastName)`)
-          .eq("careTeamId", careTeamId)
-          .is("caregiverId", null);
+    repositories.team
+      .getPatients(careTeamId)
+      .then((patientData) => {
+        if (!isActive) return;
+        const mapped: Patient[] = patientData.map((p) => ({
+          patientId: p.patientId,
+          firstName: p.firstName,
+          lastName: p.lastName,
+        }));
+        setPatients(mapped);
+        setSelectedPatientId(mapped.length > 0 ? mapped[0].patientId : null);
+      })
+      .catch((err) => {
+        console.error("Error loading patients:", err);
+      });
 
-        if (error) throw error;
-
-        const formattedPatients: Patient[] = (data ?? [])
-          .filter((item: any) => item.patients)
-          .map((item: any) => ({
-            patientId: item.patientId,
-            firstName: item.patients.firstName,
-            lastName: item.patients.lastName,
-          }));
-
-        setPatients(formattedPatients);
-
-        setSelectedPatientId(
-          formattedPatients.length > 0 ? formattedPatients[0].patientId : null,
-        );
-      } catch (error) {
-        console.error("Error loading patients:", error);
-      }
-    }
-
-    updatePatients();
+    return () => {
+      isActive = false;
+    };
   }, [careTeamId]);
 
   return (

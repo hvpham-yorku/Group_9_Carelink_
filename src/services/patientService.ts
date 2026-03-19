@@ -12,34 +12,34 @@ export const patientService = {
     // If a preferred team is provided, validate the user is still a member and use it.
     if (preferredTeamId) {
       const { data: pref } = await supabase
-        .from("careTeamMembers")
-        .select("careTeamId")
-        .eq("caregiverId", caregiverId)
-        .eq("careTeamId", preferredTeamId)
+        .from("team_members")
+        .select("team_id")
+        .eq("caregiver_id", caregiverId)
+        .eq("team_id", preferredTeamId)
         .maybeSingle();
 
       if (pref) {
         const { data: patientLink } = await supabase
-          .from("careTeamMembers")
-          .select("patientId")
-          .eq("careTeamId", preferredTeamId)
-          .not("patientId", "is", null)
+          .from("team_members")
+          .select("patient_id")
+          .eq("team_id", preferredTeamId)
+          .not("patient_id", "is", null)
           .limit(1)
           .maybeSingle();
 
         return {
           careTeamId: preferredTeamId,
-          patientId: patientLink?.patientId || null,
+          patientId: patientLink?.patient_id || null,
         };
       }
     }
 
     // Fallback: pick the most recently joined team using timestamptz ordering.
     const { data: member, error: teamError } = await supabase
-      .from("careTeamMembers")
-      .select("careTeamId, dateAssigned")
-      .eq("caregiverId", caregiverId)
-      .order("dateAssigned", { ascending: false }) // fixed bug here maybe, i hope...
+      .from("team_members")
+      .select("team_id, date_assigned")
+      .eq("caregiver_id", caregiverId)
+      .order("date_assigned", { ascending: false }) // fixed bug here maybe, i hope...
       .limit(1)
       .maybeSingle();
 
@@ -51,16 +51,16 @@ export const patientService = {
     if (!member) return { careTeamId: null, patientId: null };
 
     const { data: patientLink } = await supabase
-      .from("careTeamMembers")
-      .select("patientId")
-      .eq("careTeamId", member.careTeamId)
-      .not("patientId", "is", null)
+      .from("team_members")
+      .select("patient_id")
+      .eq("team_id", member.team_id)
+      .not("patient_id", "is", null)
       .limit(1)
       .maybeSingle();
 
     return {
-      careTeamId: member.careTeamId,
-      patientId: patientLink?.patientId || null,
+      careTeamId: member.team_id,
+      patientId: patientLink?.patient_id || null,
     };
   },
 
@@ -69,7 +69,7 @@ export const patientService = {
     const { data, error } = await supabase
       .from("patients")
       .select("*")
-      .eq("patientId", patientId)
+      .eq("patient_id", patientId)
       .single();
 
     if (error) throw error;
@@ -77,11 +77,11 @@ export const patientService = {
   },
 
   // Update profile fields
-  async updateProfile(patientId: string, updates: JSON) {
+  async updateProfile(patientId: string, updates: any) {
     const { data, error } = await supabase
       .from("patients")
       .update(updates)
-      .eq("patientId", patientId)
+      .eq("patient_id", patientId)
       .select()
       .single();
 
