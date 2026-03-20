@@ -33,10 +33,10 @@ export interface CaregiverInfo {
   caregiverId: string;
   firstName: string;
   lastName: string;
-  phoneNumber: string;
-  email: string;
-  jobTitle: string;
-  teamRole?: string; // new field ------------------------------
+  phoneNumber?: string;
+  email?: string;
+  jobTitle?: string;
+  teamRole?: string | null; // new field ------------------------------
   teamDateAssigned?: string; // new field ------------------------------
 }
 

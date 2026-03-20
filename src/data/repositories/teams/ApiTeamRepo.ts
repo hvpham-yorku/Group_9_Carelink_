@@ -41,7 +41,7 @@ export class ApiTeamRepo implements TeamRepo {
         caregiver_id,
         role,
         date_assigned,
-        caregivers (first_name, last_name, phone_number, email, job_title)
+        caregivers (first_name, last_name, email, job_title)
     `,
       )
       .eq("team_id", teamId)
@@ -52,10 +52,10 @@ export class ApiTeamRepo implements TeamRepo {
     const formattedData: CaregiverInfo[] = (data || []).map((item) => {
       const cg = item.caregivers as any;
       return {
-        caregiverId: item.caregiver_id,
+        caregiverId: item.caregiver_id!,
         firstName: cg.first_name,
         lastName: cg.last_name,
-        phoneNumber: cg.phone_number,
+
         email: cg.email,
         jobTitle: cg.job_title,
         teamRole: item.role,
