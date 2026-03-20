@@ -92,7 +92,7 @@ export const taskService = {
     };
 
     const { data, error } = await supabase
-      .from("taskLogs")
+      .from("task_logs")
       .insert([logEntry])
       .select()
       .single();

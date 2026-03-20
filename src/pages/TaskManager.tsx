@@ -9,10 +9,10 @@
 */
 
 import { useState, useEffect } from "react";
-import type { Task } from "../types/Types";
+import type { Task } from "../types/task";
 
 // Context and services
-import { taskService } from "../services/taskService";
+import { repositories } from "../data/index";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 
@@ -53,8 +53,8 @@ const TaskManager = () => {
       setLoadingTasks(true);
       try {
         const [fetchedTasks, fetchedCats] = await Promise.all([
-          taskService.getTasksByPatient(selectedPatientId),
-          taskService.getCategories(careTeamId),
+          repositories.task.getTasksByPatient(selectedPatientId),
+          repositories.task.getCategories(careTeamId),
         ]);
 
         setTasks(fetchedTasks as Task[]);
@@ -72,7 +72,7 @@ const TaskManager = () => {
   const refreshTasks = async () => {
     if (!selectedPatientId) return;
     try {
-      const data = await taskService.getTasksByPatient(selectedPatientId);
+      const data = await repositories.task.getTasksByPatient(selectedPatientId);
       if (data) setTasks(data as Task[]);
     } catch (err) {
       console.error("Failed to fetch tasks:", err);
@@ -88,7 +88,7 @@ const TaskManager = () => {
   ) => {
     if (!selectedPatientId || !careTeamId) return;
     try {
-      await taskService.addTask({
+      await repositories.task.addTask({
         title,
         description,
         scheduledAt: time,
@@ -112,9 +112,9 @@ const TaskManager = () => {
     const isCompleted = task.taskLogs?.some((log) => log.isCompleted) ?? false;
     try {
       if (isCompleted) {
-        await taskService.unmarkTaskAsDone(taskId);
+        await repositories.task.unmarkTaskAsDone(taskId);
       } else {
-        await taskService.markTaskAsDone(taskId, user.id);
+        await repositories.task.markTaskAsDone(taskId, user.id);
       }
       await refreshTasks();
     } catch (err) {
@@ -125,10 +125,10 @@ const TaskManager = () => {
   // Update an existing task
   const handleUpdateTask = async (updatedTask: Task) => {
     try {
-      await taskService.updateTask(updatedTask.taskId, {
-        title: updatedTask.title,
+      await repositories.task.updateTask(updatedTask.taskId, {
+        title: updatedTask.title || "",
         description: updatedTask.description,
-        scheduledAt: updatedTask.scheduledAt,
+        scheduledAt: updatedTask.scheduledAt || "",
         categoryId: updatedTask.categoryId,
       });
       await refreshTasks();
@@ -142,7 +142,7 @@ const TaskManager = () => {
   // Delete a task
   const handleDeleteTask = async (taskId: string) => {
     try {
-      await taskService.deleteTask(taskId);
+      await repositories.task.deleteTask(taskId);
       await refreshTasks();
       if (selectedTask?.taskId === taskId) {
         setSelectedTask(null);

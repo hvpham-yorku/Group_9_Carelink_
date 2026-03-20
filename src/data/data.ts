@@ -5,6 +5,8 @@ import type {
   Category,
 } from "../types/teams";
 
+import type { Task, TaskLogEntry } from "../types/task";
+
 // patient ids
 const patientId1 = crypto.randomUUID();
 const patientId2 = crypto.randomUUID();
@@ -16,6 +18,14 @@ const caregiverId3 = crypto.randomUUID();
 
 // care team id
 const careTeamId1 = crypto.randomUUID();
+
+// category ids
+const categoryId1 = crypto.randomUUID();
+const categoryId2 = crypto.randomUUID();
+
+/*
+  Team Related Data
+*/
 
 export let teamPatients: PatientInfo[] = [
   {
@@ -95,11 +105,67 @@ export let careTeams: CaregiverTeam[] = [
 
 export let categories: Category[] = [
   {
-    categoryId: crypto.randomUUID(),
+    categoryId: categoryId1,
     name: "Medication",
   },
   {
-    categoryId: crypto.randomUUID(),
+    categoryId: categoryId2,
     name: "Appointments",
+  },
+];
+
+/*
+  Task Related Data
+*/
+
+export let tasks: Task[] = [
+  {
+    taskId: crypto.randomUUID(),
+    patientId: patientId1,
+    title: "Take Medication",
+    description: "Take prescribed medication at the scheduled time.",
+    categories: { name: "Medication" },
+    scheduledAt: new Date().toISOString(),
+  },
+  {
+    taskId: crypto.randomUUID(),
+    patientId: patientId1,
+    title: "Doctor's Appointment",
+    description: "Visit Dr. Smith for a routine check-up.",
+    categories: { name: "Appointments" },
+    scheduledAt: new Date().toISOString(),
+  },
+  {
+    taskId: crypto.randomUUID(),
+    patientId: patientId2,
+    title: "Take Blood Pressure",
+    description: "Measure blood pressure daily and log the readings.",
+    categories: { name: "Medication" },
+    scheduledAt: new Date().toISOString(),
+  },
+  {
+    taskId: crypto.randomUUID(),
+    patientId: patientId2,
+    title: "Physical Therapy",
+    description: "Attend physical therapy sessions twice a week.",
+    categories: { name: "Appointments" },
+    scheduledAt: new Date().toISOString(),
+  },
+];
+
+export let taskLogs: TaskLogEntry[] = [
+  {
+    taskId: tasks[0].taskId,
+    caregiverId: caregiverId1,
+    completedAt: new Date().toISOString(),
+    isCompleted: true,
+    caregivers: { firstName: "Alice", lastName: "Johnson" },
+  },
+  {
+    taskId: tasks[2].taskId,
+    caregiverId: caregiverId2,
+    completedAt: new Date().toISOString(),
+    isCompleted: true,
+    caregivers: { firstName: "Bob", lastName: "Williams" },
   },
 ];

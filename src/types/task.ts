@@ -4,9 +4,10 @@
 
 export interface Task {
   taskId: string;
-  categoryId: string;
+  categoryId?: string;
+  patientId?: string;
   title: string | null;
-  description: string | null;
+  description?: string | null;
   scheduledAt: string | null;
 
   // Supabase Join

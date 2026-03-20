@@ -23,7 +23,7 @@ export class ApiTaskRepo implements TaskRepo {
                 )
             `,
       )
-      .eq("patientId", patientId)
+      .eq("patient_id", patientId)
       .order("completed_at", { foreignTable: "task_logs", ascending: false });
 
     if (error) throw error;
@@ -48,6 +48,23 @@ export class ApiTaskRepo implements TaskRepo {
     }));
 
     return formattedData;
+  }
+
+  async getCategories(
+    careTeamId: string,
+  ): Promise<{ categoryId: string; name: string }[]> {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("category_id, name")
+      .eq("team_id", careTeamId)
+      .order("name", { ascending: true });
+
+    if (error) throw error;
+
+    return data.map((item) => ({
+      categoryId: item.category_id,
+      name: item.name,
+    }));
   }
 
   async addTask(task: NewTask): Promise<Task> {

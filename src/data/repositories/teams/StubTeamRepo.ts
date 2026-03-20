@@ -1,6 +1,9 @@
 import type { TeamRepo, NewPatientData } from "./TeamRepo";
-import type { CaregiverInfo, PatientInfo } from "../../../types/teams";
-import type { Category } from "../../../types/Types";
+import type {
+  CaregiverInfo,
+  PatientInfo,
+  Category,
+} from "../../../types/teams";
 
 import { careTeams, teamPatients, categories } from "../../data";
 
