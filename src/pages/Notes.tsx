@@ -33,6 +33,9 @@ export default function Notes() {
   const [savedFlash, setSavedFlash] = useState(false);
   const saveTimerRef = useRef<number | null>(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategoryId, setFilterCategoryId] = useState("");
+
   const selectedNote = useMemo(
     () => notes.find((note) => note.noteId === selectedId) ?? null,
     [notes, selectedId]
@@ -91,10 +94,40 @@ export default function Notes() {
     };
   }, []);
 
+  const filteredNotes = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    return notes.filter((note) => {
+      const matchesCategory =
+        !filterCategoryId || note.categoryId === filterCategoryId;
+
+      if (!matchesCategory) return false;
+
+      if (!normalizedSearch) return true;
+
+      const caregiverFullName = note.caregivers
+        ? `${note.caregivers.firstName} ${note.caregivers.lastName}`.toLowerCase()
+        : "";
+
+      const searchableText = [
+        note.title ?? "",
+        note.description ?? "",
+        note.categories?.name ?? "",
+        note.caregivers?.firstName ?? "",
+        note.caregivers?.lastName ?? "",
+        caregiverFullName,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedSearch);
+    });
+  }, [notes, searchTerm, filterCategoryId]);
+
   const timelineGroups = useMemo(() => {
     const map = new Map<string, Note[]>();
 
-    for (const note of notes) {
+    for (const note of filteredNotes) {
       const key = dayKey(note.createdAt);
       const group = map.get(key) ?? [];
       group.push(note);
@@ -107,7 +140,7 @@ export default function Notes() {
       day: key,
       items: map.get(key) ?? [],
     }));
-  }, [notes]);
+  }, [filteredNotes]);
 
   function flashSaved() {
     setSavedFlash(true);
@@ -189,9 +222,53 @@ export default function Notes() {
         </div>
       ) : (
         <div className="row g-3">
+          <div className="col-12">
+            <div className="card shadow-sm border-0">
+              <div className="card-body">
+                <div className="row g-3">
+                  <div className="col-12 col-lg-8">
+                    <label htmlFor="noteSearch" className="form-label">
+                      Search
+                    </label>
+                    <input
+                      id="noteSearch"
+                      type="text"
+                      className="form-control"
+                      placeholder="Search notes by content or author..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="col-12 col-lg-4">
+                    <label htmlFor="noteTagFilter" className="form-label">
+                      Filter by Tag
+                    </label>
+                    <select
+                      id="noteTagFilter"
+                      className="form-select"
+                      value={filterCategoryId}
+                      onChange={(e) => setFilterCategoryId(e.target.value)}
+                    >
+                      <option value="">All Tags</option>
+                      {categories.map((category) => (
+                        <option
+                          key={category.categoryId}
+                          value={category.categoryId}
+                        >
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="col-12 col-lg-5">
             <CareTimelineContainer
-              notes={notes}
+              notes={filteredNotes}
               timelineGroups={timelineGroups}
               selectedId={selectedId}
               setSelectedId={setSelectedId}
