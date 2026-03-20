@@ -13,6 +13,8 @@ import { noteService } from "../services/noteService";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 
+type TimeFilter = "all" | "today" | "week" | "month" | "year";
+
 export default function Notes() {
   const { user } = useAuth();
   const {
@@ -34,7 +36,8 @@ export default function Notes() {
   const saveTimerRef = useRef<number | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategoryId, setFilterCategoryId] = useState("");
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const selectedNote = useMemo(
     () => notes.find((note) => note.noteId === selectedId) ?? null,
@@ -61,6 +64,7 @@ export default function Notes() {
     if (!selectedPatientId) {
       setNotes([]);
       setSelectedId(null);
+      setIsEditorOpen(false);
       return;
     }
 
@@ -96,12 +100,29 @@ export default function Notes() {
 
   const filteredNotes = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
+    const now = new Date();
 
     return notes.filter((note) => {
-      const matchesCategory =
-        !filterCategoryId || note.categoryId === filterCategoryId;
+      const created = new Date(note.createdAt);
 
-      if (!matchesCategory) return false;
+      const matchesTime = (() => {
+        if (timeFilter === "all") return true;
+
+        if (timeFilter === "today") {
+          return created.toDateString() === now.toDateString();
+        }
+
+        const diffMs = now.getTime() - created.getTime();
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+        if (timeFilter === "week") return diffDays <= 7;
+        if (timeFilter === "month") return diffDays <= 30;
+        if (timeFilter === "year") return diffDays <= 365;
+
+        return true;
+      })();
+
+      if (!matchesTime) return false;
 
       if (!normalizedSearch) return true;
 
@@ -122,7 +143,7 @@ export default function Notes() {
 
       return searchableText.includes(normalizedSearch);
     });
-  }, [notes, searchTerm, filterCategoryId]);
+  }, [notes, searchTerm, timeFilter]);
 
   const timelineGroups = useMemo(() => {
     const map = new Map<string, Note[]>();
@@ -159,6 +180,17 @@ export default function Notes() {
     setTitle("");
     setDescription("");
     setCategoryId(categories[0]?.categoryId ?? "");
+    setIsEditorOpen(true);
+  }
+
+  function handleSelectNote(noteId: string) {
+    setSelectedId(noteId);
+    setIsEditorOpen(true);
+  }
+
+  function handleCloseEditor() {
+    setIsEditorOpen(false);
+    setSelectedId(null);
   }
 
   async function handleSave() {
@@ -192,6 +224,8 @@ export default function Notes() {
       }
 
       flashSaved();
+      setIsEditorOpen(false);
+      setSelectedId(null);
     } catch (err) {
       console.error("Failed to save note:", err);
     }
@@ -203,7 +237,8 @@ export default function Notes() {
       setNotes((prev) => prev.filter((note) => note.noteId !== noteId));
 
       if (selectedId === noteId) {
-        handleNew();
+        setSelectedId(null);
+        setIsEditorOpen(false);
       }
     } catch (err) {
       console.error("Failed to delete note:", err);
@@ -221,80 +256,78 @@ export default function Notes() {
           No patient selected. Please select a patient from the sidebar.
         </div>
       ) : (
-        <div className="row g-3">
-          <div className="col-12">
-            <div className="card shadow-sm border-0">
-              <div className="card-body">
-                <div className="row g-3">
-                  <div className="col-12 col-lg-8">
-                    <label htmlFor="noteSearch" className="form-label">
-                      Search
-                    </label>
-                    <input
-                      id="noteSearch"
-                      type="text"
-                      className="form-control"
-                      placeholder="Search notes by content or author..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
+        <>
+          <div className="row g-3 mb-3">
+            <div className="col-12">
+              <div className="card shadow-sm border-0">
+                <div className="card-body">
+                  <div className="row g-3">
+                    <div className="col-12 col-lg-8">
+                      <label htmlFor="noteSearch" className="form-label">
+                        Search
+                      </label>
+                      <input
+                        id="noteSearch"
+                        type="text"
+                        className="form-control"
+                        placeholder="Search notes by content or author..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
 
-                  <div className="col-12 col-lg-4">
-                    <label htmlFor="noteTagFilter" className="form-label">
-                      Filter by Tag
-                    </label>
-                    <select
-                      id="noteTagFilter"
-                      className="form-select"
-                      value={filterCategoryId}
-                      onChange={(e) => setFilterCategoryId(e.target.value)}
-                    >
-                      <option value="">All Tags</option>
-                      {categories.map((category) => (
-                        <option
-                          key={category.categoryId}
-                          value={category.categoryId}
-                        >
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="col-12 col-lg-4">
+                      <label htmlFor="noteTimeFilter" className="form-label">
+                        Filter by Time
+                      </label>
+                      <select
+                        id="noteTimeFilter"
+                        className="form-select"
+                        value={timeFilter}
+                        onChange={(e) => setTimeFilter(e.target.value as TimeFilter)}
+                      >
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">Past Week</option>
+                        <option value="month">Past Month</option>
+                        <option value="year">Past Year</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            <div className="col-12">
+              <CareTimelineContainer
+                notes={filteredNotes}
+                timelineGroups={timelineGroups}
+                selectedId={selectedId}
+                setSelectedId={handleSelectNote}
+                handleDelete={handleDelete}
+                formatDateTime={formatDateTime}
+                formatDayLabel={formatDayLabel}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
 
-          <div className="col-12 col-lg-5">
-            <CareTimelineContainer
-              notes={filteredNotes}
-              timelineGroups={timelineGroups}
-              selectedId={selectedId}
-              setSelectedId={setSelectedId}
-              handleDelete={handleDelete}
-              formatDateTime={formatDateTime}
-              formatDayLabel={formatDayLabel}
-              isLoading={isLoading}
-            />
-          </div>
-
-          <div className="col-12 col-lg-7">
-            <NewNoteContainer
-              selectedNote={selectedNote}
-              formatDateTime={formatDateTime}
-              title={title}
-              description={description}
-              categoryId={categoryId}
-              setTitle={setTitle}
-              setDescription={setDescription}
-              setCategoryId={setCategoryId}
-              handleSave={handleSave}
-              handleDelete={handleDelete}
-              categories={categories}
-            />
-          </div>
-        </div>
+          <NewNoteContainer
+            isOpen={isEditorOpen}
+            onClose={handleCloseEditor}
+            selectedNote={selectedNote}
+            formatDateTime={formatDateTime}
+            title={title}
+            description={description}
+            categoryId={categoryId}
+            setTitle={setTitle}
+            setDescription={setDescription}
+            setCategoryId={setCategoryId}
+            handleSave={handleSave}
+            handleDelete={handleDelete}
+            categories={categories}
+          />
+        </>
       )}
     </div>
   );

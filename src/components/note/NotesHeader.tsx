@@ -1,5 +1,6 @@
 import Button from "../ui/Button";
 import CustomTitleBanner from "../ui/CustomTitleBanner";
+import { StickyNoteIcon } from "lucide-react";
 
 type Props = {
   savedFlash: boolean;
@@ -17,8 +18,11 @@ export default function NotesHeader({ savedFlash, onNew }: Props) {
           <span className="badge text-bg-success px-3 py-2">Saved</span>
         )}
 
-        <Button color="outline-secondary" onClick={onNew}>
-          + New
+        <Button color="primary" onClick={onNew}>
+          <span className="d-inline-flex align-items-center gap-2">
+            <StickyNoteIcon size={18} />
+            New
+          </span>
         </Button>
       </div>
     </CustomTitleBanner>

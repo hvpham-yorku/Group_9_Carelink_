@@ -14,6 +14,7 @@ type Props = {
 
   handleSave: () => void;
   handleDelete: (id: string) => void;
+  onCancel?: () => void;
 
   categories: NoteCategory[];
 };
@@ -28,13 +29,13 @@ export default function NoteForm({
   setCategoryId,
   handleSave,
   handleDelete,
+  onCancel,
   categories,
 }: Props) {
   return (
     <>
-      {/* Title */}
       <div className="mb-3">
-        <label htmlFor="noteTitle" className="form-label">
+        <label htmlFor="noteTitle" className="form-label fw-semibold">
           Title
         </label>
 
@@ -42,15 +43,14 @@ export default function NoteForm({
           id="noteTitle"
           name="noteTitle"
           className="form-control"
-          placeholder="e.g., Doctor visit summary"
+          placeholder="Write a title here..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
       </div>
 
-      {/* Category */}
       <div className="mb-3">
-        <label htmlFor="noteCategory" className="form-label">
+        <label htmlFor="noteCategory" className="form-label fw-semibold">
           Category
         </label>
 
@@ -73,9 +73,8 @@ export default function NoteForm({
         </select>
       </div>
 
-      {/* Description */}
       <div className="mb-3">
-        <label htmlFor="noteDescription" className="form-label">
+        <label htmlFor="noteDescription" className="form-label fw-semibold">
           Content
         </label>
 
@@ -84,26 +83,35 @@ export default function NoteForm({
           name="noteDescription"
           className="form-control"
           rows={10}
-          placeholder="Write your note here…"
+          placeholder="Write your note here..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
-      {/* Actions */}
-      <div className="d-flex justify-content-end align-items-center gap-2">
-        {selectedNote && (
-          <Button
-            color="outline-danger"
-            onClick={() => handleDelete(selectedNote.noteId)}
-          >
-            Delete
-          </Button>
-        )}
+      <div className="d-flex justify-content-between align-items-center gap-2">
+        <div>
+          {selectedNote && (
+            <Button
+              color="outline-danger"
+              onClick={() => handleDelete(selectedNote.noteId)}
+            >
+              Delete
+            </Button>
+          )}
+        </div>
 
-        <Button color="primary" onClick={handleSave}>
-          Save
-        </Button>
+        <div className="d-flex gap-2">
+          {onCancel && (
+            <Button color="outline-secondary" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
+
+          <Button color="primary" onClick={handleSave}>
+            Save
+          </Button>
+        </div>
       </div>
     </>
   );
