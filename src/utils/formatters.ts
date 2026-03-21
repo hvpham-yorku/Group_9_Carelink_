@@ -39,6 +39,19 @@ export const formatToDateTimeLocal = (dateString: string | null): string => {
 };
 
 /**
+ * Converts any parseable date string to the "yyyy-MM-ddThh:mm" format
+ * required by <input type="datetime-local">.
+ * Example: "2026-03-20 3:21 PM" -> "2026-03-20T15:21"
+ */
+export const toDateTimeInputValue = (dateString: string | null): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "";
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+/**
  * Extracts the "YYYY-MM-DD" date key from an ISO string.
  * Example: "2024-05-12T14:30:00Z" -> "2024-05-12"
  */
