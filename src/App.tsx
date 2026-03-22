@@ -27,7 +27,6 @@ function App() {
             <Route path="/landingpage" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/accountsettings" element={<AccountSettings />} />
 
             <Route element={<Layout />}>
               <Route
@@ -79,8 +78,16 @@ function App() {
                 }
               />
             </Route>
-
+            <Route
+                  path="/accountsettings"
+                  element={
+                    <ProtectedRoute>
+                      <AccountSettings />
+                    </ProtectedRoute>
+                  }
+                />
             <Route path="/" element={<Navigate to="/landingpage" replace />} />
+            
           </Routes>
         </PatientProvider>
       </AuthProvider>

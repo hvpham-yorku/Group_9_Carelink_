@@ -7,6 +7,7 @@
 */
 
 import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Context and services
 import { authService } from "../../services/authService";
@@ -17,9 +18,11 @@ interface SideBarProps {
 }
 
 const SideBar = ({ username }: SideBarProps) => {
+
   // Get patient context for the patient switcher dropdown
   const { patients, selectedPatientId, setSelectedPatientId } = usePatient();
-
+  const navigate = useNavigate();
+  
   return (
     <>
       <div
@@ -156,18 +159,19 @@ const SideBar = ({ username }: SideBarProps) => {
             <li>
               <NavLink
                 className="dropdown-item"
-                to="/landingpage"
-                onClick={() => authService.signOut()}
-              >
-                Sign out
-              </NavLink>
-              <NavLink
-                className="dropdown-item"
                 to="/accountsettings"
-                onClick={() => authService.signOut()}
               >
                 Account Settings
               </NavLink>
+              <button 
+              className="dropdown-item text-danger border-0 bg-transparent w-100 text-start"
+              onClick={async () => {
+                navigate("/landingpage");     // Go to landing
+                await authService.signOut(); // Clear session
+              }}
+            >
+              Sign Out
+            </button>
             </li>
           </ul>
         </div>

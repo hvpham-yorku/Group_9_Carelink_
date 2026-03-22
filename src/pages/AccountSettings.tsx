@@ -36,8 +36,11 @@ const AccountSettings = () => {
           
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="fw-bold m-0">Account Settings</h2>
-            <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
-              Back to Dashboard
+            <button 
+            className="btn btn-outline-secondary btn-sm" 
+            onClick={() => navigate(-1)} // This goes back to previous page
+            >
+            Back to dashboard
             </button>
           </div>
 
