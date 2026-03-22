@@ -10,7 +10,6 @@ import LoginText from "../components/login/LoginText";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // Added state
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -65,28 +64,27 @@ const Login = () => {
               />
             </div>
 
-            <div className="input-group">
+            <div className="input-group mb-1">
               <input
-                type={showPassword ? "text" : "password"} // Dynamic type
+                type="password"
                 placeholder="Enter password"
                 className="form-control"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              {/* Toggle Button */}
-              <button 
-                type="button" 
-                className="btn btn-outline-secondary"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="text-end mb-3">
+              <Link to="/forgot-password" style={{ fontSize: "0.875rem", textDecoration: "none" }}>
+                Forgot password?
+              </Link>
             </div>
 
             <button
               type="submit"
-              className="btn btn-primary mt-3 w-100"
+              className="btn btn-primary w-100"
               disabled={loading}
             >
               {loading ? "Signing in..." : "Login"}
