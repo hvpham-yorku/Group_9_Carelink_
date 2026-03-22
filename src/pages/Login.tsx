@@ -1,28 +1,31 @@
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 
-// Auth services
 import { authService } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
 
 import LoginText from "../components/login/LoginText";
-// import LoginTextBox from "../components/login/LoginTextBox";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [capsLockActive, setCapsLockActive] = useState(false);
 
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Redirect if user is already logged in
   useEffect(() => {
     if (user) {
       navigate("/teams");
     }
   }, [user, navigate]);
+
+  const checkCapsLock = (e: React.KeyboardEvent) => {
+    setCapsLockActive(e.getModifierState("CapsLock"));
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +52,24 @@ const Login = () => {
       }}
     >
       <div className="container vh-100 d-flex justify-content-center align-items-center">
-        <div className="col-md-6 col-lg-4 d-flex flex-column gap-3 p-4 shadow rounded">
-          <form onSubmit={handleLogin}>
+        <div className="col-md-6 col-lg-4 d-flex flex-column p-0 shadow rounded bg-white overflow-hidden">
+          
+          <div style={{ height: "6px" }}> 
+            {loading && (
+              <div className="progress rounded-0" style={{ height: "6px", backgroundColor: "#e9ecef" }}>
+                <div 
+                  className="progress-bar progress-bar-striped progress-bar-animated w-100" 
+                  role="progressbar"
+                  style={{ 
+                    backgroundColor: "#0d6efd", 
+                    boxShadow: "0 0 10px rgba(13, 110, 253, 0.5)"
+                  }}
+                ></div>
+              </div>
+            )}
+          </div>
+
+          <form onSubmit={handleLogin} className="p-4 pt-3">
             <LoginText />
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -66,23 +85,46 @@ const Login = () => {
               />
             </div>
 
-            <div className="input-group">
+            <div className="input-group mb-1">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter password"
                 className="form-control"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyUp={checkCapsLock}
+                onKeyDown={checkCapsLock}
                 required
               />
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+
+            <div style={{ minHeight: "25px" }}>
+              {capsLockActive && (
+                <div className="text-warning small mb-2" style={{ fontWeight: 500 }}>
+                  ⚠️ Caps Lock is ON
+                </div>
+              )}
+            </div>
+
+            <div className="text-end mb-3">
+              <Link to="/forgot-password" style={{ fontSize: "0.875rem", textDecoration: "none" }}>
+                Forgot password?
+              </Link>
             </div>
 
             <button
               type="submit"
-              className="btn btn-primary mt-3 w-100"
+              className="btn btn-primary w-100"
               disabled={loading}
             >
-              {loading ? "Signing in..." : "Login"}
+              {loading ? "Authenticating..." : "Login"}
             </button>
 
             <p className="text-center mt-3 mb-0">
