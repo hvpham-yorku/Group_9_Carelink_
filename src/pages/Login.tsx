@@ -6,18 +6,17 @@ import { authService } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
 
 import LoginText from "../components/login/LoginText";
-// import LoginTextBox from "../components/login/LoginTextBox";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // Added state
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Redirect if user is already logged in
   useEffect(() => {
     if (user) {
       navigate("/teams");
@@ -68,13 +67,21 @@ const Login = () => {
 
             <div className="input-group">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"} // Dynamic type
                 placeholder="Enter password"
                 className="form-control"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              {/* Toggle Button */}
+              <button 
+                type="button" 
+                className="btn btn-outline-secondary"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
             </div>
 
             <button
