@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 
-// Auth services
 import { authService } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
 
@@ -55,16 +54,15 @@ const Login = () => {
       <div className="container vh-100 d-flex justify-content-center align-items-center">
         <div className="col-md-6 col-lg-4 d-flex flex-column p-0 shadow rounded bg-white overflow-hidden">
           
-          {/* Enhanced Loading Bar */}
-          <div style={{ height: "6px" }}> {/* Increased height from 4px to 6px */}
+          <div style={{ height: "6px" }}> 
             {loading && (
               <div className="progress rounded-0" style={{ height: "6px", backgroundColor: "#e9ecef" }}>
                 <div 
                   className="progress-bar progress-bar-striped progress-bar-animated w-100" 
                   role="progressbar"
                   style={{ 
-                    backgroundColor: "#0d6efd", // Solid Bootstrap primary blue
-                    boxShadow: "0 0 10px rgba(13, 110, 253, 0.5)" // Added a subtle glow
+                    backgroundColor: "#0d6efd", 
+                    boxShadow: "0 0 10px rgba(13, 110, 253, 0.5)"
                   }}
                 ></div>
               </div>

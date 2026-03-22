@@ -13,13 +13,11 @@ const ForgotPassword = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Pure frontend simulation
     setTimeout(() => {
       setLoading(false);
       if (step === "request") {
         setStep("verify");
       } else {
-        // Success! Redirect to the dashboard
         navigate("/teams");
       }
     }, 1000);
