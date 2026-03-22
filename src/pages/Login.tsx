@@ -10,7 +10,7 @@ import LoginText from "../components/login/LoginText";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // Added back
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [capsLockActive, setCapsLockActive] = useState(false);
@@ -53,8 +53,25 @@ const Login = () => {
       }}
     >
       <div className="container vh-100 d-flex justify-content-center align-items-center">
-        <div className="col-md-6 col-lg-4 d-flex flex-column gap-3 p-4 shadow rounded bg-white">
-          <form onSubmit={handleLogin}>
+        <div className="col-md-6 col-lg-4 d-flex flex-column p-0 shadow rounded bg-white overflow-hidden">
+          
+          {/* Enhanced Loading Bar */}
+          <div style={{ height: "6px" }}> {/* Increased height from 4px to 6px */}
+            {loading && (
+              <div className="progress rounded-0" style={{ height: "6px", backgroundColor: "#e9ecef" }}>
+                <div 
+                  className="progress-bar progress-bar-striped progress-bar-animated w-100" 
+                  role="progressbar"
+                  style={{ 
+                    backgroundColor: "#0d6efd", // Solid Bootstrap primary blue
+                    boxShadow: "0 0 10px rgba(13, 110, 253, 0.5)" // Added a subtle glow
+                  }}
+                ></div>
+              </div>
+            )}
+          </div>
+
+          <form onSubmit={handleLogin} className="p-4 pt-3">
             <LoginText />
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -70,10 +87,9 @@ const Login = () => {
               />
             </div>
 
-            {/* Password Input Group */}
             <div className="input-group mb-1">
               <input
-                type={showPassword ? "text" : "password"} // Dynamic type
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter password"
                 className="form-control"
                 value={password}
@@ -91,8 +107,7 @@ const Login = () => {
               </button>
             </div>
 
-            {/* Caps Lock Warning */}
-            <div style={{ minHeight: "20px" }}> {/* Prevents layout jump */}
+            <div style={{ minHeight: "25px" }}>
               {capsLockActive && (
                 <div className="text-warning small mb-2" style={{ fontWeight: 500 }}>
                   ⚠️ Caps Lock is ON
@@ -111,7 +126,7 @@ const Login = () => {
               className="btn btn-primary w-100"
               disabled={loading}
             >
-              {loading ? "Signing in..." : "Login"}
+              {loading ? "Authenticating..." : "Login"}
             </button>
 
             <p className="text-center mt-3 mb-0">
