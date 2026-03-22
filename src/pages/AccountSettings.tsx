@@ -1,93 +1,174 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AccountSettings = () => {
   const navigate = useNavigate();
 
-  // Simple local state for the UI demo
-  const [firstName, setFirstName] = useState("John");
-  const [lastName, setLastName] = useState("Doe");
-  const [email] = useState("john.doe@example.com"); // Static for now
+  // 1. Local State for all fields (UI Only)
+  const [formData, setFormData] = useState({
+    firstName: "John",
+    lastName: "Doe",
+    username: "jdoe_dev",
+    email: "john.doe@example.com",
+    phoneNumber: "+1 (555) 123-4567",
+    password: "••••••••", // Placeholder text for UI
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  // 2. Handle Input Changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // 3. Simple Submit Handler
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert("Changes saved to local state! (UI Demo)");
+    console.log("Updated Data:", formData);
+  };
 
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
-        <div className="col-md-8 col-lg-6">
+        <div className="col-md-10 col-lg-8">
           
-          {/* Header */}
-          <div className="mb-4">
-            <h2 className="fw-bold">Account Settings</h2>
-            <p className="text-muted">Update your personal information below.</p>
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="fw-bold m-0">Account Settings</h2>
+            <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate(-1)}>
+              Back to Dashboard
+            </button>
           </div>
 
-          {/* Settings Card */}
-          <div className="card shadow-sm border-0 p-4">
-            <form>
-              <div className="row">
+          <form onSubmit={handleSave}>
+            {/* --- SECTION: Personal Information --- */}
+            <div className="card shadow-sm border-0 p-4 mb-4">
+              <h5 className="mb-4 text-primary border-bottom pb-2">Personal Information</h5>
+              
+              <div className="row g-3">
                 {/* First Name */}
-                <div className="col-md-6 mb-3">
-                  <label className="form-label small fw-bold text-uppercase text-muted">First Name</label>
+                <div className="col-md-6">
+                  <label className="form-label small fw-bold text-muted">FIRST NAME</label>
                   <input
                     type="text"
-                    className="form-control form-control-lg"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    name="firstName"
+                    className="form-control"
+                    value={formData.firstName}
+                    onChange={handleChange}
                   />
                 </div>
 
                 {/* Last Name */}
-                <div className="col-md-6 mb-3">
-                  <label className="form-label small fw-bold text-uppercase text-muted">Last Name</label>
+                <div className="col-md-6">
+                  <label className="form-label small fw-bold text-muted">LAST NAME</label>
                   <input
                     type="text"
-                    className="form-control form-control-lg"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    name="lastName"
+                    className="form-control"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Username */}
+                <div className="col-md-6">
+                  <label className="form-label small fw-bold text-muted">USERNAME</label>
+                  <div className="input-group">
+                    <span className="input-group-text bg-light">@</span>
+                    <input
+                      type="text"
+                      name="username"
+                      className="form-control"
+                      value={formData.username}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                {/* Phone Number */}
+                <div className="col-md-6">
+                  <label className="form-label small fw-bold text-muted">PHONE NUMBER</label>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    className="form-control"
+                    placeholder="+1 (000) 000-0000"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
+            </div>
 
-              {/* Email (Read Only) */}
-              <div className="mb-4">
-                <label className="form-label small fw-bold text-uppercase text-muted">Email Address</label>
-                <input
-                  type="email"
-                  className="form-control form-control-lg bg-light"
-                  value={email}
-                  readOnly
-                  disabled
-                />
-                <div className="form-text">Contact support to change your verified email.</div>
+            {/* --- SECTION: Account Security --- */}
+            <div className="card shadow-sm border-0 p-4 mb-4">
+              <h5 className="mb-4 text-primary border-bottom pb-2">Account Security</h5>
+              
+              <div className="row g-3">
+                {/* Email (Read Only) */}
+                <div className="col-12">
+                  <label className="form-label small fw-bold text-muted">EMAIL ADDRESS</label>
+                  <input
+                    type="email"
+                    className="form-control bg-light"
+                    value={formData.email}
+                    disabled
+                    readOnly
+                  />
+                  <div className="form-text">Verified email cannot be changed.</div>
+                </div>
+
+                {/* Password Field */}
+                <div className="col-12">
+                  <label className="form-label small fw-bold text-muted">PASSWORD</label>
+                  <div className="input-group">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      className="form-control"
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                    <button 
+                      className="btn btn-outline-secondary" 
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <hr className="my-4 text-secondary opacity-25" />
+            {/* --- ACTIONS --- */}
+            <div className="d-flex justify-content-end gap-3 mt-4">
+              <button type="button" className="btn btn-light border px-4" onClick={() => navigate(-1)}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary px-5 shadow-sm">
+                Save Changes
+              </button>
+            </div>
+          </form>
 
-              {/* Action Buttons */}
-              <div className="d-flex justify-content-end gap-2">
-                <button 
-                  type="button" 
-                  className="btn btn-outline-secondary px-4"
-                  onClick={() => navigate(-1)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="button" 
-                  className="btn btn-primary px-4"
-                  onClick={() => alert("UI Demo: Changes would be saved here!")}
-                >
-                  Save Changes
-                </button>
+          {/* --- DANGER ZONE --- */}
+          <div className="mt-5 pt-4 border-top">
+            <div className="alert alert-light border d-flex justify-content-between align-items-center">
+              <div>
+                <h6 className="fw-bold text-danger mb-1">Delete Account</h6>
+                <p className="small text-muted mb-0">Once you delete your account, there is no going back. Please be certain.</p>
               </div>
-            </form>
+              <button 
+                className="btn btn-outline-danger"
+                onClick={() => window.confirm("Are you absolutely sure?")}
+              >
+                Delete Account
+              </button>
+            </div>
           </div>
 
-          {/* Danger Zone Placeholder (Great for future stories) */}
-          <div className="mt-5 pt-3 border-top">
-            <h5 className="text-danger">Danger Zone</h5>
-            <button className="btn btn-outline-danger btn-sm mt-2">Delete Account</button>
-          </div>
-          
         </div>
       </div>
     </div>
