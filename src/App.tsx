@@ -16,6 +16,7 @@ import SignUp from "./pages/SignUp";
 import Layout from "./components/Layout";
 import Notes from "./pages/Notes";
 import LandingPage from "./pages/LandingPage";
+import AccountSettings from "./pages/AccountSettings";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/landingpage" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/accountsettings" element={<AccountSettings />} />
 
             <Route element={<Layout />}>
               <Route
