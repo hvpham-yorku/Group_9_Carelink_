@@ -161,6 +161,13 @@ const SideBar = ({ username }: SideBarProps) => {
               >
                 Sign out
               </NavLink>
+              <NavLink
+                className="dropdown-item"
+                to="/accountsettings"
+                onClick={() => authService.signOut()}
+              >
+                Account Settings
+              </NavLink>
             </li>
           </ul>
         </div>
