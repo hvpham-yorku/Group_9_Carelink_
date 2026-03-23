@@ -17,7 +17,14 @@ import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 import type { MedicationScheduleItemProps } from "../types/Types";
 
-type Prescription = Omit<MedicationScheduleItemProps, "onToggle">;
+type Prescription = Omit<MedicationScheduleItemProps, "onToggle"> & {
+  // PREP FOR FUTURE DB
+  purpose?: string;
+  instructions?: string;
+  warnings?: string;
+  prescribedBy?: string;
+  startDate?: string;
+};
 
 const MedicationTracker = () => {
   const { user } = useAuth();
@@ -30,15 +37,15 @@ const MedicationTracker = () => {
   >(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMedication, setEditingMedication] = useState<Prescription | null>(
-    null,
-  );
+  const [editingMedication, setEditingMedication] =
+    useState<Prescription | null>(null);
 
   const fetchPrescriptions = async (patientId: string) => {
     setLoadingMeds(true);
 
     try {
-      const data = await medicationService.getPrescriptionsByPatient(patientId);
+      const data =
+        await medicationService.getPrescriptionsByPatient(patientId);
 
       const mapped: Prescription[] = (data ?? []).map((row: any) => {
         const activeLog =
@@ -55,6 +62,14 @@ const MedicationTracker = () => {
           frequency: row.frequency ?? "",
           scheduledAt: row.scheduledAt ?? "",
           isActive: row.isActive ?? true,
+
+          // PREP FIELDS (safe even if DB doesn't send yet)
+          purpose: row.purpose ?? "",
+          instructions: row.instructions ?? "",
+          warnings: row.warnings ?? "",
+          prescribedBy: row.prescribedBy ?? "",
+          startDate: row.startDate ?? "",
+
           medicationLog: activeLog
             ? {
                 caregiverId: activeLog.caregiverId,
@@ -122,7 +137,8 @@ const MedicationTracker = () => {
 
   const handleEditMedication = (prescriptionId: string) => {
     const medicationToEdit =
-      prescriptions.find((med) => med.prescriptionId === prescriptionId) ?? null;
+      prescriptions.find((med) => med.prescriptionId === prescriptionId) ??
+      null;
 
     setEditingMedication(medicationToEdit);
     setIsModalOpen(true);
@@ -203,22 +219,33 @@ const MedicationTracker = () => {
     }
   };
 
-  const takenCount = prescriptions.filter(
+  // separate data layers
+  const activeMedications = useMemo(() => {
+    return prescriptions.filter((p) => p.isActive);
+  }, [prescriptions]);
+
+  const todaySchedule = useMemo(() => {
+    return prescriptions.filter((p) => p.isActive);
+  }, [prescriptions]);
+
+  // UPDATED STATS
+  const takenCount = activeMedications.filter(
     (p) => p.medicationLog?.isCompleted,
   ).length;
 
-  const totalCount = prescriptions.length;
+  const totalCount = activeMedications.length;
   const remainingCount = totalCount - takenCount;
   const adherencePercentage =
     totalCount > 0 ? Math.round((takenCount / totalCount) * 100) : 0;
 
+  // safer selection
   const selectedMedication = useMemo(() => {
     return (
-      prescriptions.find(
+      activeMedications.find(
         (item) => item.prescriptionId === selectedPrescriptionId,
       ) ?? null
     );
-  }, [prescriptions, selectedPrescriptionId]);
+  }, [activeMedications, selectedPrescriptionId]);
 
   const isLoading = contextLoading || loadingMeds;
 
@@ -289,12 +316,12 @@ const MedicationTracker = () => {
               >
                 {isLoading ? (
                   <div className="text-muted">Loading medications…</div>
-                ) : prescriptions.length === 0 ? (
+                ) : todaySchedule.length === 0 ? (
                   <div className="text-muted">
                     No active prescriptions found for this patient.
                   </div>
                 ) : (
-                  prescriptions.map((med) => (
+                  todaySchedule.map((med) => (
                     <MedicationScheduleItem
                       key={med.prescriptionId}
                       {...med}
@@ -313,13 +340,13 @@ const MedicationTracker = () => {
                 >
                   {isLoading ? (
                     <div className="text-muted">Loading medications…</div>
-                  ) : prescriptions.length === 0 ? (
+                  ) : activeMedications.length === 0 ? (
                     <div className="text-muted">
                       No medications available to display.
                     </div>
                   ) : (
                     <div className="d-flex flex-column gap-3">
-                      {prescriptions.map((med) => (
+                      {activeMedications.map((med) => (
                         <ActiveMedicationCard
                           key={med.prescriptionId}
                           name={med.name}
@@ -332,7 +359,9 @@ const MedicationTracker = () => {
                           onClick={() =>
                             setSelectedPrescriptionId(med.prescriptionId)
                           }
-                          onEdit={() => handleEditMedication(med.prescriptionId)}
+                          onEdit={() =>
+                            handleEditMedication(med.prescriptionId)
+                          }
                         />
                       ))}
                     </div>
