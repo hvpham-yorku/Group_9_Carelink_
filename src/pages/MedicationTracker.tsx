@@ -149,12 +149,7 @@ const MedicationTracker = () => {
     setEditingMedication(null);
   };
 
-  const handleSaveMedication = async (data: {
-    name: string;
-    dosage: string;
-    frequency: string;
-    scheduledAt: string;
-  }) => {
+  const handleSaveMedication = async (data: any) => {
     if (!selectedPatientId) return;
 
     try {

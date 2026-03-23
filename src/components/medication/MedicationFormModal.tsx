@@ -9,6 +9,11 @@ interface MedicationFormModalProps {
     dosage: string;
     frequency: string;
     scheduledAt: string;
+    purpose: string;
+    instructions: string;
+    prescribedBy: string;
+    warnings: string;
+    startDate: string;
   }) => void;
 
   initialData?: {
@@ -16,6 +21,11 @@ interface MedicationFormModalProps {
     dosage: string;
     frequency: string;
     scheduledAt: string;
+    purpose?: string;
+    instructions?: string;
+    prescribedBy?: string;
+    warnings?: string;
+    startDate?: string;
   };
 }
 
@@ -30,11 +40,23 @@ const MedicationFormModal = ({
   const [frequency, setFrequency] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
 
+  const [purpose, setPurpose] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [prescribedBy, setPrescribedBy] = useState("");
+  const [warnings, setWarnings] = useState("");
+  const [startDate, setStartDate] = useState("");
+
   useEffect(() => {
     if (isOpen) {
       setName(initialData?.name ?? "");
       setDosage(initialData?.dosage ?? "");
       setFrequency(initialData?.frequency ?? "");
+
+      setPurpose(initialData?.purpose ?? "");
+      setInstructions(initialData?.instructions ?? "");
+      setPrescribedBy(initialData?.prescribedBy ?? "");
+      setWarnings(initialData?.warnings ?? "");
+      setStartDate(initialData?.startDate ?? "");
 
       if (initialData?.scheduledAt) {
         const date = new Date(initialData.scheduledAt);
@@ -63,6 +85,11 @@ const MedicationFormModal = ({
       dosage: dosage.trim(),
       frequency: frequency.trim(),
       scheduledAt,
+      purpose: purpose.trim(),
+      instructions: instructions.trim(),
+      prescribedBy: prescribedBy.trim(),
+      warnings: warnings.trim(),
+      startDate,
     });
   };
 
@@ -71,7 +98,7 @@ const MedicationFormModal = ({
       className="modal fade show"
       style={{ display: "block", background: "rgba(0,0,0,0.5)" }}
     >
-      <div className="modal-dialog modal-dialog-centered">
+      <div className="modal-dialog modal-dialog-centered modal-lg">
         <div
           className="modal-content"
           style={{ borderRadius: "18px", overflow: "hidden" }}
@@ -90,34 +117,34 @@ const MedicationFormModal = ({
           </div>
 
           <div className="modal-body d-flex flex-column gap-3">
+            {/* BASIC */}
             <div>
               <label className="form-label">Medication Name</label>
               <input
                 className="form-control"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Enter medication name"
               />
             </div>
 
-            <div>
-              <label className="form-label">Dosage</label>
-              <input
-                className="form-control"
-                value={dosage}
-                onChange={(e) => setDosage(e.target.value)}
-                placeholder="Example: 500mg"
-              />
-            </div>
+            <div className="row">
+              <div className="col">
+                <label className="form-label">Dosage</label>
+                <input
+                  className="form-control"
+                  value={dosage}
+                  onChange={(e) => setDosage(e.target.value)}
+                />
+              </div>
 
-            <div>
-              <label className="form-label">Frequency</label>
-              <input
-                className="form-control"
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-                placeholder="Example: Twice daily"
-              />
+              <div className="col">
+                <label className="form-label">Frequency</label>
+                <input
+                  className="form-control"
+                  value={frequency}
+                  onChange={(e) => setFrequency(e.target.value)}
+                />
+              </div>
             </div>
 
             <div>
@@ -129,6 +156,53 @@ const MedicationFormModal = ({
                 onChange={(e) => setScheduledAt(e.target.value)}
               />
             </div>
+
+            {/* NEW FIELDS */}
+            <div>
+              <label className="form-label">Purpose</label>
+              <textarea
+                className="form-control"
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="form-label">Instructions</label>
+              <textarea
+                className="form-control"
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="form-label">Prescribed By</label>
+              <input
+                className="form-control"
+                value={prescribedBy}
+                onChange={(e) => setPrescribedBy(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="form-label">Start Date</label>
+              <input
+                type="date"
+                className="form-control"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="form-label">Warnings</label>
+              <textarea
+                className="form-control"
+                value={warnings}
+                onChange={(e) => setWarnings(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="modal-footer">
@@ -136,10 +210,7 @@ const MedicationFormModal = ({
               Cancel
             </Button>
 
-            <Button
-              color="primary"
-              onClick={handleSubmit}
-            >
+            <Button color="primary" onClick={handleSubmit}>
               Save Medication
             </Button>
           </div>
