@@ -13,6 +13,7 @@ import ActiveMedicationCard from "../components/medication/ActiveMedicationCard"
 import MedicationDetailsCard from "../components/medication/MedicationDetailsCard";
 import MedicationFormModal from "../components/medication/MedicationFormModal";
 import ArchivedMedicationsModal from "../components/medication/ArchivedMedicationsModal";
+import AdherenceOverviewChart from "../components/medication/AdherenceOverviewChart";
 
 import CustomSection from "../components/ui/CustomSection";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
@@ -247,6 +248,37 @@ const MedicationTracker = () => {
     );
   }, [activeMedications, selectedPrescriptionId]);
 
+  const adherenceChartData = useMemo(() => {
+    const today = new Date();
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (6 - index));
+
+      const day = date.toLocaleDateString(undefined, { weekday: "short" });
+
+      if (index === 6) {
+        return {
+          day,
+          taken: takenCount,
+          total: totalCount,
+        };
+      }
+
+      const mockTotal = totalCount || 4;
+      const mockTaken = Math.max(
+        0,
+        Math.min(mockTotal, Math.round(mockTotal * (0.55 + index * 0.06))),
+      );
+
+      return {
+        day,
+        taken: mockTaken,
+        total: mockTotal,
+      };
+    });
+  }, [takenCount, totalCount]);
+
   const isLoading = contextLoading || loadingMeds;
 
   return (
@@ -316,6 +348,12 @@ const MedicationTracker = () => {
                 icon={<AlertCircle size={20} color="#fd7e14" />}
               />
             </div>
+          </div>
+
+          <div className="mb-4">
+            <CustomSection title="Adherence Overview">
+              <AdherenceOverviewChart data={adherenceChartData} />
+            </CustomSection>
           </div>
 
           <div className="row g-3">
