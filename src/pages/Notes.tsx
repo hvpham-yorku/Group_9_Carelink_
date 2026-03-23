@@ -1,3 +1,4 @@
+// ===== IMPORTS =====
 import { useEffect, useMemo, useRef, useState } from "react";
 import NotesHeader from "../components/note/NotesHeader";
 import CareTimelineContainer from "../components/note/CareTimelineContainer";
@@ -13,9 +14,12 @@ import { noteService } from "../services/noteService";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 
+// ===== TYPES =====
 type TimeFilter = "all" | "today" | "week" | "month" | "year";
 
+// ===== COMPONENT =====
 export default function Notes() {
+  // ===== CONTEXT =====
   const { user } = useAuth();
   const {
     selectedPatientId,
@@ -23,15 +27,18 @@ export default function Notes() {
     loading: contextLoading,
   } = usePatient();
 
+  // ===== STATE: DATA =====
   const [notes, setNotes] = useState<Note[]>([]);
   const [categories, setCategories] = useState<NoteCategory[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // ===== STATE: FORM =====
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
 
+  // ===== STATE: UI =====
   const [savedFlash, setSavedFlash] = useState(false);
   const saveTimerRef = useRef<number | null>(null);
 
@@ -39,11 +46,13 @@ export default function Notes() {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
+  // ===== DERIVED STATE =====
   const selectedNote = useMemo(
     () => notes.find((note) => note.noteId === selectedId) ?? null,
     [notes, selectedId]
   );
 
+  // ===== FETCH: CATEGORIES =====
   useEffect(() => {
     if (!careTeamId) return;
 
@@ -60,6 +69,7 @@ export default function Notes() {
       .catch((err: unknown) => console.error("Failed to load categories:", err));
   }, [careTeamId]);
 
+  // ===== FETCH: NOTES =====
   useEffect(() => {
     if (!selectedPatientId) {
       setNotes([]);
@@ -77,6 +87,7 @@ export default function Notes() {
       .finally(() => setLoadingNotes(false));
   }, [selectedPatientId]);
 
+  // ===== SYNC FORM WITH SELECTED NOTE =====
   useEffect(() => {
     if (!selectedNote) {
       setTitle("");
@@ -90,6 +101,7 @@ export default function Notes() {
     setCategoryId(selectedNote.categoryId ?? categories[0]?.categoryId ?? "");
   }, [selectedNote, categories]);
 
+  // ===== CLEANUP =====
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) {
@@ -98,6 +110,7 @@ export default function Notes() {
     };
   }, []);
 
+  // ===== FILTER LOGIC =====
   const filteredNotes = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const now = new Date();
@@ -145,6 +158,7 @@ export default function Notes() {
     });
   }, [notes, searchTerm, timeFilter]);
 
+  // ===== TIMELINE GROUPING =====
   const timelineGroups = useMemo(() => {
     const map = new Map<string, Note[]>();
 
@@ -163,6 +177,7 @@ export default function Notes() {
     }));
   }, [filteredNotes]);
 
+  // ===== HELPERS =====
   function flashSaved() {
     setSavedFlash(true);
 
@@ -175,6 +190,7 @@ export default function Notes() {
     }, 3000);
   }
 
+  // ===== ACTIONS =====
   function handleNew() {
     setSelectedId(null);
     setTitle("");
@@ -249,6 +265,7 @@ export default function Notes() {
 
   return (
     <div className="container py-3">
+      {/* ===== HEADER ===== */}
       <NotesHeader savedFlash={savedFlash} onNew={handleNew} />
 
       {!selectedPatientId && !contextLoading ? (
@@ -258,12 +275,41 @@ export default function Notes() {
       ) : (
         <>
           <div className="row g-3 mb-3">
+
+            {/* ===== STATS CARD: TODAY ===== */}
+            <div className="col-12">
+              <div className="row g-3">
+                <div className="col-12 col-md-3">
+                  <div
+                    className="card shadow-sm border-0 h-100"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setTimeFilter("today")}
+                  >
+                    <div className="card-body">
+                      <div className="text-muted small">Today's Notes</div>
+                      <div className="fs-4 fw-bold">
+                        {
+                          notes.filter(
+                            (n) =>
+                              new Date(n.createdAt).toDateString() ===
+                              new Date().toDateString()
+                          ).length
+                        }
+                      </div>
+                      <div className="text-muted small">Current day</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ===== SEARCH + FILTER ===== */}
             <div className="col-12">
               <div className="card shadow-sm border-0">
                 <div className="card-body">
                   <div className="row g-3">
                     <div className="col-12 col-lg-8">
-                      <label htmlFor="noteSearch" className="form-label">
+                      <label htmlFor="noteSearch" className="form-label fw-semibold">
                         Search
                       </label>
                       <input
@@ -277,8 +323,8 @@ export default function Notes() {
                     </div>
 
                     <div className="col-12 col-lg-4">
-                      <label htmlFor="noteTimeFilter" className="form-label">
-                        Filter by Time
+                      <label htmlFor="noteTimeFilter" className="form-label fw-semibold">
+                        Filter
                       </label>
                       <select
                         id="noteTimeFilter"
@@ -298,6 +344,7 @@ export default function Notes() {
               </div>
             </div>
 
+            {/* ===== TIMELINE ===== */}
             <div className="col-12">
               <CareTimelineContainer
                 notes={filteredNotes}
@@ -312,6 +359,7 @@ export default function Notes() {
             </div>
           </div>
 
+          {/* ===== MODAL EDITOR ===== */}
           <NewNoteContainer
             isOpen={isEditorOpen}
             onClose={handleCloseEditor}
