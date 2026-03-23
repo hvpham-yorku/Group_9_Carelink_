@@ -1,8 +1,13 @@
-import { formatToTime } from "../../utils/formatters";
 import type { MedicationScheduleItemProps } from "../../types/Types";
 import Button from "../ui/Button";
 
-type Prescription = Omit<MedicationScheduleItemProps, "onToggle">;
+type Prescription = Omit<MedicationScheduleItemProps, "onToggle"> & {
+  purpose?: string;
+  instructions?: string;
+  warnings?: string;
+  prescribedBy?: string;
+  startDate?: string;
+};
 
 interface MedicationDetailsCardProps {
   medication: Prescription | null;
@@ -22,16 +27,11 @@ const MedicationDetailsCard = ({
   }
 
   return (
-    <div className="d-flex flex-column gap-3">
+    <div className="d-flex flex-column gap-4">
       <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
         <div>
-          <p
-            className="text-muted mb-1"
-            style={{ fontSize: "0.82rem", fontWeight: 600 }}
-          >
-            Medication
-          </p>
-          <div className="fw-semibold">{medication.name}</div>
+          <p className="text-muted mb-1 small fw-semibold">Medication</p>
+          <div className="fw-semibold fs-5">{medication.name}</div>
         </div>
 
         {onArchive && (
@@ -43,68 +43,63 @@ const MedicationDetailsCard = ({
 
       <div className="row g-3">
         <div className="col-6">
-          <p
-            className="text-muted mb-1"
-            style={{ fontSize: "0.82rem", fontWeight: 600 }}
-          >
-            Dosage
-          </p>
+          <p className="text-muted mb-1 small fw-semibold">Dosage</p>
           <div>{medication.dosage || "Not available"}</div>
         </div>
 
         <div className="col-6">
-          <p
-            className="text-muted mb-1"
-            style={{ fontSize: "0.82rem", fontWeight: 600 }}
-          >
-            Frequency
-          </p>
+          <p className="text-muted mb-1 small fw-semibold">Frequency</p>
           <div>{medication.frequency || "Not available"}</div>
         </div>
       </div>
 
       <div>
-        <p
-          className="text-muted mb-1"
-          style={{ fontSize: "0.82rem", fontWeight: 600 }}
-        >
-          Scheduled Time
-        </p>
+        <p className="text-muted mb-1 small fw-semibold">Scheduled Times</p>
+
+        {medication.scheduledAt ? (
+          <div className="d-flex flex-wrap gap-2">
+            {medication.scheduledAt.split(",").map((time, index) => (
+              <span
+                key={index}
+                className="badge rounded-pill"
+                style={{
+                  backgroundColor: "#f1f3f5",
+                  color: "#495057",
+                  padding: "0.5rem 0.75rem",
+                  fontSize: "0.8rem",
+                }}
+              >
+                {time.trim()}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div>Not available</div>
+        )}
+      </div>
+
+      <div>
+        <p className="text-muted mb-1 small fw-semibold">Start Date</p>
         <div>
-          {medication.scheduledAt
-            ? formatToTime(medication.scheduledAt)
+          {medication.startDate
+            ? new Date(medication.startDate).toLocaleDateString()
             : "Not available"}
         </div>
       </div>
 
       <div>
-        <p
-          className="text-muted mb-1"
-          style={{ fontSize: "0.82rem", fontWeight: 600 }}
-        >
-          Purpose
-        </p>
-        <div className="text-muted">Not available</div>
+        <p className="text-muted mb-1 small fw-semibold">Purpose</p>
+        <div>{medication.purpose || "No purpose provided"}</div>
       </div>
 
       <div>
-        <p
-          className="text-muted mb-1"
-          style={{ fontSize: "0.82rem", fontWeight: 600 }}
-        >
-          Instructions
-        </p>
-        <div className="text-muted">Not available</div>
+        <p className="text-muted mb-1 small fw-semibold">Instructions</p>
+        <div>{medication.instructions || "No instructions provided"}</div>
       </div>
 
       <div>
-        <p
-          className="text-muted mb-1"
-          style={{ fontSize: "0.82rem", fontWeight: 600 }}
-        >
-          Prescribed By
-        </p>
-        <div className="text-muted">Not available</div>
+        <p className="text-muted mb-1 small fw-semibold">Prescribed By</p>
+        <div>{medication.prescribedBy || "Not available"}</div>
       </div>
 
       <div
@@ -117,17 +112,13 @@ const MedicationDetailsCard = ({
       >
         <p
           className="mb-1"
-          style={{
-            fontSize: "0.85rem",
-            fontWeight: 600,
-            color: "#997404",
-          }}
+          style={{ fontSize: "0.85rem", fontWeight: 600, color: "#997404" }}
         >
           Warnings
         </p>
 
         <div style={{ fontSize: "0.92rem", color: "#6c5b00" }}>
-          None listed
+          {medication.warnings || "No warnings provided"}
         </div>
       </div>
     </div>
