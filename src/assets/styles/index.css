@@ -1,40 +1,48 @@
-/* Navbar Active Patient dropdown styling */
+/* NAVBAR SELECT (UPDATED FOR WHITE NAVBAR) */
+
 .navbar-select {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: none;
+  background-color: #ffffff;
+  color: #111827;
+  border: 1px solid #D1D5DB;
+  border-radius: 10px;
 }
 
 .navbar-select:focus {
-  box-shadow: none;
-  border: none;
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+  border-color: #93C5FD;
 }
 
 .navbar-select option {
   color: black;
 }
 
-/* NAVBAR DROPDOWN */
+/* NAVBAR LINK STATES */
 
-.navbar-select {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: none;
+.inactive-nav-link {
+  color: #6B7280 !important;
+  transition: all 0.2s ease;
 }
 
-.navbar-select:focus {
-  box-shadow: none;
-  border: none;
+.inactive-nav-link:hover {
+  color: #2563EB !important;
+  background-color: #EFF6FF;
+  border-radius: 8px;
 }
 
-.navbar-select option {
-  color: black;
+.active-nav-link {
+  color: #2563EB !important;
+  background-color: #DBEAFE;
+  border-radius: 8px;
 }
 
-/* NAVBAR LINK HOVER */
+/* NAV ITEM SPACING */
 
-.nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
+.nav-item {
+  margin: 0 6px;
+}
+
+/* BUTTON HOVER */
+
+.btn-primary:hover {
+  background-color: #1D4ED8 !important;
 }
