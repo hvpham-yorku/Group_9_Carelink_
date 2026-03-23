@@ -13,20 +13,8 @@ const AdherenceOverviewChart = ({
 }: AdherenceOverviewChartProps) => {
   const maxTotal = Math.max(...data.map((item) => item.total), 1);
 
-  return (
-    <div className="d-flex flex-column gap-3">
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-          <div className="fw-semibold">7-Day Adherence Overview</div>
-          <div className="text-muted" style={{ fontSize: "0.92rem" }}>
-            Daily medication completion trends
-          </div>
-        </div>
-
-        <div className="text-muted" style={{ fontSize: "0.88rem" }}>
-          Last 7 days
-        </div>
-      </div>
+return (
+  <div className="d-flex flex-column gap-3">
 
       <div className="row g-3">
         {data.map((item) => {

@@ -162,12 +162,6 @@ const MedicationTracker = () => {
     if (!selectedPatientId) return;
 
     try {
-      let formattedScheduledAt: string | undefined = undefined;
-
-      if (data.scheduledAt) {
-        formattedScheduledAt = data.scheduledAt;
-      }
-
       if (editingMedication) {
         await medicationService.updatePrescription(
           editingMedication.prescriptionId,
@@ -175,7 +169,7 @@ const MedicationTracker = () => {
             name: data.name,
             dosage: data.dosage,
             frequency: data.frequency,
-            scheduledAt: formattedScheduledAt,
+            scheduledAt: data.scheduledAt,
           },
         );
       } else {
@@ -189,7 +183,7 @@ const MedicationTracker = () => {
           name: data.name,
           dosage: data.dosage,
           frequency: data.frequency,
-          scheduledAt: formattedScheduledAt,
+          scheduledAt: data.scheduledAt,
         });
       }
 
@@ -214,6 +208,7 @@ const MedicationTracker = () => {
         selectedMedication.prescriptionId,
       );
       await fetchPrescriptions(selectedPatientId);
+      setSelectedPrescriptionId(null);
     } catch (err) {
       console.error("Failed to archive medication:", err);
     }
@@ -350,13 +345,14 @@ const MedicationTracker = () => {
             </div>
           </div>
 
-          <div className="mb-4">
-            <CustomSection title="Adherence Overview">
-              <AdherenceOverviewChart data={adherenceChartData} />
-            </CustomSection>
-          </div>
+          <CustomSection
+  title="7-Day Adherence Overview"
+  subheader="Daily medication completion trends"
+>
+  <AdherenceOverviewChart data={adherenceChartData} />
+</CustomSection>
 
-          <div className="row g-3">
+          <div className="row g-3 mt-1">
             <div className="col-12 col-xl-7">
               <CustomSection
                 title="Today's Medication Schedule"
@@ -381,7 +377,7 @@ const MedicationTracker = () => {
             </div>
 
             <div className="col-12 col-xl-5">
-              <div style={{ position: "sticky", top: 20 }}>
+              <div className="d-flex flex-column gap-3">
                 <CustomSection
                   title="Active Medications"
                   subheader={`${totalCount} prescribed`}
