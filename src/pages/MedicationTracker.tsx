@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pill, CheckCircle2, AlertCircle, Clock, Plus } from "lucide-react";
+import {
+  Pill,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Plus,
+  Archive,
+} from "lucide-react";
 
 import MedicationScheduleItem from "../components/medication/MedicationScheduleItem";
 import ActiveMedicationCard from "../components/medication/ActiveMedicationCard";
 import MedicationDetailsCard from "../components/medication/MedicationDetailsCard";
 import MedicationFormModal from "../components/medication/MedicationFormModal";
+import ArchivedMedicationsModal from "../components/medication/ArchivedMedicationsModal";
 
 import CustomSection from "../components/ui/CustomSection";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
@@ -18,7 +26,6 @@ import { usePatient } from "../contexts/patient/usePatient";
 import type { MedicationScheduleItemProps } from "../types/Types";
 
 type Prescription = Omit<MedicationScheduleItemProps, "onToggle"> & {
-  // PREP FOR FUTURE DB
   purpose?: string;
   instructions?: string;
   warnings?: string;
@@ -40,12 +47,13 @@ const MedicationTracker = () => {
   const [editingMedication, setEditingMedication] =
     useState<Prescription | null>(null);
 
+  const [isArchivedModalOpen, setIsArchivedModalOpen] = useState(false);
+
   const fetchPrescriptions = async (patientId: string) => {
     setLoadingMeds(true);
 
     try {
-      const data =
-        await medicationService.getPrescriptionsByPatient(patientId);
+      const data = await medicationService.getPrescriptionsByPatient(patientId);
 
       const mapped: Prescription[] = (data ?? []).map((row: any) => {
         const activeLog =
@@ -62,14 +70,11 @@ const MedicationTracker = () => {
           frequency: row.frequency ?? "",
           scheduledAt: row.scheduledAt ?? "",
           isActive: row.isActive ?? true,
-
-          // PREP FIELDS (safe even if DB doesn't send yet)
           purpose: row.purpose ?? "",
           instructions: row.instructions ?? "",
           warnings: row.warnings ?? "",
           prescribedBy: row.prescribedBy ?? "",
           startDate: row.startDate ?? "",
-
           medicationLog: activeLog
             ? {
                 caregiverId: activeLog.caregiverId,
@@ -87,13 +92,16 @@ const MedicationTracker = () => {
       setSelectedPrescriptionId((currentSelectedId) => {
         if (!mapped.length) return null;
 
-        const selectedStillExists = mapped.some(
+        const activeMapped = mapped.filter((item) => item.isActive);
+        if (!activeMapped.length) return null;
+
+        const selectedStillExists = activeMapped.some(
           (item) => item.prescriptionId === currentSelectedId,
         );
 
         if (selectedStillExists) return currentSelectedId;
 
-        return mapped[0].prescriptionId;
+        return activeMapped[0].prescriptionId;
       });
     } catch (err) {
       console.error("Failed to load prescriptions:", err);
@@ -156,11 +164,7 @@ const MedicationTracker = () => {
       let formattedScheduledAt: string | undefined = undefined;
 
       if (data.scheduledAt) {
-        const today = new Date();
-        const [hours, minutes] = data.scheduledAt.split(":");
-
-        today.setHours(Number(hours), Number(minutes), 0, 0);
-        formattedScheduledAt = today.toISOString();
+        formattedScheduledAt = data.scheduledAt;
       }
 
       if (editingMedication) {
@@ -214,16 +218,18 @@ const MedicationTracker = () => {
     }
   };
 
-  // separate data layers
   const activeMedications = useMemo(() => {
     return prescriptions.filter((p) => p.isActive);
   }, [prescriptions]);
 
-  const todaySchedule = useMemo(() => {
-    return prescriptions.filter((p) => p.isActive);
+  const archivedMedications = useMemo(() => {
+    return prescriptions.filter((p) => !p.isActive);
   }, [prescriptions]);
 
-  // UPDATED STATS
+  const todaySchedule = useMemo(() => {
+    return activeMedications;
+  }, [activeMedications]);
+
   const takenCount = activeMedications.filter(
     (p) => p.medicationLog?.isCompleted,
   ).length;
@@ -233,7 +239,6 @@ const MedicationTracker = () => {
   const adherencePercentage =
     totalCount > 0 ? Math.round((takenCount / totalCount) * 100) : 0;
 
-  // safer selection
   const selectedMedication = useMemo(() => {
     return (
       activeMedications.find(
@@ -250,13 +255,23 @@ const MedicationTracker = () => {
         title="Medication Tracker"
         subheader="Track today's medication schedule for your patient"
       >
-        <Button
-          color="primary"
-          icon={<Plus size={16} />}
-          onClick={handleAddMedication}
-        >
-          Add Medication
-        </Button>
+        <div className="d-flex gap-2 flex-wrap">
+          <Button
+            color="outline-secondary"
+            icon={<Archive size={16} />}
+            onClick={() => setIsArchivedModalOpen(true)}
+          >
+            View Archived
+          </Button>
+
+          <Button
+            color="primary"
+            icon={<Plus size={16} />}
+            onClick={handleAddMedication}
+          >
+            Add Medication
+          </Button>
+        </div>
       </CustomTitleBanner>
 
       {!selectedPatientId && !contextLoading ? (
@@ -395,9 +410,20 @@ const MedicationTracker = () => {
                 dosage: editingMedication.dosage,
                 frequency: editingMedication.frequency,
                 scheduledAt: editingMedication.scheduledAt,
+                purpose: editingMedication.purpose,
+                instructions: editingMedication.instructions,
+                prescribedBy: editingMedication.prescribedBy,
+                warnings: editingMedication.warnings,
+                startDate: editingMedication.startDate,
               }
             : undefined
         }
+      />
+
+      <ArchivedMedicationsModal
+        isOpen={isArchivedModalOpen}
+        onClose={() => setIsArchivedModalOpen(false)}
+        medications={archivedMedications}
       />
     </div>
   );
