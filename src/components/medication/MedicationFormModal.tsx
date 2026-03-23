@@ -4,29 +4,8 @@ import Button from "../ui/Button";
 interface MedicationFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: {
-    name: string;
-    dosage: string;
-    frequency: string;
-    scheduledAt: string;
-    purpose: string;
-    instructions: string;
-    prescribedBy: string;
-    warnings: string;
-    startDate: string;
-  }) => void;
-
-  initialData?: {
-    name: string;
-    dosage: string;
-    frequency: string;
-    scheduledAt: string;
-    purpose?: string;
-    instructions?: string;
-    prescribedBy?: string;
-    warnings?: string;
-    startDate?: string;
-  };
+  onSave: (data: any) => void;
+  initialData?: any;
 }
 
 const MedicationFormModal = ({
@@ -38,7 +17,7 @@ const MedicationFormModal = ({
   const [name, setName] = useState("");
   const [dosage, setDosage] = useState("");
   const [frequency, setFrequency] = useState("");
-  const [scheduledAt, setScheduledAt] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("08:00");
 
   const [purpose, setPurpose] = useState("");
   const [instructions, setInstructions] = useState("");
@@ -51,44 +30,28 @@ const MedicationFormModal = ({
       setName(initialData?.name ?? "");
       setDosage(initialData?.dosage ?? "");
       setFrequency(initialData?.frequency ?? "");
+      setScheduledAt(initialData?.scheduledAt || "08:00");
 
       setPurpose(initialData?.purpose ?? "");
       setInstructions(initialData?.instructions ?? "");
       setPrescribedBy(initialData?.prescribedBy ?? "");
       setWarnings(initialData?.warnings ?? "");
       setStartDate(initialData?.startDate ?? "");
-
-      if (initialData?.scheduledAt) {
-        const date = new Date(initialData.scheduledAt);
-        if (!Number.isNaN(date.getTime())) {
-          const hours = String(date.getHours()).padStart(2, "0");
-          const minutes = String(date.getMinutes()).padStart(2, "0");
-          setScheduledAt(`${hours}:${minutes}`);
-        } else {
-          setScheduledAt("");
-        }
-      } else {
-        setScheduledAt("");
-      }
     }
   }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
-  const isFormValid = name.trim() !== "" && dosage.trim() !== "";
-
   const handleSubmit = () => {
-    if (!isFormValid) return;
-
     onSave({
-      name: name.trim(),
-      dosage: dosage.trim(),
-      frequency: frequency.trim(),
+      name,
+      dosage,
+      frequency,
       scheduledAt,
-      purpose: purpose.trim(),
-      instructions: instructions.trim(),
-      prescribedBy: prescribedBy.trim(),
-      warnings: warnings.trim(),
+      purpose,
+      instructions,
+      prescribedBy,
+      warnings,
       startDate,
     });
   };
@@ -99,24 +62,16 @@ const MedicationFormModal = ({
       style={{ display: "block", background: "rgba(0,0,0,0.5)" }}
     >
       <div className="modal-dialog modal-dialog-centered modal-lg">
-        <div
-          className="modal-content"
-          style={{ borderRadius: "18px", overflow: "hidden" }}
-        >
+        <div className="modal-content" style={{ borderRadius: "18px" }}>
           <div className="modal-header">
             <h5 className="modal-title">
               {initialData ? "Edit Medication" : "Add Medication"}
             </h5>
 
-            <button
-              type="button"
-              className="btn-close"
-              aria-label="Close"
-              onClick={onClose}
-            />
+            <button className="btn-close" onClick={onClose} />
           </div>
 
-          <div className="modal-body d-flex flex-column gap-3">
+          <div className="modal-body d-flex flex-column gap-4">
             {/* BASIC */}
             <div>
               <label className="form-label">Medication Name</label>
@@ -147,17 +102,39 @@ const MedicationFormModal = ({
               </div>
             </div>
 
+            {/* MULTIPLE TIMES */}
             <div>
-              <label className="form-label">Scheduled Time</label>
-              <input
-                type="time"
-                className="form-control"
-                value={scheduledAt}
-                onChange={(e) => setScheduledAt(e.target.value)}
-              />
+              <label className="form-label">Scheduled Times</label>
+
+              <div className="d-flex flex-column gap-2">
+                {scheduledAt.split(",").map((time, index) => (
+                  <input
+                    key={index}
+                    type="time"
+                    className="form-control"
+                    value={time.trim()}
+                    onChange={(e) => {
+                      const times = scheduledAt.split(",");
+                      times[index] = e.target.value;
+                      setScheduledAt(times.join(","));
+                    }}
+                  />
+                ))}
+
+                <Button
+                  color="outline-primary"
+                  onClick={() =>
+                    setScheduledAt(
+                      scheduledAt ? `${scheduledAt},` : "",
+                    )
+                  }
+                >
+                  + Add Time
+                </Button>
+              </div>
             </div>
 
-            {/* NEW FIELDS */}
+            {/* DETAILS */}
             <div>
               <label className="form-label">Purpose</label>
               <textarea
