@@ -1,13 +1,10 @@
 /*
     This is the SideBar component for the CareLink application. 
-    It provides navigation links to different sections of the app.
-    
-    Props:
-    - username: The name of the logged-in user, displayed in the dropdown menu.
 */
 
 import { NavLink } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { Heart, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 // Context and services
 import { authService } from "../../services/authService";
@@ -20,10 +17,17 @@ interface SideBarProps {
 const SideBar = ({ username }: SideBarProps) => {
   const { patients, selectedPatientId, setSelectedPatientId } = usePatient();
 
+  // ✅ ADD THIS (missing before)
+  const [patientMenuOpen, setPatientMenuOpen] = useState(false);
+
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `nav-link text-uppercase fw-semibold px-3 py-2 rounded-3 ${
       isActive ? "active-nav-link" : "inactive-nav-link"
     }`;
+
+  const selectedPatient = patients.find(
+    (p) => p.patientId === selectedPatientId
+  );
 
   return (
     <>
@@ -49,7 +53,6 @@ const SideBar = ({ username }: SideBarProps) => {
                 fontSize: "1.6rem",
                 fontWeight: 700,
                 color: "#111827",
-                lineHeight: 1,
               }}
             >
               CareLink
@@ -95,7 +98,7 @@ const SideBar = ({ username }: SideBarProps) => {
               </NavLink>
             </li>
 
-            {/* Active Patient */}
+            {/* ✅ FIXED Active Patient Dropdown */}
             <li className="nav-item d-flex align-items-center ms-3">
               <span
                 className="fw-semibold me-2 text-uppercase"
@@ -103,38 +106,66 @@ const SideBar = ({ username }: SideBarProps) => {
                   fontSize: "0.7rem",
                   letterSpacing: "0.08em",
                   color: "#6B7280",
-                  whiteSpace: "nowrap",
                 }}
               >
                 Active Patient
               </span>
 
-              <select
-                className="form-select form-select-sm navbar-select"
-                style={{
-                  width: "180px",
-                  borderRadius: "10px",
-                  border: "1px solid #D1D5DB",
-                  backgroundColor: "#ffffff",
-                  color: "#111827",
-                }}
-                value={selectedPatientId || ""}
-                onChange={(e) => setSelectedPatientId(e.target.value)}
-              >
-                {patients.map((p) => (
-                  <option key={p.patientId} value={p.patientId}>
-                    {p.firstName} {p.lastName}
-                  </option>
-                ))}
-              </select>
+              <div className="dropdown">
+                <button
+                  type="button"
+                  className={`btn patient-dropdown-button d-flex align-items-center justify-content-between ${
+                    patientMenuOpen ? "show" : ""
+                  }`}
+                  data-bs-toggle="dropdown"
+                  aria-expanded={patientMenuOpen}
+                  onClick={() => setPatientMenuOpen((prev) => !prev)}
+                  style={{
+                    width: "180px",
+                    borderRadius: "10px",
+                    border: "1px solid #D1D5DB",
+                    backgroundColor: "#ffffff",
+                    color: "#111827",
+                    fontWeight: 500,
+                    padding: "8px 12px",
+                  }}
+                >
+                  <span className="text-truncate">
+                    {selectedPatient
+                      ? `${selectedPatient.firstName} ${selectedPatient.lastName}`
+                      : "Select Patient"}
+                  </span>
+
+                  <ChevronDown size={18} className="patient-chevron ms-2" />
+                </button>
+
+                <ul className="dropdown-menu shadow-sm" style={{ minWidth: "180px" }}>
+                  {patients.map((p) => (
+                    <li key={p.patientId}>
+                      <button
+                        type="button"
+                        className={`dropdown-item ${
+                          selectedPatientId === p.patientId ? "active" : ""
+                        }`}
+                        onClick={() => {
+                          setSelectedPatientId(p.patientId);
+                          setPatientMenuOpen(false);
+                        }}
+                      >
+                        {p.firstName} {p.lastName}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </li>
           </ul>
 
-          {/* User Dropdown */}
-          <div className="btn-group dropup">
+          {/* Account Dropdown */}
+          <div className="btn-group dropup account-dropdown">
             <button
               type="button"
-              className="btn btn-primary dropdown-toggle d-flex align-items-center px-3 py-2"
+              className="btn btn-primary d-flex align-items-center px-3 py-2 account-button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
               style={{
@@ -142,7 +173,8 @@ const SideBar = ({ username }: SideBarProps) => {
                 fontWeight: 600,
               }}
             >
-              {username}
+              <span>{username}</span>
+              <ChevronDown size={18} className="account-chevron ms-2" />
             </button>
 
             <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0">

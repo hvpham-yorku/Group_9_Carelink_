@@ -1,37 +1,54 @@
-/* NAVBAR SELECT (UPDATED FOR WHITE NAVBAR) */
+/* NAVBAR SELECT */
 
 .navbar-select {
   background-color: #ffffff;
   color: #111827;
-  border: 1px solid #D1D5DB;
+  border: 1px solid #d1d5db;
   border-radius: 10px;
+  padding-right: 2.5rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
 .navbar-select:focus {
   box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
-  border-color: #93C5FD;
+  border-color: #93c5fd;
 }
 
 .navbar-select option {
   color: black;
 }
 
+.patient-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.patient-select-icon {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: #4b5563;
+}
+
 /* NAVBAR LINK STATES */
 
 .inactive-nav-link {
-  color: #6B7280 !important;
+  color: #6b7280 !important;
   transition: all 0.2s ease;
 }
 
 .inactive-nav-link:hover {
-  color: #2563EB !important;
-  background-color: #EFF6FF;
+  color: #2563eb !important;
+  background-color: #eff6ff;
   border-radius: 8px;
 }
 
 .active-nav-link {
-  color: #2563EB !important;
-  background-color: #DBEAFE;
+  color: #2563eb !important;
+  background-color: #dbeafe;
   border-radius: 8px;
 }
 
@@ -41,8 +58,43 @@
   margin: 0 6px;
 }
 
+/* ACCOUNT BUTTON */
+
+.account-button {
+  border-radius: 12px !important;
+}
+
+.account-chevron {
+  transition: transform 0.2s ease;
+}
+
+.account-dropdown .show .account-chevron,
+.account-dropdown .account-button.show .account-chevron {
+  transform: rotate(180deg);
+}
+
 /* BUTTON HOVER */
 
 .btn-primary:hover {
-  background-color: #1D4ED8 !important;
+  background-color: #1d4ed8 !important;
+}
+
+/* PATIENT BUTTON */
+
+.patient-dropdown-button {
+  box-shadow: none !important;
+}
+
+.patient-dropdown-button:focus,
+.patient-dropdown-button:active {
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15) !important;
+  border-color: #93c5fd !important;
+}
+
+.patient-chevron {
+  transition: transform 0.2s ease;
+}
+
+.patient-dropdown-button.show .patient-chevron {
+  transform: rotate(180deg);
 }
