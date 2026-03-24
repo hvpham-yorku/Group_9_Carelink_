@@ -17,6 +17,7 @@ interface TaskCardProps {
 
 const TaskCard = ({ task, onToggle, onSelect }: TaskCardProps) => {
   const categoryName = task.categories?.name ?? "General";
+  const categoryColor = task.categories?.color;
 
   // Format the scheduled time for display
   const displayTime = formatToTime(task.scheduledAt);
@@ -112,7 +113,7 @@ const TaskCard = ({ task, onToggle, onSelect }: TaskCardProps) => {
               <span
                 className="badge rounded-pill"
                 style={{
-                  backgroundColor: "#dde9ff",
+                  backgroundColor: categoryColor ?? "#dde9ff",
                   color: "#2c5ce6",
                   fontWeight: 600,
                   fontSize: "0.8rem",

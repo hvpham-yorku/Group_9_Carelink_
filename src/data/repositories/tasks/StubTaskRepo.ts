@@ -1,5 +1,6 @@
 import type { TaskRepo, NewTask } from "./TaskRepo";
 import type { Task, TaskLogEntry } from "../../../types/task";
+import type { Category } from "../../../types/teams";
 import { tasks, taskLogs, categories } from "../../data";
 
 export class StubTaskRepo implements TaskRepo {
@@ -7,12 +8,14 @@ export class StubTaskRepo implements TaskRepo {
     return tasks.filter((task) => task.patientId === patientId);
   }
 
-  async getCategories(
-    careTeamId: string,
-  ): Promise<{ categoryId: string; name: string }[]> {
+  async getCategories(careTeamId: string): Promise<Category[]> {
     // In stub mode, careTeamId is ignored and all categories are returned
     void careTeamId;
-    return categories.map((c) => ({ categoryId: c.categoryId, name: c.name }));
+    return categories.map((c) => ({
+      categoryId: c.categoryId,
+      name: c.name,
+      color: c.color,
+    }));
   }
 
   async addTask(task: NewTask): Promise<Task> {

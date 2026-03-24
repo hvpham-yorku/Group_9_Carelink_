@@ -52,7 +52,7 @@ const TaskEdit = ({
       scheduledAt: formState.time,
       categoryId: formState.categoryId,
       categories: updatedCategory
-        ? { name: updatedCategory.name }
+        ? { name: updatedCategory.name, color: updatedCategory.color }
         : task.categories,
     });
   };

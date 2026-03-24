@@ -55,7 +55,7 @@ const TaskManager = () => {
   // Context state: patientId, careTeamId, caregiverId
   const [tasks, setTasks] = useState<Task[]>([]);
   const [categories, setCategories] = useState<
-    { categoryId: string; name: string }[]
+    { categoryId: string; name: string; color?: string }[]
   >([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
 

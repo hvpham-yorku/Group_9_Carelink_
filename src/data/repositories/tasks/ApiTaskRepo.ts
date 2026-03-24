@@ -1,5 +1,6 @@
 import type { NewTask, TaskRepo } from "./TaskRepo";
 import type { Task, TaskLogEntry } from "../../../types/task";
+import type { Category } from "../../../types/teams";
 
 import { supabase } from "../../../lib/supabase";
 import { formatToDateTimeLocal } from "../../../utils/formatters";
@@ -15,7 +16,7 @@ export class ApiTaskRepo implements TaskRepo {
                 title,
                 description,
                 scheduled_at,
-                categories (name),
+                categories (name, color),
                 task_logs (
                     completed_at,
                     is_completed,
@@ -50,21 +51,22 @@ export class ApiTaskRepo implements TaskRepo {
     return formattedData;
   }
 
-  async getCategories(
-    careTeamId: string,
-  ): Promise<{ categoryId: string; name: string }[]> {
+  async getCategories(careTeamId: string): Promise<Category[]> {
     const { data, error } = await supabase
       .from("categories")
-      .select("category_id, name")
+      .select("category_id, name, color")
       .eq("team_id", careTeamId)
       .order("name", { ascending: true });
 
     if (error) throw error;
 
-    return data.map((item) => ({
+    const formattedData: Category[] = data.map((item) => ({
       categoryId: item.category_id,
       name: item.name,
+      color: item.color,
     }));
+
+    return formattedData;
   }
 
   async addTask(task: NewTask): Promise<Task> {

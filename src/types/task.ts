@@ -11,7 +11,7 @@ export interface Task {
   scheduledAt: string | null;
 
   // Supabase Join
-  categories?: { name: string };
+  categories?: { name: string; color?: string };
   taskLogs?: TaskLogEntry[];
 }
 

@@ -1,4 +1,5 @@
 import type { Task, TaskLogEntry } from "../../../types/task";
+import type { Category } from "../../../types/teams";
 
 export interface NewTask {
   title: string;
@@ -11,9 +12,7 @@ export interface NewTask {
 
 export interface TaskRepo {
   getTasksByPatient(patientId: string): Promise<Task[]>;
-  getCategories(
-    careTeamId: string,
-  ): Promise<{ categoryId: string; name: string }[]>;
+  getCategories(careTeamId: string): Promise<Category[]>;
   addTask(task: NewTask): Promise<Task>;
   updateTask(taskId: string, updates: Partial<NewTask>): Promise<Task>;
   deleteTask(taskId: string): Promise<void>;
