@@ -99,7 +99,12 @@ export class ApiTaskRepo implements TaskRepo {
   async updateTask(taskId: string, updates: Partial<NewTask>): Promise<Task> {
     const { data, error } = await supabase
       .from("tasks")
-      .update(updates)
+      .update({
+        title: updates.title,
+        description: updates.description || null,
+        category_id: updates.categoryId,
+        scheduled_at: updates.scheduledAt,
+      })
       .eq("task_id", taskId)
       .select()
       .single();
