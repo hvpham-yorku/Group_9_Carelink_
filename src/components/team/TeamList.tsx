@@ -10,29 +10,42 @@ const TeamList = ({ caregivers }: TeamListProps) => {
   }
 
   return (
-    <ul className="list-group list-group-flush">
-      {caregivers.map((caregivers) => (
-        <li key={caregivers.caregiverId} className="list-group-item py-2">
-          <div className="d-flex justify-content-between align-items-start flex-wrap">
-            <div>
-              <div className="fw-semibold">
-                {caregivers.firstName} {caregivers.lastName}
-              </div>
-              <small className="text-muted">
-                {caregivers.teamRole} • {caregivers.jobTitle}
-              </small>
+    <div className="d-flex flex-column gap-2">
+      {caregivers.map((caregiver) => (
+        <div
+          key={caregiver.caregiverId}
+          className="d-flex align-items-center gap-3 p-2 rounded border bg-white"
+        >
+          <div className="flex-grow-1 min-width-0">
+            <div className="fw-semibold text-truncate">
+              {caregiver.firstName} {caregiver.lastName}
             </div>
-
-            <div className="text-end">
-              <div className="small">{caregivers.email}</div>
-              <small className="text-muted">
-                {caregivers.teamDateAssigned}
-              </small>
+            <div className="d-flex flex-wrap gap-2 mt-1">
+              {caregiver.teamRole && (
+                <span className="badge text-bg-light border">
+                  {caregiver.teamRole}
+                </span>
+              )}
+              {caregiver.jobTitle && (
+                <span className="badge text-bg-light border">
+                  {caregiver.jobTitle}
+                </span>
+              )}
+              {caregiver.email && (
+                <span className="badge text-bg-light border">
+                  {caregiver.email}
+                </span>
+              )}
+              {caregiver.teamDateAssigned && (
+                <span className="badge text-bg-light border">
+                  Since: {caregiver.teamDateAssigned}
+                </span>
+              )}
             </div>
           </div>
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 };
 

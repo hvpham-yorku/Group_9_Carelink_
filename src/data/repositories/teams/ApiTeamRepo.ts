@@ -72,7 +72,7 @@ export class ApiTeamRepo implements TeamRepo {
       .select(
         `
             patient_id,
-            patients (patient_id, first_name, last_name, dob, gender)
+            patients (patient_id, first_name, last_name, dob, gender, blood_type)
           `,
       )
       .eq("team_id", teamId)
@@ -90,6 +90,7 @@ export class ApiTeamRepo implements TeamRepo {
           lastName: p.last_name,
           dob: p.dob,
           gender: p.gender,
+          bloodType: p.blood_type,
         };
       });
 

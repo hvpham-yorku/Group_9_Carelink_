@@ -12,17 +12,38 @@ const PatientList = ({ patients }: PatientListProps) => {
   }
 
   return (
-    <ul className="list-group list-group-flush">
+    <div className="d-flex flex-column gap-2">
       {patients.map((patient) => (
-        <li key={patient.patientId} className="list-group-item px-0">
-          <h6 className="mb-1">
-            {patient.firstName} {patient.lastName}
-          </h6>
-          <p className="mb-1 text-muted">{patient.gender}</p>
-          <p className="mb-1 text-muted">Dob: {patient.dob}</p>
-        </li>
+        <div
+          key={patient.patientId}
+          className="d-flex align-items-center gap-3 p-2 rounded border bg-white"
+        >
+          {/* Info */}
+          <div className="flex-grow-1 min-width-0">
+            <div className="fw-semibold text-truncate">
+              {patient.firstName} {patient.lastName}
+            </div>
+            <div className="d-flex flex-wrap gap-2 mt-1">
+              {patient.gender && (
+                <span className="badge text-bg-light border">
+                  {patient.gender}
+                </span>
+              )}
+              {patient.dob && (
+                <span className="badge text-bg-light border">
+                  DOB: {patient.dob}
+                </span>
+              )}
+              {patient.bloodType && (
+                <span className="badge text-bg-danger bg-opacity-10 border border-danger-subtle text-danger">
+                  {patient.bloodType}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 };
 
