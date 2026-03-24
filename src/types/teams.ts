@@ -6,24 +6,8 @@ export interface PatientInfo {
   firstName: string;
   lastName: string;
   dob?: string;
-  address?: string;
-  phoneNumber?: string;
-  email?: string;
   gender?: string;
   bloodType?: string;
-  height?: string;
-  weight?: string;
-  allergies?: string[];
-  conditions?: string[];
-  emergencyContactName?: string;
-  emergencyContactPhone?: string;
-  emergencyContactRelationship?: string;
-  physicianName?: string;
-  physicianPhone?: string;
-  physicianAddress?: string;
-  insuranceProvider?: string;
-  insurancePolicyNumber?: string;
-  careNotes?: string;
 }
 
 /**
