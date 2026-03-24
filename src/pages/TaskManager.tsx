@@ -23,6 +23,8 @@ import TaskList from "../components/task/TaskList";
 import TaskForm from "../components/task/TaskForm";
 import Button from "../components/ui/Button";
 import TaskEdit from "../components/task/TaskEdit";
+import StatCard from "../components/ui/StatCard";
+import { List, Check, Hourglass, CircleAlert } from "lucide-react";
 
 const TaskManager = () => {
   // Local state for tasks, categories, and form visibility
@@ -178,6 +180,57 @@ const TaskManager = () => {
             + Add New Task
           </Button>
         </CustomTitleBanner>
+
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-md-6 col-xl-3">
+            <StatCard
+              title="Total Tasks"
+              description="Total Number of tasks"
+              value={tasks.length}
+              icon={<List size={20} color="#0d6efd" />}
+            />
+          </div>
+
+          <div className="col-12 col-md-6 col-xl-3">
+            <StatCard
+              title="Completed Tasks"
+              description="Tasks marked as done"
+              value={
+                tasks.filter((t) => t.taskLogs?.some((log) => log.isCompleted))
+                  .length
+              }
+              icon={<Check size={20} color="#198754" />}
+            />
+          </div>
+
+          <div className="col-12 col-md-6 col-xl-3">
+            <StatCard
+              title="Pending Tasks"
+              description="Number of incomplete tasks"
+              value={
+                tasks.filter((t) => !t.taskLogs?.some((log) => log.isCompleted))
+                  .length
+              }
+              icon={<Hourglass size={20} color="#ffc107" />}
+            />
+          </div>
+
+          <div className="col-12 col-md-6 col-xl-3">
+            <StatCard
+              title="Overdue Tasks"
+              description="Number of missed tasks"
+              value={
+                tasks.filter(
+                  (t) =>
+                    !t.taskLogs?.some((log) => log.isCompleted) &&
+                    t.scheduledAt != null &&
+                    new Date(t.scheduledAt) < new Date(),
+                ).length
+              }
+              icon={<CircleAlert size={20} color="#dc3545" />}
+            />
+          </div>
+        </div>
 
         <section className="row mb-4">
           <div className="col">
