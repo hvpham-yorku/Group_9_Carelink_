@@ -24,8 +24,20 @@ const TaskCard = ({ task, onToggle, onSelect }: TaskCardProps) => {
     task.taskLogs?.[0]?.completedAt ?? null,
   );
 
-  const isCompleted = task.taskLogs?.some((log) => log.isCompleted) ?? false;
-  const completedLog = task.taskLogs?.find((log) => log.isCompleted);
+  const today = new Date().toDateString();
+  const isCompleted =
+    task.taskLogs?.some(
+      (log) =>
+        log.isCompleted &&
+        log.completedAt != null &&
+        new Date(log.completedAt).toDateString() === today,
+    ) ?? false;
+  const completedLog = task.taskLogs?.find(
+    (log) =>
+      log.isCompleted &&
+      log.completedAt != null &&
+      new Date(log.completedAt).toDateString() === today,
+  );
   const completedAt = completedLog?.completedAt;
   const completedBy = completedLog?.caregivers
     ? `${completedLog.caregivers.firstName} ${completedLog.caregivers.lastName}`

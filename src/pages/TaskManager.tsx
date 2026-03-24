@@ -26,6 +26,18 @@ import TaskEdit from "../components/task/TaskEdit";
 import StatCard from "../components/ui/StatCard";
 import { List, Check, Hourglass, CircleAlert } from "lucide-react";
 
+const isCompletedToday = (task: Task): boolean => {
+  const today = new Date().toDateString();
+  return (
+    task.taskLogs?.some(
+      (log) =>
+        log.isCompleted &&
+        log.completedAt != null &&
+        new Date(log.completedAt).toDateString() === today,
+    ) ?? false
+  );
+};
+
 const TaskManager = () => {
   // Local state for tasks, categories, and form visibility
   const [visible, setVisible] = useState(false);
@@ -111,7 +123,7 @@ const TaskManager = () => {
     if (!user) return;
     const task = tasks.find((t) => t.taskId === taskId);
     if (!task) return;
-    const isCompleted = task.taskLogs?.some((log) => log.isCompleted) ?? false;
+    const isCompleted = isCompletedToday(task);
     try {
       if (isCompleted) {
         await repositories.task.unmarkTaskAsDone(taskId);
@@ -195,10 +207,7 @@ const TaskManager = () => {
             <StatCard
               title="Completed Tasks"
               description="Tasks marked as done"
-              value={
-                tasks.filter((t) => t.taskLogs?.some((log) => log.isCompleted))
-                  .length
-              }
+              value={tasks.filter(isCompletedToday).length}
               icon={<Check size={20} color="#198754" />}
             />
           </div>
@@ -207,10 +216,7 @@ const TaskManager = () => {
             <StatCard
               title="Pending Tasks"
               description="Number of incomplete tasks"
-              value={
-                tasks.filter((t) => !t.taskLogs?.some((log) => log.isCompleted))
-                  .length
-              }
+              value={tasks.filter((t) => !isCompletedToday(t)).length}
               icon={<Hourglass size={20} color="#ffc107" />}
             />
           </div>
@@ -222,7 +228,7 @@ const TaskManager = () => {
               value={
                 tasks.filter(
                   (t) =>
-                    !t.taskLogs?.some((log) => log.isCompleted) &&
+                    !isCompletedToday(t) &&
                     t.scheduledAt != null &&
                     new Date(t.scheduledAt) < new Date(),
                 ).length
