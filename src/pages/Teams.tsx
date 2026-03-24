@@ -30,34 +30,38 @@ const Teams = () => {
   const [joinCode, setJoinCode] = useState<string | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
 
+  const loadTeamData = async (id: string) => {
+    try {
+      const [caregiverData, patientData, code, name, categoryData] =
+        await Promise.all([
+          repositories.team.getCaregivers(id),
+          repositories.team.getPatients(id),
+          repositories.team.getJoinCode(id),
+          repositories.team.getName(id),
+          repositories.team.getCategories(id),
+        ]);
+
+      setTeamId(id);
+      setCaregivers(caregiverData);
+      setPatients(patientData);
+      setJoinCode(code);
+      setTeamName(name);
+      setCategories(categoryData);
+    } catch (error) {
+      console.error("Failed to load team data:", error);
+    }
+  };
+
   useEffect(() => {
     if (!careTeamId) return;
     let isActive = true;
 
-    const loadTeamData = async () => {
-      try {
-        const [caregiverData, patientData, code, name, categoryData] =
-          await Promise.all([
-            repositories.team.getCaregivers(careTeamId),
-            repositories.team.getPatients(careTeamId),
-            repositories.team.getJoinCode(careTeamId),
-            repositories.team.getName(careTeamId),
-            repositories.team.getCategories(careTeamId),
-          ]);
-
-        if (!isActive) return;
-        setTeamId(careTeamId);
-        setCaregivers(caregiverData);
-        setPatients(patientData);
-        setJoinCode(code);
-        setTeamName(name);
-        setCategories(categoryData);
-      } catch (error) {
-        console.error("Failed to load team data:", error);
-      }
+    const run = async () => {
+      await loadTeamData(careTeamId);
+      if (!isActive) return;
     };
 
-    void loadTeamData();
+    void run();
 
     return () => {
       isActive = false;
@@ -70,7 +74,7 @@ const Teams = () => {
     try {
       const newTeamId = await repositories.team.joinTeamWithCode(user.id, code);
       setCareTeamId(newTeamId);
-      //window.location.reload();
+      await loadTeamData(newTeamId);
     } catch (error: unknown) {
       setJoinError((error as Error)?.message ?? "Failed to join team");
     }
@@ -87,16 +91,20 @@ const Teams = () => {
     }
   };
 
-  const handleAddCategory = async (name: string) => {
+  const handleAddCategory = async (name: string, color: string) => {
     if (!teamId) return;
     try {
-      await repositories.team.addCategory(teamId, name);
+      await repositories.team.addCategory(teamId, name, color);
       const categoryData = await repositories.team.getCategories(teamId);
       setCategories(categoryData);
     } catch (error) {
       console.error("Failed to add category:", error);
     }
   };
+
+  const currentUserRole = user
+    ? (caregivers.find((c) => c.caregiverId === user.id)?.teamRole ?? null)
+    : null;
 
   const handleUpdateTeamName = async (newName: string) => {
     if (!teamId) return;
@@ -180,13 +188,15 @@ const Teams = () => {
               subheader="Add patients or join another team"
             >
               <div className="d-flex flex-column flex-sm-row gap-2">
-                <button
-                  className="btn btn-success"
-                  data-bs-toggle="modal"
-                  data-bs-target="#editTeamNameModal"
-                >
-                  Edit Team Details
-                </button>
+                {currentUserRole === "Primary Caregiver" && (
+                  <button
+                    className="btn btn-success"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editTeamNameModal"
+                  >
+                    Edit Team Details
+                  </button>
+                )}
 
                 <button
                   className="btn btn-success"

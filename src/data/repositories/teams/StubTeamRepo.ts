@@ -76,12 +76,17 @@ export class StubTeamRepo implements TeamRepo {
     return team ? [...categories] : [];
   }
 
-  async addCategory(teamId: string, categoryName: string): Promise<void> {
+  async addCategory(
+    teamId: string,
+    categoryName: string,
+    color: string,
+  ): Promise<void> {
     const team = careTeams.find((t) => t.careTeamId === teamId);
     if (team) {
       const newCategory = {
         categoryId: crypto.randomUUID(),
         name: categoryName,
+        color,
       };
       categories.push(newCategory);
     } else {

@@ -57,4 +57,5 @@ export interface CaregiverTeam {
 export interface Category {
   categoryId: string;
   name: string;
+  color?: string;
 }

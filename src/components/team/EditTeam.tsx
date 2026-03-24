@@ -9,7 +9,7 @@ interface EditTeamModalProps {
   onUpdateName: (newName: string) => void | Promise<void>;
   onUpdateRole: (caregiverId: string, newRole: string) => void | Promise<void>;
   onRemoveCaregiver: (caregiverId: string) => void | Promise<void>;
-  onAddCategory: (name: string) => void | Promise<void>;
+  onAddCategory: (name: string, color: string) => void | Promise<void>;
 }
 
 const EditTeamModal = ({
@@ -28,13 +28,23 @@ const EditTeamModal = ({
       caregivers.map((c) => [c.caregiverId, c.teamRole ?? ""]),
     ),
   );
+  const CATEGORY_COLORS = [
+    { label: "Blue", value: "text-bg-primary" },
+    { label: "Green", value: "text-bg-success" },
+    { label: "Red", value: "text-bg-danger" },
+    { label: "Yellow", value: "text-bg-warning" },
+    { label: "Light Blue", value: "text-bg-info" },
+  ];
+
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryColor, setNewCategoryColor] = useState("text-bg-primary");
 
   const handleAddCategorySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCategoryName.trim()) return;
-    void onAddCategory(newCategoryName.trim());
+    void onAddCategory(newCategoryName.trim(), newCategoryColor);
     setNewCategoryName("");
+    setNewCategoryColor("text-bg-primary");
   };
 
   const handleNameSubmit = (e: React.FormEvent) => {
@@ -148,7 +158,7 @@ const EditTeamModal = ({
                   <p className="text-muted">No team members to edit.</p>
                 ) : (
                   <ul className="list-group list-group-flush">
-                    {caregivers.map((c) => (
+                    {caregivers.map((c, index) => (
                       <li
                         key={c.caregiverId}
                         className="list-group-item px-0 py-2"
@@ -156,31 +166,43 @@ const EditTeamModal = ({
                         <div className="d-flex align-items-center gap-2 flex-wrap">
                           <span className="flex-grow-1 fw-semibold">
                             {c.firstName} {c.lastName}
+                            {index === 0 && (
+                              <span className="badge text-bg-warning ms-2">
+                                Leader
+                              </span>
+                            )}
                           </span>
-                          <select
-                            className="form-select form-select-sm"
-                            style={{ maxWidth: "220px" }}
-                            value={roles[c.caregiverId] ?? ""}
-                            onChange={(e) =>
-                              handleRoleChange(c.caregiverId, e.target.value)
-                            }
-                          >
-                            <option value="">Select role…</option>
-                            <option value="Primary Caregiver">
-                              Primary Caregiver
-                            </option>
-                            <option value="Secondary Caregiver">
-                              Secondary Caregiver
-                            </option>
-                            <option value="Caregiver">Caregiver</option>
-                          </select>
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-primary"
-                            onClick={() => handleRoleSave(c.caregiverId)}
-                          >
-                            Save
-                          </button>
+                          {index !== 0 && (
+                            <>
+                              <select
+                                className="form-select form-select-sm"
+                                style={{ maxWidth: "220px" }}
+                                value={roles[c.caregiverId] ?? ""}
+                                onChange={(e) =>
+                                  handleRoleChange(
+                                    c.caregiverId,
+                                    e.target.value,
+                                  )
+                                }
+                              >
+                                <option value="">Select role…</option>
+                                <option value="Primary Caregiver">
+                                  Primary Caregiver
+                                </option>
+                                <option value="Secondary Caregiver">
+                                  Secondary Caregiver
+                                </option>
+                                <option value="Caregiver">Caregiver</option>
+                              </select>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-primary"
+                                onClick={() => handleRoleSave(c.caregiverId)}
+                              >
+                                Save
+                              </button>
+                            </>
+                          )}
                         </div>
                       </li>
                     ))}
@@ -194,7 +216,7 @@ const EditTeamModal = ({
                   <p className="text-muted">No team members to remove.</p>
                 ) : (
                   <ul className="list-group list-group-flush">
-                    {caregivers.map((c) => (
+                    {caregivers.map((c, index) => (
                       <li
                         key={c.caregiverId}
                         className="list-group-item px-0 py-2 d-flex justify-content-between align-items-center"
@@ -202,18 +224,27 @@ const EditTeamModal = ({
                         <div>
                           <div className="fw-semibold">
                             {c.firstName} {c.lastName}
+                            {index === 0 && (
+                              <span className="badge text-bg-warning ms-2">
+                                Leader
+                              </span>
+                            )}
                           </div>
                           <small className="text-muted">
                             {c.teamRole} • {c.jobTitle}
                           </small>
                         </div>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-danger"
-                          onClick={() => void onRemoveCaregiver(c.caregiverId)}
-                        >
-                          Remove
-                        </button>
+                        {index !== 0 && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-danger"
+                            onClick={() =>
+                              void onRemoveCaregiver(c.caregiverId)
+                            }
+                          >
+                            Remove
+                          </button>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -224,7 +255,7 @@ const EditTeamModal = ({
               <div className="tab-pane fade" id={`${modalId}TabCategories`}>
                 <form onSubmit={handleAddCategorySubmit} className="mb-3">
                   <label className="form-label">New Category</label>
-                  <div className="input-group">
+                  <div className="d-flex gap-2 mb-2">
                     <input
                       type="text"
                       className="form-control"
@@ -233,25 +264,44 @@ const EditTeamModal = ({
                       onChange={(e) => setNewCategoryName(e.target.value)}
                       required
                     />
+                    <select
+                      className="form-select"
+                      style={{ maxWidth: 140 }}
+                      value={newCategoryColor}
+                      onChange={(e) => setNewCategoryColor(e.target.value)}
+                    >
+                      {CATEGORY_COLORS.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
                     <button type="submit" className="btn btn-primary">
                       Add
                     </button>
                   </div>
+                  {newCategoryName && (
+                    <div className="mt-1">
+                      <span className={`badge ${newCategoryColor}`}>
+                        {newCategoryName}
+                      </span>
+                    </div>
+                  )}
                 </form>
 
                 {categories.length === 0 ? (
                   <p className="text-muted">No categories yet.</p>
                 ) : (
-                  <ul className="list-group list-group-flush">
+                  <div className="d-flex flex-wrap gap-2">
                     {categories.map((cat) => (
-                      <li
+                      <span
                         key={cat.categoryId}
-                        className="list-group-item px-0 py-2"
+                        className={`badge ${cat.color ?? "text-bg-secondary"}`}
                       >
                         {cat.name}
-                      </li>
+                      </span>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </div>
             </div>

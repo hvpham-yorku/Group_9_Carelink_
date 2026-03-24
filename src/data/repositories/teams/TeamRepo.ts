@@ -26,7 +26,11 @@ export interface TeamRepo {
   ): Promise<unknown>;
 
   updateTeamName(teamId: string, newName: string): Promise<void>;
-  addCategory(teamId: string, categoryName: string): Promise<void>;
+  addCategory(
+    teamId: string,
+    categoryName: string,
+    color: string,
+  ): Promise<void>;
   // removeCategory(teamId: string, categoryName: string): Promise<void>;
   editCaregiverRole(
     teamId: string,

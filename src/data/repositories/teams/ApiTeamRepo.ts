@@ -100,16 +100,19 @@ export class ApiTeamRepo implements TeamRepo {
   async getCategories(teamId: string): Promise<Category[]> {
     const { data, error } = await supabase
       .from("categories")
-      .select("category_id, name")
+      .select("category_id, name, color")
       .eq("team_id", teamId)
       .order("name", { ascending: true });
 
     if (error) throw error;
 
-    return (data ?? []).map((row) => ({
+    const formattedData: Category[] = (data ?? []).map((row) => ({
       categoryId: row.category_id,
       name: row.name,
+      color: row.color,
     }));
+
+    return formattedData;
   }
 
   async joinTeamWithCode(
@@ -176,10 +179,14 @@ export class ApiTeamRepo implements TeamRepo {
     if (error) throw error;
   }
 
-  async addCategory(teamId: string, categoryName: string): Promise<void> {
+  async addCategory(
+    teamId: string,
+    categoryName: string,
+    color: string,
+  ): Promise<void> {
     const { error } = await supabase
       .from("categories")
-      .insert({ team_id: teamId, name: categoryName, color: "#000000" });
+      .insert({ team_id: teamId, name: categoryName, color });
 
     if (error) throw error;
   }
