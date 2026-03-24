@@ -16,14 +16,54 @@ const MedicationScheduleItem = ({
     ? `${medicationLog.firstName} ${medicationLog.lastName}`
     : null;
 
+  const primaryScheduledTime = scheduledAt?.split(",")[0]?.trim() || "";
+  const scheduledDate = primaryScheduledTime
+    ? new Date(primaryScheduledTime)
+    : null;
+
+  const hasValidScheduledDate =
+    scheduledDate instanceof Date && !Number.isNaN(scheduledDate.getTime());
+
+  const now = new Date();
+  const isOverdue =
+    !isCompleted && hasValidScheduledDate ? scheduledDate < now : false;
+
+  const statusLabel = isCompleted
+    ? "Taken"
+    : isOverdue
+      ? "Overdue"
+      : "Pending";
+
+  const statusStyles = isCompleted
+    ? {
+        border: "1px solid #98d4a9",
+        backgroundColor: "#f3fbf5",
+        badgeBackground: "#d1e7dd",
+        badgeColor: "#146c43",
+      }
+    : isOverdue
+      ? {
+          border: "1px solid #f5c2c7",
+          backgroundColor: "#fff5f5",
+          badgeBackground: "#f8d7da",
+          badgeColor: "#b02a37",
+        }
+      : {
+          border: "1px solid #e9ecef",
+          backgroundColor: "#ffffff",
+          badgeBackground: "#f1f3f5",
+          badgeColor: "#495057",
+        };
+
   return (
     <div
       className="mb-3"
       style={{
         borderRadius: "18px",
-        border: isCompleted ? "1px solid #98d4a9" : "1px solid #e9ecef",
-        backgroundColor: isCompleted ? "#f3fbf5" : "#ffffff",
+        border: statusStyles.border,
+        backgroundColor: statusStyles.backgroundColor,
         transition: "all 0.2s ease",
+        boxShadow: "0 4px 14px rgba(0,0,0,0.03)",
       }}
     >
       <div className="p-3 p-md-4 d-flex align-items-start gap-3">
@@ -54,29 +94,66 @@ const MedicationScheduleItem = ({
               </h5>
 
               <p className="text-muted mb-2" style={{ fontSize: "0.95rem" }}>
-                {frequency}
+                {frequency || "No frequency provided"}
               </p>
             </div>
 
-            <span
-              className="badge rounded-pill"
-              style={{
-                backgroundColor: isCompleted ? "#d1e7dd" : "#f1f3f5",
-                color: isCompleted ? "#146c43" : "#495057",
-                fontWeight: 600,
-                fontSize: "0.8rem",
-                padding: "0.55rem 0.8rem",
-              }}
-            >
-              {formatToTime(scheduledAt)}
-            </span>
+            <div className="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+              <span
+                className="badge rounded-pill"
+                style={{
+                  backgroundColor: statusStyles.badgeBackground,
+                  color: statusStyles.badgeColor,
+                  fontWeight: 600,
+                  fontSize: "0.8rem",
+                  padding: "0.55rem 0.8rem",
+                }}
+              >
+                {statusLabel}
+              </span>
+
+              <span
+                className="badge rounded-pill"
+                style={{
+                  backgroundColor: "#eef2ff",
+                  color: "#3b5bdb",
+                  fontWeight: 600,
+                  fontSize: "0.8rem",
+                  padding: "0.55rem 0.8rem",
+                }}
+              >
+                {primaryScheduledTime
+                  ? hasValidScheduledDate
+                    ? formatToTime(primaryScheduledTime)
+                    : primaryScheduledTime
+                  : "No time"}
+              </span>
+            </div>
           </div>
 
           <div className="mb-2">
             <span className="text-muted" style={{ fontSize: "0.92rem" }}>
-              Scheduled: {formatToTime(scheduledAt)}
+              {isCompleted
+                ? "Completed for today"
+                : isOverdue
+                  ? "This medication is overdue"
+                  : "Scheduled for today"}
             </span>
           </div>
+
+          {!isCompleted && scheduledAt?.includes(",") && (
+            <div className="mb-2">
+              <span className="text-muted" style={{ fontSize: "0.88rem" }}>
+                Additional times:{" "}
+                {scheduledAt
+                  .split(",")
+                  .slice(1)
+                  .map((time) => time.trim())
+                  .filter(Boolean)
+                  .join(", ") || "None"}
+              </span>
+            </div>
+          )}
 
           {isCompleted && (takenAt || takenBy) && (
             <div

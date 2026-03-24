@@ -16,6 +16,8 @@ import SignUp from "./pages/SignUp";
 import Layout from "./components/Layout";
 import Notes from "./pages/Notes";
 import LandingPage from "./pages/LandingPage";
+import AccountSettings from "./pages/AccountSettings";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   return (
@@ -26,7 +28,8 @@ function App() {
             <Route path="/landingpage" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            
             <Route element={<Layout />}>
               <Route
                 path="/dashboard"
@@ -77,8 +80,16 @@ function App() {
                 }
               />
             </Route>
-
+            <Route
+                  path="/accountsettings"
+                  element={
+                    <ProtectedRoute>
+                      <AccountSettings />
+                    </ProtectedRoute>
+                  }
+                />
             <Route path="/" element={<Navigate to="/landingpage" replace />} />
+            
           </Routes>
         </PatientProvider>
       </AuthProvider>

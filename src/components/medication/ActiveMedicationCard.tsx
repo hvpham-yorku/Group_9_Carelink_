@@ -37,10 +37,12 @@ const ActiveMedicationCard = ({
         borderRadius: "16px",
         border: isSelected ? "1px solid #b6d4fe" : "1px solid #e9ecef",
         padding: "1rem",
-        boxShadow: isSelected ? "0 0 0 3px rgba(13,110,253,0.08)" : "none",
+        boxShadow: isSelected
+          ? "0 0 0 3px rgba(13,110,253,0.08)"
+          : "0 4px 12px rgba(0,0,0,0.03)",
         transition: "all 0.2s ease",
         cursor: "pointer",
-        background: "#fff",
+        background: isSelected ? "#f8fbff" : "#fff",
       }}
     >
       <div className="d-flex justify-content-between align-items-start gap-3">
@@ -61,17 +63,45 @@ const ActiveMedicationCard = ({
           <div>
             <div className="fw-semibold text-dark mb-1">{name}</div>
 
-            <div className="text-muted" style={{ fontSize: "0.92rem" }}>
+            <div className="text-muted mb-2" style={{ fontSize: "0.92rem" }}>
               {dosage} • {frequency || "Not available"}
+            </div>
+
+            <div className="d-flex align-items-center gap-2 flex-wrap">
+              {isSelected && (
+                <span
+                  className="badge rounded-pill"
+                  style={{
+                    backgroundColor: "#e7f1ff",
+                    color: "#0d6efd",
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    padding: "0.45rem 0.7rem",
+                  }}
+                >
+                  Selected
+                </span>
+              )}
+
+              {isCompleted && (
+                <span
+                  className="badge rounded-pill"
+                  style={{
+                    backgroundColor: "#d1e7dd",
+                    color: "#146c43",
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    padding: "0.45rem 0.7rem",
+                  }}
+                >
+                  Taken
+                </span>
+              )}
             </div>
           </div>
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          {isCompleted && (
-            <span className="badge text-bg-success rounded-pill">Taken</span>
-          )}
-
           {onEdit && (
             <Button
               color="outline-secondary"
