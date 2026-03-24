@@ -5,6 +5,8 @@ import type {
   Category,
 } from "../types/teams";
 
+import type { AllPatientInfo } from "../types/patient";
+
 import type { Task, TaskLogEntry } from "../types/task";
 
 // patient ids
@@ -33,30 +35,16 @@ export let teamPatients: PatientInfo[] = [
     firstName: "John",
     lastName: "Doe",
     dob: "1950-01-01",
-    address: "123 Main St, Anytown, USA",
-    phoneNumber: "(555) 123-4567",
-    email: "testpatient1@example.com",
+    gender: "Male",
+    bloodType: "A+",
   },
   {
     patientId: patientId2,
     firstName: "Jane",
     lastName: "Smith",
     dob: "1945-05-15",
-    address: "456 Elm St, Othertown, USA",
-    phoneNumber: "(555) 987-6543",
-    email: "testpatient2@example.com",
     gender: "Female",
     bloodType: "O+",
-    height: "165 cm",
-    weight: "60 kg",
-    allergies: ["Peanuts"],
-    conditions: ["Hypertension"], // database doesnt have this field yet -----------------------------
-    emergencyContactName: "Mary Smith",
-    emergencyContactPhone: "(555) 123-4567",
-    emergencyContactRelationship: "Daughter",
-    insuranceProvider: "HealthCare Inc.",
-    insurancePolicyNumber: "HC123456789",
-    careNotes: "Patient requires daily monitoring for blood pressure.", // database doesnt have this field yet -----------------------------
   },
 ];
 
@@ -167,5 +155,45 @@ export let taskLogs: TaskLogEntry[] = [
     completedAt: new Date().toISOString(),
     isCompleted: true,
     caregivers: { firstName: "Bob", lastName: "Williams" },
+  },
+];
+
+/*
+  Patient Related Data
+*/
+export let patients: AllPatientInfo[] = [
+  {
+    patientId: patientId1,
+    firstName: "John",
+    lastName: "Doe",
+    dob: "1950-01-01",
+    gender: "Male",
+    bloodType: "A+",
+    height: "180 cm",
+    weight: "80 kg",
+    allergies: ["Penicillin"],
+    conditions: ["Diabetes"],
+    emergencyContactName: "Mary Doe",
+    emergencyContactPhone: "(555) 123-4567",
+    emergencyContactRelationship: "Spouse",
+    insuranceProvider: "HealthCare Inc.",
+    insurancePolicyNumber: "HC123456789",
+  },
+  {
+    patientId: patientId2,
+    firstName: "Jane",
+    lastName: "Smith",
+    dob: "1945-05-15",
+    gender: "Female",
+    bloodType: "O+",
+    height: "165 cm",
+    weight: "60 kg",
+    allergies: ["Peanuts"],
+    conditions: ["Hypertension"],
+    emergencyContactName: "Mary Smith",
+    emergencyContactPhone: "(555) 123-4567",
+    emergencyContactRelationship: "Daughter",
+    insuranceProvider: "HealthCare Inc.",
+    insurancePolicyNumber: "HC123456789",
   },
 ];

@@ -39,7 +39,7 @@ export interface PatientInsuranceInfo {
 }
 
 // Full patient composed from all sections
-export type PatientInfo = PatientBasicInfo &
+export type AllPatientInfo = PatientBasicInfo &
   PatientContactInfo &
   PatientMedicalInfo &
   PatientEmergencyContact &

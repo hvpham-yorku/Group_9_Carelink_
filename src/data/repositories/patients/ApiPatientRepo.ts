@@ -1,6 +1,6 @@
 import { supabase } from "../../../lib/supabase";
 import type {
-  PatientInfo,
+  AllPatientInfo,
   PatientBasicInfo,
   PatientContactInfo,
   PatientMedicalInfo,
@@ -11,7 +11,7 @@ import type {
 import type { PatientRepo } from "./PatientRepo";
 
 export class ApiPatientRepo implements PatientRepo {
-  async getPatientDetails(patientId: string): Promise<PatientInfo> {
+  async getPatientDetails(patientId: string): Promise<AllPatientInfo> {
     const { data, error } = await supabase
       .from("patients")
       .select(
@@ -29,7 +29,7 @@ export class ApiPatientRepo implements PatientRepo {
 
     const ec = data.emergency_contacts?.[0];
 
-    const formattedData: PatientInfo = {
+    const formattedData: AllPatientInfo = {
       patientId: data.patient_id,
       firstName: data.first_name,
       lastName: data.last_name,
@@ -65,7 +65,7 @@ export class ApiPatientRepo implements PatientRepo {
   async updatePatientBasicInfo(
     patientId: string,
     updates: Partial<PatientBasicInfo>,
-  ): Promise<PatientInfo> {
+  ): Promise<AllPatientInfo> {
     const { error } = await supabase
       .from("patients")
       .update({
@@ -85,7 +85,7 @@ export class ApiPatientRepo implements PatientRepo {
   async updatePatientContactInfo(
     patientId: string,
     contactInfo: Partial<PatientContactInfo>,
-  ): Promise<PatientInfo> {
+  ): Promise<AllPatientInfo> {
     const { error } = await supabase
       .from("patients")
       .update({
@@ -104,7 +104,7 @@ export class ApiPatientRepo implements PatientRepo {
   async updatePatientMedicalInfo(
     patientId: string,
     medicalInfo: Partial<PatientMedicalInfo>,
-  ): Promise<PatientInfo> {
+  ): Promise<AllPatientInfo> {
     const { error } = await supabase
       .from("patients")
       .update({
@@ -141,7 +141,7 @@ export class ApiPatientRepo implements PatientRepo {
   async updatePatientEmergencyContact(
     patientId: string,
     emergencyContactInfo: Partial<PatientEmergencyContact>,
-  ): Promise<PatientInfo> {
+  ): Promise<AllPatientInfo> {
     const { data, error } = await supabase
       .from("emergency_contacts")
       .select("contact_id")
@@ -178,7 +178,7 @@ export class ApiPatientRepo implements PatientRepo {
   async updatePatientInsuranceInfo(
     patientId: string,
     insuranceInfo: Partial<PatientInsuranceInfo>,
-  ): Promise<PatientInfo> {
+  ): Promise<AllPatientInfo> {
     const { error } = await supabase
       .from("patients")
       .update({

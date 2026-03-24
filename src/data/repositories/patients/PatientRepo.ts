@@ -1,5 +1,5 @@
 import type {
-  PatientInfo,
+  AllPatientInfo,
   PatientBasicInfo,
   PatientContactInfo,
   PatientMedicalInfo,
@@ -8,33 +8,33 @@ import type {
 } from "../../../types/patient";
 
 export interface PatientRepo {
-  getPatientDetails(patientId: string): Promise<PatientInfo>;
+  getPatientDetails(patientId: string): Promise<AllPatientInfo>;
 
   // update patient fields
   updatePatientBasicInfo(
     patientId: string,
     updates: Partial<PatientBasicInfo>,
-  ): Promise<PatientInfo>;
+  ): Promise<AllPatientInfo>;
   updatePatientContactInfo(
     patientId: string,
     contactInfo: Partial<PatientContactInfo>,
-  ): Promise<PatientInfo>;
+  ): Promise<AllPatientInfo>;
   updatePatientMedicalInfo(
     patientId: string,
     medicalInfo: Partial<PatientMedicalInfo>,
-  ): Promise<PatientInfo>;
+  ): Promise<AllPatientInfo>;
   updatePatientEmergencyContact(
     patientId: string,
     emergencyContactInfo: Partial<PatientEmergencyContact>,
-  ): Promise<PatientInfo>;
+  ): Promise<AllPatientInfo>;
   updatePatientInsuranceInfo(
     patientId: string,
     insuranceInfo: Partial<PatientInsuranceInfo>,
-  ): Promise<PatientInfo>;
+  ): Promise<AllPatientInfo>;
   /*
   updatePatientPhysicianInfo(
     patientId: string,
     physicianInfo: Partial<PatientPhysicianInfo>,
-  ): Promise<PatientInfo>;
+  ): Promise<AllPatientInfo>;
     */
 }
