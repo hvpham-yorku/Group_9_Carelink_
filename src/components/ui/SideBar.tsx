@@ -17,7 +17,6 @@ interface SideBarProps {
 const SideBar = ({ username }: SideBarProps) => {
   const { patients, selectedPatientId, setSelectedPatientId } = usePatient();
 
-  // ✅ ADD THIS (missing before)
   const [patientMenuOpen, setPatientMenuOpen] = useState(false);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
