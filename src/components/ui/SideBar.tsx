@@ -97,7 +97,6 @@ const SideBar = ({ username }: SideBarProps) => {
               </NavLink>
             </li>
 
-            {/* ✅ FIXED Active Patient Dropdown */}
             <li className="nav-item d-flex align-items-center ms-3">
               <span
                 className="fw-semibold me-2 text-uppercase"
