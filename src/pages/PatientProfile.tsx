@@ -15,6 +15,7 @@ import {
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
+import Button from "../components/ui/Button";
 import StatCard from "../components/ui/StatCard";
 import type { PatientInfo } from "../types/Types";
 import { usePatient } from "../contexts/patient/usePatient";
@@ -242,31 +243,28 @@ const PatientProfile = () => {
             </div>
           </CustomSection>
 
-          <CustomSection
-            title="Care Notes"
-            rightAction={
-              <button
-                className="btn btn-sm btn-outline-primary"
-                onClick={() => navigate("/notes")}
-              >
-                View Notes
-              </button>
-            }
-          >
-            <div className="d-flex align-items-start gap-3">
-              <div
-                className="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle"
-                style={{ width: "44px", height: "44px" }}
-              >
-                <FileText size={20} className="text-warning-emphasis" />
-              </div>
+<CustomSection
+  title="Care Notes"
+  rightAction={
+    <Button color="outline-primary" onClick={() => navigate("/notes")}>
+      View Notes
+    </Button>
+  }
+>
+  <div className="d-flex align-items-start gap-3">
+    <div
+      className="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle"
+      style={{ width: "44px", height: "44px" }}
+    >
+      <FileText size={20} className="text-warning-emphasis" />
+    </div>
 
-              <div className="flex-grow-1">
-                <div className="text-muted small mb-2">Latest Note</div>
-                <div>{patient.careNotes || "Not Available"}</div>
-              </div>
-            </div>
-          </CustomSection>
+    <div className="flex-grow-1">
+      <div className="text-muted small mb-2">Latest Note</div>
+      <div>{patient.careNotes || "Not Available"}</div>
+    </div>
+  </div>
+</CustomSection>
         </div>
       </div>
 
