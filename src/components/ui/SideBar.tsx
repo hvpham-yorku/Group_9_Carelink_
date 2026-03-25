@@ -47,7 +47,7 @@ const SideBar = ({ username }: SideBarProps) => {
             end
             className="d-flex align-items-center text-decoration-none"
           >
-            <Heart size={36} className="text-primary me-2" />
+            <Heart size={40} className="text-primary me-2" />
             <span
               style={{
                 fontSize: "1.6rem",
