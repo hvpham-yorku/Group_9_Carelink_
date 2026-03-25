@@ -8,6 +8,8 @@ export interface NewNote {
   title: string | null;
   description: string | null;
   categoryId?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   isUrgent?: boolean | null;
 }
 

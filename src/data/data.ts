@@ -6,6 +6,7 @@ import type {
 } from "../types/teams";
 
 import type { AllPatientInfo } from "../types/patient";
+import type { Note } from "../types/note";
 
 import type { Task, TaskLogEntry } from "../types/task";
 
@@ -95,10 +96,12 @@ export let categories: Category[] = [
   {
     categoryId: categoryId1,
     name: "Medication",
+    color: "text-bg-primary",
   },
   {
     categoryId: categoryId2,
     name: "Appointments",
+    color: "text-bg-success",
   },
 ];
 
@@ -112,7 +115,7 @@ export let tasks: Task[] = [
     patientId: patientId1,
     title: "Take Medication",
     description: "Take prescribed medication at the scheduled time.",
-    categories: { name: "Medication" },
+    categories: { name: "Medication", color: "text-bg-primary" },
     scheduledAt: new Date().toISOString(),
   },
   {
@@ -120,7 +123,7 @@ export let tasks: Task[] = [
     patientId: patientId1,
     title: "Doctor's Appointment",
     description: "Visit Dr. Smith for a routine check-up.",
-    categories: { name: "Appointments" },
+    categories: { name: "Appointments", color: "text-bg-success" },
     scheduledAt: new Date().toISOString(),
   },
   {
@@ -128,7 +131,7 @@ export let tasks: Task[] = [
     patientId: patientId2,
     title: "Take Blood Pressure",
     description: "Measure blood pressure daily and log the readings.",
-    categories: { name: "Medication" },
+    categories: { name: "Medication", color: "text-bg-primary" },
     scheduledAt: new Date().toISOString(),
   },
   {
@@ -136,7 +139,7 @@ export let tasks: Task[] = [
     patientId: patientId2,
     title: "Physical Therapy",
     description: "Attend physical therapy sessions twice a week.",
-    categories: { name: "Appointments" },
+    categories: { name: "Appointments", color: "text-bg-success" },
     scheduledAt: new Date().toISOString(),
   },
 ];
@@ -195,5 +198,39 @@ export let patients: AllPatientInfo[] = [
     emergencyContactRelationship: "Daughter",
     insuranceProvider: "HealthCare Inc.",
     insurancePolicyNumber: "HC123456789",
+  },
+];
+
+/*
+  Note Related Data
+*/
+export let notes: Note[] = [
+  {
+    noteId: crypto.randomUUID(),
+    patientId: patientId1,
+    caregiverId: caregiverId1,
+    careTeamId: careTeamId1,
+    categoryId: categoryId1,
+    title: "Medication Reminder",
+    description: "Reminder to take morning medication.",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isUrgent: false,
+    categories: { name: "Medication", color: "text-bg-primary" },
+    caregivers: { firstName: "Alice", lastName: "Johnson" },
+  },
+  {
+    noteId: crypto.randomUUID(),
+    patientId: patientId2,
+    caregiverId: caregiverId2,
+    careTeamId: careTeamId1,
+    categoryId: categoryId2,
+    title: "Appointment Reminder",
+    description: "Reminder for upcoming doctor's appointment.",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isUrgent: true,
+    categories: { name: "Appointments", color: "text-bg-success" },
+    caregivers: { firstName: "Bob", lastName: "Williams" },
   },
 ];
