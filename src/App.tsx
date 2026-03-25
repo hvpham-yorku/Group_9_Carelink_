@@ -9,6 +9,7 @@ import { PatientProvider } from "./contexts/patient/PatientProvider";
 import Dashboard from "./pages/Dashboard";
 import TaskManager from "./pages/TaskManager";
 import MedicationTracker from "./pages/MedicationTracker";
+import AppointmentManager from "./pages/AppointmentManager";
 import PatientProfile from "./pages/PatientProfile";
 import Teams from "./pages/Teams";
 import Login from "./pages/Login";
@@ -29,7 +30,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            
+
             <Route element={<Layout />}>
               <Route
                 path="/dashboard"
@@ -39,6 +40,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/task-manager"
                 element={
@@ -47,6 +49,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/medication-tracker"
                 element={
@@ -55,6 +58,16 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/appointments"
+                element={
+                  <ProtectedRoute>
+                    <AppointmentManager />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path="/patient-profile"
                 element={
@@ -63,6 +76,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/notes"
                 element={
@@ -71,6 +85,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/teams"
                 element={
@@ -80,16 +95,17 @@ function App() {
                 }
               />
             </Route>
+
             <Route
-                  path="/accountsettings"
-                  element={
-                    <ProtectedRoute>
-                      <AccountSettings />
-                    </ProtectedRoute>
-                  }
-                />
+              path="/accountsettings"
+              element={
+                <ProtectedRoute>
+                  <AccountSettings />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="/" element={<Navigate to="/landingpage" replace />} />
-            
           </Routes>
         </PatientProvider>
       </AuthProvider>

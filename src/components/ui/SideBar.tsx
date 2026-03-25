@@ -1,9 +1,9 @@
 /*
-    This is the SideBar component for the CareLink application. 
-    It provides navigation links to different sections of the app.
-    
-    Props:
-    - username: The name of the logged-in user, displayed in the dropdown menu.
+ This is the SideBar component for the CareLink application.
+ It provides navigation links to different sections of the app.
+
+ Props:
+ - username: The name of the logged-in user, displayed in the dropdown menu.
 */
 
 import { NavLink } from "react-router-dom";
@@ -18,11 +18,10 @@ interface SideBarProps {
 }
 
 const SideBar = ({ username }: SideBarProps) => {
-
   // Get patient context for the patient switcher dropdown
   const { patients, selectedPatientId, setSelectedPatientId } = usePatient();
   const navigate = useNavigate();
-  
+
   return (
     <>
       <div
@@ -36,113 +35,116 @@ const SideBar = ({ username }: SideBarProps) => {
         >
           <span style={{ fontSize: "1.8rem", lineHeight: 1 }}>CareLink</span>
         </NavLink>
-        
+
         <ul className="nav d-flex flex-row align-items-center justify-content-evenly mb-0 flex-grow-1">
+          <li className="nav-item">
+            <NavLink
+              to="/dashboard"
+              end
+              className={({ isActive }) =>
+                `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${isActive ? "bg-white bg-opacity-10" : ""
+                }`
+              }
+            >
+              Dashboard
+            </NavLink>
+          </li>
 
-  <li className="nav-item">
-    <NavLink
-      to="/dashboard"
-      end
-      className={({ isActive }) =>
-        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
-          isActive ? "bg-white bg-opacity-10" : ""
-        }`
-      }
-    >
-      Dashboard
-    </NavLink>
-  </li>
+          <li className="nav-item">
+            <NavLink
+              to="/task-manager"
+              className={({ isActive }) =>
+                `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${isActive ? "bg-white bg-opacity-10" : ""
+                }`
+              }
+            >
+              Task Manager
+            </NavLink>
+          </li>
 
-  <li className="nav-item">
-    <NavLink
-      to="/task-manager"
-      className={({ isActive }) =>
-        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
-          isActive ? "bg-white bg-opacity-10" : ""
-        }`
-      }
-    >
-      Task Manager
-    </NavLink>
-  </li>
+          <li className="nav-item">
+            <NavLink
+              to="/medication-tracker"
+              className={({ isActive }) =>
+                `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${isActive ? "bg-white bg-opacity-10" : ""
+                }`
+              }
+            >
+              Medication Tracker
+            </NavLink>
+          </li>
 
-  <li className="nav-item">
-    <NavLink
-      to="/medication-tracker"
-      className={({ isActive }) =>
-        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
-          isActive ? "bg-white bg-opacity-10" : ""
-        }`
-      }
-    >
-      Medication Tracker
-    </NavLink>
-  </li>
+          <li className="nav-item">
+            <NavLink
+              to="/appointments"
+              className={({ isActive }) =>
+                `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${isActive ? "bg-white bg-opacity-10" : ""
+                }`
+              }
+            >
+              Appointments
+            </NavLink>
+          </li>
 
-  <li className="nav-item">
-    <NavLink
-      to="/notes"
-      className={({ isActive }) =>
-        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
-          isActive ? "bg-white bg-opacity-10" : ""
-        }`
-      }
-    >
-      Notes
-    </NavLink>
-  </li>
+          <li className="nav-item">
+            <NavLink
+              to="/notes"
+              className={({ isActive }) =>
+                `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${isActive ? "bg-white bg-opacity-10" : ""
+                }`
+              }
+            >
+              Notes
+            </NavLink>
+          </li>
 
-  <li className="nav-item">
-    <NavLink
-      to="/teams"
-      className={({ isActive }) =>
-        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
-          isActive ? "bg-white bg-opacity-10" : ""
-        }`
-      }
-    >
-      Care Team
-    </NavLink>
-  </li>
+          <li className="nav-item">
+            <NavLink
+              to="/teams"
+              className={({ isActive }) =>
+                `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${isActive ? "bg-white bg-opacity-10" : ""
+                }`
+              }
+            >
+              Care Team
+            </NavLink>
+          </li>
 
-  <li className="nav-item">
-    <NavLink
-      to="/patient-profile"
-      className={({ isActive }) =>
-        `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${
-          isActive ? "bg-white bg-opacity-10" : ""
-        }`
-      }
-    >
-      Patient Profile
-    </NavLink>
-  </li>
+          <li className="nav-item">
+            <NavLink
+              to="/patient-profile"
+              className={({ isActive }) =>
+                `nav-link text-white text-uppercase fw-semibold px-3 py-2 rounded ${isActive ? "bg-white bg-opacity-10" : ""
+                }`
+              }
+            >
+              Patient Profile
+            </NavLink>
+          </li>
 
-  <li className="nav-item d-flex align-items-center">
-  <span
-    className="text-white text-uppercase fw-semibold me-2"
-    style={{ fontSize: "0.75rem", letterSpacing: "0.08em" }}
-  >
-    Active Patient
-  </span>
+          <li className="nav-item d-flex align-items-center">
+            <span
+              className="text-white text-uppercase fw-semibold me-2"
+              style={{ fontSize: "0.75rem", letterSpacing: "0.08em" }}
+            >
+              Active Patient
+            </span>
 
-  <select
-    className="form-select form-select-sm navbar-select"
-    style={{ width: "170px" }}
-    value={selectedPatientId || ""}
-    onChange={(e) => setSelectedPatientId(e.target.value)}
-  >
-    {patients.map((p) => (
-      <option key={p.patientId} value={p.patientId}>
-        {p.firstName} {p.lastName}
-      </option>
-    ))}
-  </select>
-</li>
+            <select
+              className="form-select form-select-sm navbar-select"
+              style={{ width: "170px" }}
+              value={selectedPatientId || ""}
+              onChange={(e) => setSelectedPatientId(e.target.value)}
+            >
+              {patients.map((p) => (
+                <option key={p.patientId} value={p.patientId}>
+                  {p.firstName} {p.lastName}
+                </option>
+              ))}
+            </select>
+          </li>
+        </ul>
 
-</ul>
-
-        
         <div className="btn-group dropup">
           <button
             type="button"
@@ -152,26 +154,26 @@ const SideBar = ({ username }: SideBarProps) => {
           >
             {username}
           </button>
+
           <ul className="dropdown-menu">
             <li>
               <hr className="dropdown-divider" />
             </li>
+
             <li>
-              <NavLink
-                className="dropdown-item"
-                to="/accountsettings"
-              >
+              <NavLink className="dropdown-item" to="/accountsettings">
                 Account Settings
               </NavLink>
-              <button 
-              className="dropdown-item text-danger border-0 bg-transparent w-100 text-start"
-              onClick={async () => {
-                navigate("/landingpage");     // Go to landing
-                await authService.signOut(); // Clear session
-              }}
-            >
-              Sign Out
-            </button>
+
+              <button
+                className="dropdown-item text-danger border-0 bg-transparent w-100 text-start"
+                onClick={async () => {
+                  navigate("/landingpage");
+                  await authService.signOut();
+                }}
+              >
+                Sign Out
+              </button>
             </li>
           </ul>
         </div>
