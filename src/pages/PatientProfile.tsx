@@ -11,6 +11,7 @@ import {
   FileText,
 } from "lucide-react";
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
+import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import type { PatientInfo } from "../types/Types";
 import { usePatient } from "../contexts/patient/usePatient";
 import { patientService } from "../services/patientService";
@@ -62,10 +63,16 @@ const PatientProfile = () => {
   }
 
   return (
-    <div className="container py-4">
-      <div className="mb-4">
-        <PatientInfoBanner patient={patient} />
-      </div>
+  <div className="container py-4">
+    <CustomTitleBanner
+      title="Patient Profile"
+      subheader="View and manage patient details"
+    />
+
+    <div className="mb-4">
+      <PatientInfoBanner patient={patient} />
+    </div>
+      
 
       <div className="row g-4">
         <div className="col-lg-4">
