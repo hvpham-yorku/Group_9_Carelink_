@@ -9,9 +9,14 @@ import {
   Stethoscope,
   Shield,
   FileText,
+  Calendar,
+  CheckCircle,
 } from "lucide-react";
+
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
+import StatCard from "../components/ui/StatCard";
+
 import type { PatientInfo } from "../types/Types";
 import { usePatient } from "../contexts/patient/usePatient";
 import { patientService } from "../services/patientService";
@@ -63,23 +68,21 @@ const PatientProfile = () => {
   }
 
   return (
-  <div className="container py-4">
-    <CustomTitleBanner
-      title="Patient Profile"
-      subheader="View and manage patient details"
-    />
+    <div className="container py-4">
+      <CustomTitleBanner
+        title="Patient Profile"
+        subheader="View and manage patient details"
+      />
 
-    <div className="mb-4">
-      <PatientInfoBanner patient={patient} />
-    </div>
-      
+      <div className="mb-4">
+        <PatientInfoBanner patient={patient} />
+      </div>
 
       <div className="row g-4">
+        {/* LEFT COLUMN */}
         <div className="col-lg-4">
-          <div
-            className="card border-0 shadow"
-            style={{ borderRadius: "18px" }}
-          >
+          {/* Contact */}
+          <div className="card border-0 shadow" style={{ borderRadius: "18px" }}>
             <div className="card-body p-4">
               <h3 className="fw-semibold mb-4 text-dark">
                 Contact Information
@@ -111,6 +114,7 @@ const PatientProfile = () => {
             </div>
           </div>
 
+          {/* Insurance */}
           <div
             className="card border-0 shadow mt-4"
             style={{ borderRadius: "18px" }}
@@ -142,11 +146,10 @@ const PatientProfile = () => {
           </div>
         </div>
 
+        {/* RIGHT COLUMN */}
         <div className="col-lg-8">
-          <div
-            className="card border-0 shadow"
-            style={{ borderRadius: "18px" }}
-          >
+          {/* Medical */}
+          <div className="card border-0 shadow" style={{ borderRadius: "18px" }}>
             <div className="card-body p-4">
               <h3 className="fw-semibold mb-4 text-dark">
                 Medical Information
@@ -170,15 +173,12 @@ const PatientProfile = () => {
               <div>
                 <div className="text-muted small mb-2">Allergies</div>
 
-                {patient.allergies && patient.allergies.length > 0 ? (
+                {patient.allergies?.length ? (
                   <div className="d-flex flex-wrap gap-2">
-                    {patient.allergies.map((allergy, index) => (
-                      <span
-                        key={index}
-                        className="badge rounded-pill text-bg-danger"
-                      >
+                    {patient.allergies.map((a, i) => (
+                      <span key={i} className="badge rounded-pill text-bg-danger">
                         <AlertCircle size={14} className="me-1" />
-                        {allergy}
+                        {a}
                       </span>
                     ))}
                   </div>
@@ -189,86 +189,47 @@ const PatientProfile = () => {
             </div>
           </div>
 
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
+          {/* Emergency */}
+          <div className="card border-0 shadow mt-4" style={{ borderRadius: "18px" }}>
             <div className="card-body p-4">
               <h3 className="fw-semibold mb-4 text-dark">Emergency Contact</h3>
 
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <UserRound size={20} className="text-danger" />
-                </div>
-
-                <div className="flex-grow-1">
-                  <div className="mb-3">
-                    <div className="text-muted small">Name</div>
-                    <div>{patient.emergencyContactName || "Not Available"}</div>
+              <div className="d-flex gap-3">
+                <UserRound size={20} className="text-danger" />
+                <div>
+                  <div>{patient.emergencyContactName || "Not Available"}</div>
+                  <div className="text-muted small">
+                    {patient.emergencyContactRelationship || "—"}
                   </div>
-
-                  <div className="mb-3">
-                    <div className="text-muted small">Relationship</div>
-                    <div>
-                      {patient.emergencyContactRelationship || "Not Available"}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-muted small">Phone</div>
-                    <div>{patient.emergencyContactPhone || "Not Available"}</div>
-                  </div>
+                  <div>{patient.emergencyContactPhone || "—"}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
+          {/* Physician */}
+          <div className="card border-0 shadow mt-4" style={{ borderRadius: "18px" }}>
             <div className="card-body p-4">
               <h3 className="fw-semibold mb-4 text-dark">Primary Physician</h3>
 
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <Stethoscope size={20} className="text-primary" />
-                </div>
-
-                <div className="flex-grow-1">
-                  <div className="mb-3">
-                    <div className="text-muted small">Name</div>
-                    <div>{patient.physicianName || "Not Available"}</div>
+              <div className="d-flex gap-3">
+                <Stethoscope size={20} className="text-primary" />
+                <div>
+                  <div>{patient.physicianName || "Not Available"}</div>
+                  <div className="text-muted small">
+                    {patient.physicianPhone || "—"}
                   </div>
-
-                  <div className="mb-3">
-                    <div className="text-muted small">Phone</div>
-                    <div>{patient.physicianPhone || "Not Available"}</div>
-                  </div>
-
-                  <div>
-                    <div className="text-muted small">Address</div>
-                    <div>{patient.physicianAddress || "Not Available"}</div>
-                  </div>
+                  <div>{patient.physicianAddress || "—"}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
+          {/* Notes */}
+          <div className="card border-0 shadow mt-4" style={{ borderRadius: "18px" }}>
             <div className="card-body p-4">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="fw-semibold mb-0 text-dark">Care Notes</h3>
-
+              <div className="d-flex justify-content-between mb-4">
+                <h3 className="fw-semibold">Care Notes</h3>
                 <button
                   className="btn btn-sm btn-outline-primary"
                   onClick={() => navigate("/notes")}
@@ -277,23 +238,44 @@ const PatientProfile = () => {
                 </button>
               </div>
 
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <FileText size={20} className="text-warning-emphasis" />
-                </div>
-
-                <div className="flex-grow-1">
-                  <div className="text-muted small mb-2">Latest Note</div>
-                  <div>{patient.careNotes || "Not Available"}</div>
-                </div>
-              </div>
+              <div>{patient.careNotes || "Not Available"}</div>
             </div>
           </div>
         </div>
-      </div>      
+      </div>
+
+      <div className="mt-4">
+        <h3 className="fw-semibold mb-3">Care History Summary</h3>
+
+        <div className="row g-3">
+          <div className="col-md-4">
+            <StatCard
+              title="Care Days"
+              value="—"
+              description="Total days under care"
+              icon={<Calendar size={18} />}
+            />
+          </div>
+
+          <div className="col-md-4">
+            <StatCard
+              title="Tasks Completed"
+              value="—"
+              description="Completed care tasks"
+              icon={<CheckCircle size={18} />}
+            />
+          </div>
+
+          <div className="col-md-4">
+            <StatCard
+              title="Appointments"
+              value="—"
+              description="Scheduled appointments"
+              icon={<Calendar size={18} />}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
