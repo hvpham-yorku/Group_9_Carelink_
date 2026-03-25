@@ -43,8 +43,9 @@ const SideBar = ({ username }: SideBarProps) => {
           backgroundColor: "#ffffff",
         }}
       >
-        <div className="d-flex align-items-center justify-content-between h-100 px-5">
-          {/* Logo */}
+        <div className="d-flex align-items-center justify-content-evenly h-100 px-3">
+
+            {/* Logo */}
           <NavLink
             to="/dashboard"
             end
@@ -63,8 +64,8 @@ const SideBar = ({ username }: SideBarProps) => {
           </NavLink>
 
           {/* Navigation */}
-          <ul className="nav d-flex flex-row align-items-center justify-content-evenly mb-0 flex-grow-1 mx-4">
-            <li className="nav-item">
+          <ul className="nav d-flex align-items-center justify-content-evenly mb-0 flex-grow-1">
+              <li className="nav-item">
               <NavLink to="/dashboard" end className={navLinkClass}>
                 Dashboard
               </NavLink>
