@@ -290,7 +290,6 @@ export type Database = {
       }
       medications: {
         Row: {
-          caregiver_id: string
           dosage: string | null
           frequency: string | null
           instructions: string | null
@@ -298,11 +297,12 @@ export type Database = {
           medication_id: string
           name: string | null
           patient_id: string
+          prescribed_by: string | null
           purpose: string | null
           team_id: string
+          warnings: string | null
         }
         Insert: {
-          caregiver_id: string
           dosage?: string | null
           frequency?: string | null
           instructions?: string | null
@@ -310,11 +310,12 @@ export type Database = {
           medication_id?: string
           name?: string | null
           patient_id: string
+          prescribed_by?: string | null
           purpose?: string | null
           team_id: string
+          warnings?: string | null
         }
         Update: {
-          caregiver_id?: string
           dosage?: string | null
           frequency?: string | null
           instructions?: string | null
@@ -322,17 +323,12 @@ export type Database = {
           medication_id?: string
           name?: string | null
           patient_id?: string
+          prescribed_by?: string | null
           purpose?: string | null
           team_id?: string
+          warnings?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "medications_caregiver_id_fkey"
-            columns: ["caregiver_id"]
-            isOneToOne: false
-            referencedRelation: "caregivers"
-            referencedColumns: ["caregiver_id"]
-          },
           {
             foreignKeyName: "medications_patient_id_fkey"
             columns: ["patient_id"]
@@ -355,6 +351,7 @@ export type Database = {
           category_id: string
           created_at: string | null
           description: string | null
+          is_urgent: boolean | null
           note_id: string
           patient_id: string
           team_id: string
@@ -366,6 +363,7 @@ export type Database = {
           category_id: string
           created_at?: string | null
           description?: string | null
+          is_urgent?: boolean | null
           note_id?: string
           patient_id: string
           team_id: string
@@ -377,6 +375,7 @@ export type Database = {
           category_id?: string
           created_at?: string | null
           description?: string | null
+          is_urgent?: boolean | null
           note_id?: string
           patient_id?: string
           team_id?: string
@@ -667,10 +666,11 @@ export type Database = {
         Args: {
           p_dob: string
           p_first_name: string
+          p_gender: string
           p_last_name: string
           p_team_id: string
         }
-        Returns: Json
+        Returns: string
       }
     }
     Enums: {
