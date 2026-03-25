@@ -1,8 +1,12 @@
-/*
-    This is the SideBar component for the CareLink application. 
-*/
+/**
+ * This is the SideBar component for the CareLink application.
+ * It provides navigation links to different sections of the app.
+ *
+ * Props:
+ * - username: The name of the logged-in user, displayed in the dropdown menu.
+ */
 
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Heart, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
@@ -16,6 +20,7 @@ interface SideBarProps {
 
 const SideBar = ({ username }: SideBarProps) => {
   const { patients, selectedPatientId, setSelectedPatientId } = usePatient();
+  const navigate = useNavigate();
 
   const [patientMenuOpen, setPatientMenuOpen] = useState(false);
 
@@ -39,7 +44,6 @@ const SideBar = ({ username }: SideBarProps) => {
         }}
       >
         <div className="d-flex align-items-center justify-content-between h-100 px-5">
-
           {/* Logo */}
           <NavLink
             to="/dashboard"
@@ -60,7 +64,6 @@ const SideBar = ({ username }: SideBarProps) => {
 
           {/* Navigation */}
           <ul className="nav d-flex flex-row align-items-center justify-content-evenly mb-0 flex-grow-1 mx-4">
-
             <li className="nav-item">
               <NavLink to="/dashboard" end className={navLinkClass}>
                 Dashboard
@@ -137,7 +140,10 @@ const SideBar = ({ username }: SideBarProps) => {
                   <ChevronDown size={18} className="patient-chevron ms-2" />
                 </button>
 
-                <ul className="dropdown-menu shadow-sm" style={{ minWidth: "180px" }}>
+                <ul
+                  className="dropdown-menu shadow-sm"
+                  style={{ minWidth: "180px" }}
+                >
                   {patients.map((p) => (
                     <li key={p.patientId}>
                       <button
@@ -177,17 +183,19 @@ const SideBar = ({ username }: SideBarProps) => {
 
             <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0">
               <li>
-                <NavLink
+                <button
+                  type="button"
                   className="dropdown-item"
-                  to="/landingpage"
-                  onClick={() => authService.signOut()}
+                  onClick={async () => {
+                    navigate("/landingpage");
+                    await authService.signOut();
+                  }}
                 >
                   Sign out
-                </NavLink>
+                </button>
               </li>
             </ul>
           </div>
-
         </div>
       </div>
     </>
