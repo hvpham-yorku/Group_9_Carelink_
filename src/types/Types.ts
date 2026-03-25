@@ -14,7 +14,6 @@ export interface Category {
 /**
  * Task Type Definition
  */
-
 export interface Task {
   taskId: string;
   patientId: string;
@@ -75,6 +74,23 @@ export interface MedicationScheduleItemProps {
 }
 
 /**
+ * Appointment Type Definitions
+ */
+export interface Appointment {
+  appointmentId: string;
+  careTeamId: string;
+  caregiverId: string;
+  patientId: string;
+  scheduledAt: string;
+  description: string;
+  completedTime?: string | null;
+  caregivers?: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
+/**
  * Notes Type Definition
  */
 export interface Note {
@@ -87,6 +103,7 @@ export interface Note {
   description: string;
   createdAt: string;
   updatedAt: string;
+
   // Supabase Joins
   caregivers?: {
     firstName: string;
@@ -195,4 +212,5 @@ type AppointmentItem = {
   day: string;
   title: string;
   location: string;
+  time?: string;
 };

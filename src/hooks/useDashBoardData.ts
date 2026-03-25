@@ -6,6 +6,7 @@ import { patientService } from "../services/patientService";
 import { taskService } from "../services/taskService";
 import { medicationService } from "../services/medicationService";
 import { noteService } from "../services/noteService";
+import { appointmentService } from "../services/appointmentService";
 import { calculateAge, formatToTime } from "../utils/formatters";
 
 type StatCard = {
@@ -32,6 +33,7 @@ type AppointmentItem = {
   day: string;
   title: string;
   location: string;
+  time?: string;
 };
 
 type DashboardPatient = {
@@ -77,18 +79,26 @@ export const useDashboardData = () => {
       setError(null);
 
       try {
-        const [profile, patientProfile, tasksRaw, prescriptionsRaw, notesRaw] =
-          await Promise.all([
-            authService.getProfile(user.id),
-            patientService.getFullProfile(selectedPatientId),
-            taskService.getTasksByPatient(selectedPatientId),
-            medicationService.getPrescriptionsByPatient(selectedPatientId),
-            noteService.getNotesByPatient(selectedPatientId),
-          ]);
+        const [
+          profile,
+          patientProfile,
+          tasksRaw,
+          prescriptionsRaw,
+          notesRaw,
+          appointmentsRaw,
+        ] = await Promise.all([
+          authService.getProfile(user.id),
+          patientService.getFullProfile(selectedPatientId),
+          taskService.getTasksByPatient(selectedPatientId),
+          medicationService.getPrescriptionsByPatient(selectedPatientId),
+          noteService.getNotesByPatient(selectedPatientId),
+          appointmentService.getAppointmentsByPatient(selectedPatientId),
+        ]);
 
         const tasks = tasksRaw ?? [];
         const prescriptions = prescriptionsRaw ?? [];
         const notes = notesRaw ?? [];
+        const appointments = appointmentsRaw ?? [];
 
         const caregiverName =
           `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim() ||
@@ -105,20 +115,49 @@ export const useDashboardData = () => {
         const patientMeta = age !== null ? `Age ${age}` : "Patient";
 
         const completedTasks = tasks.filter((task: any) =>
-          task.taskLogs?.some((log: any) => log.isCompleted),
+          task.taskLogs?.some((log: any) => log.isCompleted)
         ).length;
 
         const totalTasks = tasks.length;
         const remainingTasks = totalTasks - completedTasks;
 
         const takenMeds = prescriptions.filter((prescription: any) =>
-          prescription.medicationLogs?.some((log: any) => log.isCompleted),
+          prescription.medicationLogs?.some((log: any) => log.isCompleted)
         ).length;
 
         const totalMeds = prescriptions.length;
         const remainingMeds = totalMeds - takenMeds;
 
         const recentNotesCount = notes.length;
+
+        const upcomingAppointments: AppointmentItem[] = appointments
+          .filter((appointment: any) => {
+            const isCompleted = !!appointment.completedTime;
+            const isFuture = new Date(appointment.scheduledAt).getTime() >= Date.now();
+            return !isCompleted && isFuture;
+          })
+          .sort(
+            (a: any, b: any) =>
+              new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+          )
+          .slice(0, 4)
+          .map((appointment: any) => {
+            const date = new Date(appointment.scheduledAt);
+
+            return {
+              day: date.toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+              }),
+              time: date.toLocaleTimeString(undefined, {
+                hour: "numeric",
+                minute: "2-digit",
+              }),
+              title:
+                appointment.description?.trim() || "Upcoming appointment",
+              location: "",
+            };
+          });
 
         const stats: StatCard[] = [
           {
@@ -138,8 +177,12 @@ export const useDashboardData = () => {
           },
           {
             title: "Next Appointment",
-            primary: "—",
-            secondary: "No data yet",
+            primary: upcomingAppointments.length > 0 ? upcomingAppointments[0].day : "—",
+            secondary:
+              upcomingAppointments.length > 0
+                ? upcomingAppointments[0].title
+                : "No data yet",
+            route: "/appointments",
           },
           {
             title: "Care Notes",
@@ -152,7 +195,7 @@ export const useDashboardData = () => {
 
         const recentActivity: ActivityItem[] = tasks
           .filter((task: any) =>
-            task.taskLogs?.some((log: any) => log.isCompleted),
+            task.taskLogs?.some((log: any) => log.isCompleted)
           )
           .slice(0, 4)
           .map((task: any) => ({
@@ -174,7 +217,7 @@ export const useDashboardData = () => {
 
         const todaysMeds: MedItem[] = prescriptions.slice(0, 5).map((prescription: any) => {
           const taken = prescription.medicationLogs?.some(
-            (log: any) => log.isCompleted,
+            (log: any) => log.isCompleted
           );
 
           return {
@@ -192,8 +235,6 @@ export const useDashboardData = () => {
           emergencyContact: "Coming soon",
           emergencyPhone: "—",
         };
-
-        const upcomingAppointments: AppointmentItem[] = [];
 
         setData({
           caregiver: {
