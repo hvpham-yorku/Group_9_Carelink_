@@ -79,214 +79,194 @@ const PatientProfile = () => {
 
       <div className="row g-4">
         <div className="col-lg-4">
-          
-<CustomSection title="Contact Information">
-  <div className="d-flex gap-3 mb-4">
-    <MapPin size={18} className="text-muted mt-1" />
-    <div>
-      <div className="text-muted small">Address</div>
-      <div>{patient.address || "Not Available"}</div>
-    </div>
-  </div>
+          <CustomSection title="Contact Information">
+            <div className="d-flex gap-3 mb-4">
+              <MapPin size={18} className="text-muted mt-1" />
+              <div>
+                <div className="text-muted small">Address</div>
+                <div>{patient.address || "Not Available"}</div>
+              </div>
+            </div>
 
-  <div className="d-flex gap-3 mb-4">
-    <Phone size={18} className="text-muted mt-1" />
-    <div>
-      <div className="text-muted small">Phone</div>
-      <div>{patient.phoneNumber || "Not Available"}</div>
-    </div>
-  </div>
+            <div className="d-flex gap-3 mb-4">
+              <Phone size={18} className="text-muted mt-1" />
+              <div>
+                <div className="text-muted small">Phone</div>
+                <div>{patient.phoneNumber || "Not Available"}</div>
+              </div>
+            </div>
 
-  <div className="d-flex gap-3">
-    <Mail size={18} className="text-muted mt-1" />
-    <div>
-      <div className="text-muted small">Email</div>
-      <div>{patient.email || "Not Available"}</div>
-    </div>
-  </div>
-</CustomSection>
+            <div className="d-flex gap-3">
+              <Mail size={18} className="text-muted mt-1" />
+              <div>
+                <div className="text-muted small">Email</div>
+                <div>{patient.email || "Not Available"}</div>
+              </div>
+            </div>
+          </CustomSection>
 
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4 text-dark">Insurance</h3>
+          <CustomSection title="Insurance">
+            <div className="d-flex align-items-start gap-3">
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle"
+                style={{ width: "44px", height: "44px" }}
+              >
+                <Shield size={20} className="text-success" />
+              </div>
 
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <Shield size={20} className="text-success" />
+              <div className="flex-grow-1">
+                <div className="mb-3">
+                  <div className="text-muted small">Provider</div>
+                  <div>{patient.insuranceProvider || "Not Available"}</div>
                 </div>
 
-                <div className="flex-grow-1">
-                  <div className="mb-3">
-                    <div className="text-muted small">Provider</div>
-                    <div>{patient.insuranceProvider || "Not Available"}</div>
-                  </div>
-
-                  <div>
-                    <div className="text-muted small">Policy Number</div>
-                    <div>{patient.insurancePolicyNumber || "Not Available"}</div>
-                  </div>
+                <div>
+                  <div className="text-muted small">Policy Number</div>
+                  <div>{patient.insurancePolicyNumber || "Not Available"}</div>
                 </div>
               </div>
             </div>
-          </div>
+          </CustomSection>
         </div>
 
         <div className="col-lg-8">
-          <div
-            className="card border-0 shadow"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4 text-dark">
-                Medical Information
-              </h3>
-
-              <div className="mb-3">
-                <div className="text-muted small">Blood Type</div>
-                <div>{patient.bloodType || "Not Available"}</div>
-              </div>
-
-              <div className="mb-3">
-                <div className="text-muted small">Height</div>
-                <div>{patient.height || "Not Available"}</div>
-              </div>
-
-              <div className="mb-3">
-                <div className="text-muted small">Weight</div>
-                <div>{patient.weight || "Not Available"}</div>
-              </div>
-
-              <div>
-                <div className="text-muted small mb-2">Allergies</div>
-
-                {patient.allergies && patient.allergies.length > 0 ? (
-                  <div className="d-flex flex-wrap gap-2">
-                    {patient.allergies.map((allergy, index) => (
-                      <span
-                        key={index}
-                        className="badge rounded-pill text-bg-danger"
-                      >
-                        <AlertCircle size={14} className="me-1" />
-                        {allergy}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-muted">Not Available</div>
-                )}
-              </div>
+          <CustomSection title="Medical Information">
+            <div className="mb-3">
+              <div className="text-muted small">Blood Type</div>
+              <div>{patient.bloodType || "Not Available"}</div>
             </div>
-          </div>
 
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4 text-dark">Emergency Contact</h3>
+            <div className="mb-3">
+              <div className="text-muted small">Height</div>
+              <div>{patient.height || "Not Available"}</div>
+            </div>
 
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <UserRound size={20} className="text-danger" />
+            <div className="mb-3">
+              <div className="text-muted small">Weight</div>
+              <div>{patient.weight || "Not Available"}</div>
+            </div>
+
+            <div className="mb-3">
+              <div className="text-muted small mb-2">Allergies</div>
+              {patient.allergies && patient.allergies.length > 0 ? (
+                <div className="d-flex flex-wrap gap-2">
+                  {patient.allergies.map((allergy, index) => (
+                    <span
+                      key={index}
+                      className="badge rounded-pill text-bg-danger"
+                    >
+                      <AlertCircle size={14} className="me-1" />
+                      {allergy}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-muted">Not Available</div>
+              )}
+            </div>
+
+            <div>
+              <div className="text-muted small mb-2">Conditions</div>
+              {patient.conditions && patient.conditions.length > 0 ? (
+                <div className="d-flex flex-wrap gap-2">
+                  {patient.conditions.map((condition, index) => (
+                    <span
+                      key={index}
+                      className="badge rounded-pill text-bg-light border"
+                    >
+                      {condition}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-muted">Not Available</div>
+              )}
+            </div>
+          </CustomSection>
+
+          <CustomSection title="Emergency Contact">
+            <div className="d-flex align-items-start gap-3">
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle"
+                style={{ width: "44px", height: "44px" }}
+              >
+                <UserRound size={20} className="text-danger" />
+              </div>
+
+              <div className="flex-grow-1">
+                <div className="mb-3">
+                  <div className="text-muted small">Name</div>
+                  <div>{patient.emergencyContactName || "Not Available"}</div>
                 </div>
 
-                <div className="flex-grow-1">
-                  <div className="mb-3">
-                    <div className="text-muted small">Name</div>
-                    <div>{patient.emergencyContactName || "Not Available"}</div>
-                  </div>
-
-                  <div className="mb-3">
-                    <div className="text-muted small">Relationship</div>
-                    <div>
-                      {patient.emergencyContactRelationship || "Not Available"}
-                    </div>
-                  </div>
-
+                <div className="mb-3">
+                  <div className="text-muted small">Relationship</div>
                   <div>
-                    <div className="text-muted small">Phone</div>
-                    <div>{patient.emergencyContactPhone || "Not Available"}</div>
+                    {patient.emergencyContactRelationship || "Not Available"}
                   </div>
+                </div>
+
+                <div>
+                  <div className="text-muted small">Phone</div>
+                  <div>{patient.emergencyContactPhone || "Not Available"}</div>
                 </div>
               </div>
             </div>
-          </div>
+          </CustomSection>
 
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
+          <CustomSection title="Primary Physician">
+            <div className="d-flex align-items-start gap-3">
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle"
+                style={{ width: "44px", height: "44px" }}
+              >
+                <Stethoscope size={20} className="text-primary" />
+              </div>
+
+              <div className="flex-grow-1">
+                <div className="mb-3">
+                  <div className="text-muted small">Name</div>
+                  <div>{patient.physicianName || "Not Available"}</div>
+                </div>
+
+                <div className="mb-3">
+                  <div className="text-muted small">Phone</div>
+                  <div>{patient.physicianPhone || "Not Available"}</div>
+                </div>
+
+                <div>
+                  <div className="text-muted small">Address</div>
+                  <div>{patient.physicianAddress || "Not Available"}</div>
+                </div>
+              </div>
+            </div>
+          </CustomSection>
+
+          <CustomSection
+            title="Care Notes"
+            rightAction={
+              <button
+                className="btn btn-sm btn-outline-primary"
+                onClick={() => navigate("/notes")}
+              >
+                View Notes
+              </button>
+            }
           >
-            <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4 text-dark">Primary Physician</h3>
+            <div className="d-flex align-items-start gap-3">
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle"
+                style={{ width: "44px", height: "44px" }}
+              >
+                <FileText size={20} className="text-warning-emphasis" />
+              </div>
 
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <Stethoscope size={20} className="text-primary" />
-                </div>
-
-                <div className="flex-grow-1">
-                  <div className="mb-3">
-                    <div className="text-muted small">Name</div>
-                    <div>{patient.physicianName || "Not Available"}</div>
-                  </div>
-
-                  <div className="mb-3">
-                    <div className="text-muted small">Phone</div>
-                    <div>{patient.physicianPhone || "Not Available"}</div>
-                  </div>
-
-                  <div>
-                    <div className="text-muted small">Address</div>
-                    <div>{patient.physicianAddress || "Not Available"}</div>
-                  </div>
-                </div>
+              <div className="flex-grow-1">
+                <div className="text-muted small mb-2">Latest Note</div>
+                <div>{patient.careNotes || "Not Available"}</div>
               </div>
             </div>
-          </div>
-
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="fw-semibold mb-0 text-dark">Care Notes</h3>
-
-                <button
-                  className="btn btn-sm btn-outline-primary"
-                  onClick={() => navigate("/notes")}
-                >
-                  View Notes
-                </button>
-              </div>
-
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <FileText size={20} className="text-warning-emphasis" />
-                </div>
-
-                <div className="flex-grow-1">
-                  <div className="text-muted small mb-2">Latest Note</div>
-                  <div>{patient.careNotes || "Not Available"}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          </CustomSection>
         </div>
       </div>
 
