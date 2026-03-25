@@ -1,5 +1,11 @@
 export function formatDateTime(ts: string) {
-  return new Date(ts).toLocaleString();
+  return new Date(ts).toLocaleString([], {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 export function dayKey(ts: string) {

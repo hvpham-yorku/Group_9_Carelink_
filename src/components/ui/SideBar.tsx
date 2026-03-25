@@ -98,6 +98,16 @@ const SideBar = ({ username }: SideBarProps) => {
               <NavLink to="/patient-profile" className={navLinkClass}>
                 Patient Profile
               </NavLink>
+
+              <button
+                className="dropdown-item text-danger border-0 bg-transparent w-100 text-start"
+                onClick={async () => {
+                  navigate("/landingpage");
+                  await authService.signOut();
+                }}
+              >
+                Sign Out
+              </button>
             </li>
 
             <li className="nav-item d-flex align-items-center ms-3">
