@@ -4,6 +4,8 @@ import { ApiTaskRepo } from "./repositories/tasks/ApiTaskRepo";
 import { StubTaskRepo } from "./repositories/tasks/StubTaskRepo";
 import { StubPatientRepo } from "./repositories/patients/StubPatientRepo";
 import { ApiPatientRepo } from "./repositories/patients/ApiPatientRepo";
+import { ApiNoteRepo } from "./repositories/notes/ApiNoteRepo";
+import { StubNoteRepo } from "./repositories/notes/StubNoteRepo";
 
 // import.meta.env.VITE_STUB_MODE
 const mode = import.meta.env.VITE_STUB_MODE;
@@ -12,4 +14,5 @@ export const repositories = {
   team: mode === "stub" ? new StubTeamRepo() : new ApiTeamRepo(),
   task: mode === "stub" ? new StubTaskRepo() : new ApiTaskRepo(),
   patient: mode === "stub" ? new StubPatientRepo() : new ApiPatientRepo(),
+  note: mode === "stub" ? new StubNoteRepo() : new ApiNoteRepo(),
 };
