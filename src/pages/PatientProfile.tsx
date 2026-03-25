@@ -79,6 +79,7 @@ const PatientProfile = () => {
       </div>
 
       <div className="row g-4">
+        {/* LEFT */}
         <div className="col-lg-4">
           <CustomSection title="Contact Information">
             <div className="d-flex gap-3 mb-4">
@@ -121,15 +122,21 @@ const PatientProfile = () => {
                   <div>{patient.insuranceProvider || "Not Available"}</div>
                 </div>
 
-                <div>
+                <div className="mb-3">
                   <div className="text-muted small">Policy Number</div>
                   <div>{patient.insurancePolicyNumber || "Not Available"}</div>
+                </div>
+
+                <div>
+                  <div className="text-muted small">Group Number</div>
+                  <div>Not Available</div>
                 </div>
               </div>
             </div>
           </CustomSection>
         </div>
 
+        {/* RIGHT */}
         <div className="col-lg-8">
           <CustomSection title="Medical Information">
             <div className="mb-3">
@@ -148,16 +155,23 @@ const PatientProfile = () => {
             </div>
 
             <div className="mb-3">
+              <div className="text-muted small">Mobility</div>
+              <div>Not Available</div>
+            </div>
+
+            <div className="mb-3">
+              <div className="text-muted small">Dietary Requirements</div>
+              <div>Not Available</div>
+            </div>
+
+            <div className="mb-3">
               <div className="text-muted small mb-2">Allergies</div>
-              {patient.allergies && patient.allergies.length > 0 ? (
+              {patient.allergies?.length ? (
                 <div className="d-flex flex-wrap gap-2">
-                  {patient.allergies.map((allergy, index) => (
-                    <span
-                      key={index}
-                      className="badge rounded-pill text-bg-danger"
-                    >
+                  {patient.allergies.map((a, i) => (
+                    <span key={i} className="badge rounded-pill text-bg-danger">
                       <AlertCircle size={14} className="me-1" />
-                      {allergy}
+                      {a}
                     </span>
                   ))}
                 </div>
@@ -168,14 +182,11 @@ const PatientProfile = () => {
 
             <div>
               <div className="text-muted small mb-2">Conditions</div>
-              {patient.conditions && patient.conditions.length > 0 ? (
+              {patient.conditions?.length ? (
                 <div className="d-flex flex-wrap gap-2">
-                  {patient.conditions.map((condition, index) => (
-                    <span
-                      key={index}
-                      className="badge rounded-pill text-bg-light border"
-                    >
-                      {condition}
+                  {patient.conditions.map((c, i) => (
+                    <span key={i} className="badge rounded-pill text-bg-light border">
+                      {c}
                     </span>
                   ))}
                 </div>
@@ -187,116 +198,62 @@ const PatientProfile = () => {
 
           <CustomSection title="Emergency Contact">
             <div className="d-flex align-items-start gap-3">
-              <div
-                className="d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle"
-                style={{ width: "44px", height: "44px" }}
-              >
-                <UserRound size={20} className="text-danger" />
-              </div>
-
-              <div className="flex-grow-1">
-                <div className="mb-3">
-                  <div className="text-muted small">Name</div>
-                  <div>{patient.emergencyContactName || "Not Available"}</div>
+              <UserRound size={20} className="text-danger" />
+              <div>
+                <div>{patient.emergencyContactName || "Not Available"}</div>
+                <div className="text-muted small">
+                  {patient.emergencyContactRelationship || "—"}
                 </div>
-
-                <div className="mb-3">
-                  <div className="text-muted small">Relationship</div>
-                  <div>
-                    {patient.emergencyContactRelationship || "Not Available"}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-muted small">Phone</div>
-                  <div>{patient.emergencyContactPhone || "Not Available"}</div>
-                </div>
+                <div>{patient.emergencyContactPhone || "—"}</div>
               </div>
             </div>
           </CustomSection>
 
           <CustomSection title="Primary Physician">
             <div className="d-flex align-items-start gap-3">
-              <div
-                className="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle"
-                style={{ width: "44px", height: "44px" }}
-              >
-                <Stethoscope size={20} className="text-primary" />
-              </div>
-
-              <div className="flex-grow-1">
-                <div className="mb-3">
-                  <div className="text-muted small">Name</div>
-                  <div>{patient.physicianName || "Not Available"}</div>
+              <Stethoscope size={20} className="text-primary" />
+              <div>
+                <div>{patient.physicianName || "Not Available"}</div>
+                <div className="text-muted small">
+                  {patient.physicianPhone || "—"}
                 </div>
-
-                <div className="mb-3">
-                  <div className="text-muted small">Phone</div>
-                  <div>{patient.physicianPhone || "Not Available"}</div>
-                </div>
-
-                <div>
-                  <div className="text-muted small">Address</div>
-                  <div>{patient.physicianAddress || "Not Available"}</div>
-                </div>
+                <div>{patient.physicianAddress || "—"}</div>
               </div>
             </div>
           </CustomSection>
 
-<CustomSection
-  title="Care Notes"
-  rightAction={
-    <Button color="outline-primary" onClick={() => navigate("/notes")}>
-      View Notes
-    </Button>
-  }
->
-  <div className="d-flex align-items-start gap-3">
-    <div
-      className="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle"
-      style={{ width: "44px", height: "44px" }}
-    >
-      <FileText size={20} className="text-warning-emphasis" />
-    </div>
-
-    <div className="flex-grow-1">
-      <div className="text-muted small mb-2">Latest Note</div>
-      <div>{patient.careNotes || "Not Available"}</div>
-    </div>
-  </div>
-</CustomSection>
+          <CustomSection
+            title="Care Notes"
+            rightAction={
+              <Button color="outline-primary" onClick={() => navigate("/notes")}>
+                View Notes
+              </Button>
+            }
+          >
+            <div className="d-flex align-items-start gap-3">
+              <FileText size={20} className="text-warning-emphasis" />
+              <div>
+                <div className="text-muted small mb-2">Latest Note</div>
+                <div>{patient.careNotes || "Not Available"}</div>
+              </div>
+            </div>
+          </CustomSection>
         </div>
       </div>
 
+      {/* STATS */}
       <div className="mt-4">
         <h3 className="fw-semibold mb-3">Care History Summary</h3>
 
         <div className="row g-3">
           <div className="col-md-4">
-            <StatCard
-              title="Care Days"
-              value="—"
-              description="Total days under care"
-              icon={<Calendar size={18} />}
-            />
+            <StatCard title="Care Days" value="—" description="Total days under care" icon={<Calendar size={18} />} />
           </div>
-
           <div className="col-md-4">
-            <StatCard
-              title="Tasks Completed"
-              value="—"
-              description="Completed care tasks"
-              icon={<CheckCircle size={18} />}
-            />
+            <StatCard title="Tasks Completed" value="—" description="Completed care tasks" icon={<CheckCircle size={18} />} />
           </div>
-
           <div className="col-md-4">
-            <StatCard
-              title="Appointments"
-              value="—"
-              description="Scheduled appointments"
-              icon={<Calendar size={18} />}
-            />
+            <StatCard title="Appointments" value="—" description="Scheduled appointments" icon={<Calendar size={18} />} />
           </div>
         </div>
       </div>
