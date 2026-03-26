@@ -40,8 +40,24 @@ const PatientMedicalSection = ({
       }
     >
       <div className="d-flex flex-column gap-3">
+        <div>
+          <div className="text-muted small mb-1">Gender</div>
+          {isEditing ? (
+            <select
+              className="form-select"
+              value={draft.gender || ""}
+              onChange={(e) => onChange("gender", e.target.value)}
+            >
+              <option value="">Select gender</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Other">Other</option>
+            </select>
+          ) : (
+            <div>{patient.gender || "Not Available"}</div>
+          )}
+        </div>
 
-        {/* Blood Type */}
         <div>
           <div className="text-muted small mb-1">Blood Type</div>
           {isEditing ? (
@@ -55,7 +71,6 @@ const PatientMedicalSection = ({
           )}
         </div>
 
-        {/* Height & Weight */}
         <div className="row g-3">
           <div className="col-6">
             <div className="text-muted small mb-1">Height</div>
@@ -84,7 +99,6 @@ const PatientMedicalSection = ({
           </div>
         </div>
 
-        {/* Allergies */}
         <div>
           <div className="text-muted small mb-1">Allergies</div>
 
@@ -120,7 +134,6 @@ const PatientMedicalSection = ({
             <div>Not Available</div>
           )}
         </div>
-
       </div>
     </CustomSection>
   );

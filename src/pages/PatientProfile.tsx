@@ -1,37 +1,47 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Mail,
-  MapPin,
-  Phone,
-  HeartPulse,
-  Stethoscope,
-  Shield,
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  ClipboardList,
-  UserRound,
-} from "lucide-react";
+import { Calendar, CheckCircle } from "lucide-react";
+
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
-import Button from "../components/ui/Button";
 import StatCard from "../components/ui/StatCard";
+
+import PatientContactSection from "../components/patientProfile/PatientContactSection";
+import PatientMedicalSection from "../components/patientProfile/PatientMedicalSection";
+import PatientInsuranceSection from "../components/patientProfile/PatientInsuranceSection";
+import PatientPhysicianSection from "../components/patientProfile/PatientPhysicianSection";
+import PatientNotesSection from "../components/patientProfile/PatientNotesSection";
+import PatientConditionsSection from "../components/patientProfile/PatientConditionsSection";
+import EmergencyContactsSection from "../components/patientProfile/EmergencyContactsSection";
+
 import type { PatientInfo } from "../types/Types";
 import { usePatient } from "../contexts/patient/usePatient";
 import { patientService } from "../services/patientService";
+
+type EditableSection =
+  | "contact"
+  | "medical"
+  | "insurance"
+  | "physician"
+  | "notes"
+  | "conditions"
+  | null;
 
 const PatientProfile = () => {
   const { selectedPatientId } = usePatient();
   const navigate = useNavigate();
 
   const [patient, setPatient] = useState<PatientInfo | null>(null);
+  const [draftPatient, setDraftPatient] = useState<PatientInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const [savingSection, setSavingSection] = useState<EditableSection>(null);
+  const [editingSection, setEditingSection] = useState<EditableSection>(null);
 
   useEffect(() => {
     if (!selectedPatientId) {
       setPatient(null);
+      setDraftPatient(null);
       return;
     }
 
@@ -39,10 +49,13 @@ const PatientProfile = () => {
       setLoading(true);
       try {
         const data = await patientService.getFullProfile(selectedPatientId);
-        setPatient(data as PatientInfo);
+        const typedData = data as PatientInfo;
+        setPatient(typedData);
+        setDraftPatient(typedData);
       } catch (err) {
         console.error("Failed to load patient profile:", err);
         setPatient(null);
+        setDraftPatient(null);
       } finally {
         setLoading(false);
       }
@@ -51,356 +64,140 @@ const PatientProfile = () => {
     fetchPatient();
   }, [selectedPatientId]);
 
-  const renderContactInfo = () => (
-    <CustomSection title="Contact Information">
-      <div className="d-flex flex-column gap-4">
-        <div className="d-flex gap-3">
-          <MapPin size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
-          <div>
-            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "2px" }}>
-              Address
-            </div>
-            <div style={{ color: "#111827", fontSize: "0.95rem" }}>
-              {patient?.address || "Not Available"}
-            </div>
-          </div>
-        </div>
+  const startEditing = (section: EditableSection) => {
+    if (!patient) return;
+    setDraftPatient({ ...patient });
+    setEditingSection(section);
+  };
 
-        <div className="d-flex gap-3">
-          <Phone size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
-          <div>
-            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "2px" }}>
-              Phone
-            </div>
-            <div style={{ color: "#111827", fontSize: "0.95rem" }}>
-              {patient?.phoneNumber || "Not Available"}
-            </div>
-          </div>
-        </div>
+  const cancelEditing = () => {
+    setDraftPatient(patient ? { ...patient } : null);
+    setEditingSection(null);
+  };
 
-        <div className="d-flex gap-3">
-          <Mail size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
-          <div>
-            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "2px" }}>
-              Email
-            </div>
-            <div style={{ color: "#111827", fontSize: "0.95rem" }}>
-              {patient?.email || "Not Available"}
-            </div>
-          </div>
-        </div>
-      </div>
-    </CustomSection>
-  );
+  const saveSection = async (section: EditableSection) => {
+    if (!patient || !draftPatient || !section) return;
 
-  const renderMedicalInfo = () => (
-    <CustomSection title="Medical Information">
-      <div className="d-flex flex-column gap-3">
-        <div>
-          <div style={{ color: "#6b7280", fontSize: "0.8rem" }}>Blood Type</div>
-          <div style={{ color: "#111827" }}>{patient?.bloodType || "Not Available"}</div>
-        </div>
+    setSavingSection(section);
 
-        <div className="row g-3">
-          <div className="col-6">
-            <div style={{ color: "#6b7280", fontSize: "0.8rem" }}>Height</div>
-            <div style={{ color: "#111827" }}>{patient?.height || "Not Available"}</div>
-          </div>
+    try {
+      let updates: Partial<PatientInfo> = {};
 
-          <div className="col-6">
-            <div style={{ color: "#6b7280", fontSize: "0.8rem" }}>Weight</div>
-            <div style={{ color: "#111827" }}>{patient?.weight || "Not Available"}</div>
-          </div>
-        </div>
-
-        <div>
-          <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "6px" }}>
-            Allergies
-          </div>
-
-          {patient?.allergies?.length ? (
-            <div className="d-flex flex-wrap gap-2">
-              {patient.allergies.map((allergy, index) => (
-                <span
-                  key={index}
-                  className="d-inline-flex align-items-center gap-1"
-                  style={{
-                    backgroundColor: "#fef2f2",
-                    color: "#dc2626",
-                    border: "1px solid #fecaca",
-                    borderRadius: "999px",
-                    padding: "4px 10px",
-                    fontSize: "0.8rem",
-                    fontWeight: 500,
-                  }}
-                >
-                  <AlertCircle size={12} />
-                  {allergy}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <div style={{ color: "#111827" }}>Not Available</div>
-          )}
-        </div>
-
-        <div>
-          <div style={{ color: "#6b7280", fontSize: "0.8rem" }}>Mobility</div>
-          <div style={{ color: "#111827" }}>Not Available</div>
-        </div>
-
-        <div>
-          <div style={{ color: "#6b7280", fontSize: "0.8rem" }}>
-            Dietary Requirements
-          </div>
-          <div style={{ color: "#111827" }}>Not Available</div>
-        </div>
-      </div>
-    </CustomSection>
-  );
-
-  const renderInsuranceInfo = () => (
-    <CustomSection title="Insurance Information">
-      <div className="d-flex align-items-start gap-3">
-        <div
-          className="d-flex align-items-center justify-content-center flex-shrink-0"
-          style={{
-            width: "42px",
-            height: "42px",
-            borderRadius: "12px",
-            backgroundColor: "#eef6ff",
-          }}
-        >
-          <Shield size={18} color="#2563eb" />
-        </div>
-
-        <div className="flex-grow-1 d-flex flex-column gap-3">
-          <div>
-            <div style={{ color: "#6b7280", fontSize: "0.8rem" }}>Provider</div>
-            <div style={{ color: "#111827" }}>
-              {patient?.insuranceProvider || "Not Available"}
-            </div>
-          </div>
-
-          <div>
-            <div style={{ color: "#6b7280", fontSize: "0.8rem" }}>Policy Number</div>
-            <div style={{ color: "#111827" }}>
-              {patient?.insurancePolicyNumber || "Not Available"}
-            </div>
-          </div>
-
-          <div>
-            <div style={{ color: "#6b7280", fontSize: "0.8rem" }}>Group Number</div>
-            <div style={{ color: "#111827" }}>Not Available</div>
-          </div>
-        </div>
-      </div>
-    </CustomSection>
-  );
-
-  const renderEmergencyContact = () => (
-    <CustomSection title="Emergency Contacts">
-      <div className="row g-3">
-        <div className="col-md-6">
-          <div
-            className="h-100 p-3"
-            style={{
-              border: "1px solid #fecaca",
-              borderRadius: "14px",
-              backgroundColor: "#fff7f7",
-            }}
-          >
-            <div
-              className="mb-2"
-              style={{
-                color: "#dc2626",
-                fontSize: "0.72rem",
-                fontWeight: 700,
-                letterSpacing: "0.04em",
-              }}
-            >
-              PRIMARY CONTACT
-            </div>
-
-            <div className="d-flex align-items-start gap-2 mb-2">
-              <UserRound size={16} color="#ef4444" style={{ marginTop: "2px" }} />
-              <div>
-                <div className="fw-semibold" style={{ color: "#111827" }}>
-                  {patient?.emergencyContactName || "Not Available"}
-                </div>
-                <div style={{ color: "#6b7280", fontSize: "0.85rem" }}>
-                  {patient?.emergencyContactRelationship || "Not Available"}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ color: "#111827", fontSize: "0.92rem" }}>
-              {patient?.emergencyContactPhone || "Not Available"}
-            </div>
-
-            <div style={{ color: "#9ca3af", fontSize: "0.82rem", marginTop: "4px" }}>
-              Not Available
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-6">
-          <div
-            className="h-100 p-3"
-            style={{
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-              backgroundColor: "#ffffff",
-            }}
-          >
-            <div
-              className="mb-2"
-              style={{
-                color: "#9ca3af",
-                fontSize: "0.72rem",
-                fontWeight: 700,
-                letterSpacing: "0.04em",
-              }}
-            >
-              SECONDARY CONTACT
-            </div>
-
-            <div className="fw-semibold" style={{ color: "#111827" }}>
-              Not Available
-            </div>
-            <div style={{ color: "#6b7280", fontSize: "0.85rem" }}>Not Available</div>
-            <div style={{ color: "#111827", fontSize: "0.92rem", marginTop: "8px" }}>
-              Not Available
-            </div>
-            <div style={{ color: "#9ca3af", fontSize: "0.82rem", marginTop: "4px" }}>
-              Not Available
-            </div>
-          </div>
-        </div>
-      </div>
-    </CustomSection>
-  );
-
-  const renderPhysicianInfo = () => (
-    <CustomSection title="Primary Care Physician">
-      <div className="d-flex align-items-start gap-3">
-        <div
-          className="d-flex align-items-center justify-content-center flex-shrink-0"
-          style={{
-            width: "42px",
-            height: "42px",
-            borderRadius: "12px",
-            backgroundColor: "#eef4ff",
-          }}
-        >
-          <Stethoscope size={18} color="#3b82f6" />
-        </div>
-
-        <div className="flex-grow-1">
-          <div className="fw-semibold" style={{ color: "#111827" }}>
-            {patient?.physicianName || "Not Available"}
-          </div>
-
-          <div style={{ color: "#6b7280", fontSize: "0.85rem", marginBottom: "10px" }}>
-            Not Available
-          </div>
-
-          <div className="row g-3">
-            <div className="col-md-6">
-              <div className="d-flex align-items-center gap-2">
-                <Phone size={14} color="#9ca3af" />
-                <span style={{ color: "#111827", fontSize: "0.92rem" }}>
-                  {patient?.physicianPhone || "Not Available"}
-                </span>
-              </div>
-            </div>
-
-            <div className="col-md-6">
-              <div className="d-flex align-items-center gap-2">
-                <MapPin size={14} color="#9ca3af" />
-                <span style={{ color: "#111827", fontSize: "0.92rem" }}>
-                  {patient?.physicianAddress || "Not Available"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </CustomSection>
-  );
-
-  const renderMedicalConditions = () => (
-    <CustomSection title="Medical Conditions">
-      {patient?.conditions?.length ? (
-        <div className="d-flex flex-column gap-2">
-          {patient.conditions.map((condition, index) => (
-            <div
-              key={index}
-              className="d-flex align-items-center gap-3 px-3 py-3"
-              style={{
-                backgroundColor: "#f8fafc",
-                borderRadius: "12px",
-              }}
-            >
-              <div
-                className="d-flex align-items-center justify-content-center"
-                style={{
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "8px",
-                  backgroundColor: "#eef4ff",
-                  flexShrink: 0,
-                }}
-              >
-                <HeartPulse size={15} color="#3b82f6" />
-              </div>
-
-              <span style={{ color: "#111827", fontSize: "0.95rem", fontWeight: 500 }}>
-                {condition}
-              </span>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div style={{ color: "#6b7280" }}>Not Available</div>
-      )}
-    </CustomSection>
-  );
-
-  const renderCareNotes = () => (
-    <CustomSection
-      title="Care Notes & Preferences"
-      rightAction={
-        <Button color="outline-primary" onClick={() => navigate("/notes")}>
-          View Notes
-        </Button>
+      if (section === "contact") {
+        updates = {
+          address: draftPatient.address,
+          phoneNumber: draftPatient.phoneNumber,
+          email: draftPatient.email,
+        };
       }
-    >
-      <div
-        className="p-3"
-        style={{
-          backgroundColor: "#fffbea",
-          borderRadius: "12px",
-          border: "1px solid #fde68a",
-        }}
-      >
-        <div className="d-flex align-items-start gap-2">
-          <ClipboardList size={16} color="#ca8a04" style={{ marginTop: "2px" }} />
-          <div>
-            <div
-              className="fw-semibold mb-1"
-              style={{ color: "#92400e", fontSize: "0.9rem" }}
-            >
-              Important Care Information
-            </div>
-            <div style={{ fontSize: "0.93rem", color: "#4b5563", lineHeight: 1.6 }}>
-              {patient?.careNotes || "Not Available"}
-            </div>
-          </div>
-        </div>
-      </div>
-    </CustomSection>
-  );
+
+      if (section === "medical") {
+        updates = {
+          gender: draftPatient.gender,
+          bloodType: draftPatient.bloodType,
+          height: draftPatient.height,
+          weight: draftPatient.weight,
+          allergies: draftPatient.allergies,
+        };
+      }
+
+      if (section === "insurance") {
+        updates = {
+          insuranceProvider: draftPatient.insuranceProvider,
+          insurancePolicyNumber: draftPatient.insurancePolicyNumber,
+        };
+      }
+
+      if (section === "physician") {
+        updates = {
+          physicianName: draftPatient.physicianName,
+          physicianPhone: draftPatient.physicianPhone,
+          physicianAddress: draftPatient.physicianAddress,
+        };
+      }
+
+      if (section === "notes") {
+        updates = {
+          careNotes: draftPatient.careNotes,
+        };
+      }
+
+      if (section === "conditions") {
+        updates = {
+          conditions: draftPatient.conditions,
+        };
+      }
+
+      const updated = await patientService.updateProfile(
+        patient.patientId,
+        updates as never,
+      );
+
+      const updatedPatient = updated as PatientInfo;
+      setPatient(updatedPatient);
+      setDraftPatient(updatedPatient);
+      setEditingSection(null);
+    } catch (err) {
+      console.error(`Failed to save ${section} section:`, err);
+    } finally {
+      setSavingSection(null);
+    }
+  };
+
+  const handleFieldChange = (field: keyof PatientInfo, value: string) => {
+    if (!draftPatient) return;
+    setDraftPatient({
+      ...draftPatient,
+      [field]: value,
+    });
+  };
+
+  const handleAllergyChange = (value: string) => {
+    if (!draftPatient) return;
+
+    const allergyArray = value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    setDraftPatient({
+      ...draftPatient,
+      allergies: allergyArray,
+    });
+  };
+
+  const handleConditionChange = (index: number, value: string) => {
+    if (!draftPatient) return;
+
+    const updatedConditions = [...(draftPatient.conditions || [])];
+    updatedConditions[index] = value;
+
+    setDraftPatient({
+      ...draftPatient,
+      conditions: updatedConditions,
+    });
+  };
+
+  const addCondition = () => {
+    if (!draftPatient) return;
+
+    setDraftPatient({
+      ...draftPatient,
+      conditions: [...(draftPatient.conditions || []), ""],
+    });
+  };
+
+  const removeCondition = (index: number) => {
+    if (!draftPatient) return;
+
+    const updatedConditions = [...(draftPatient.conditions || [])];
+    updatedConditions.splice(index, 1);
+
+    setDraftPatient({
+      ...draftPatient,
+      conditions: updatedConditions,
+    });
+  };
 
   const renderCareHistorySummary = () => (
     <CustomSection
@@ -458,13 +255,18 @@ const PatientProfile = () => {
     );
   }
 
-  if (!patient) {
+  if (!patient || !draftPatient) {
     return (
       <div className="container py-4 text-center text-muted">
         No patient selected.
       </div>
     );
   }
+
+  const bannerPatient =
+    editingSection === "medical" || editingSection === "conditions"
+      ? draftPatient
+      : patient;
 
   return (
     <div className="container py-4">
@@ -474,21 +276,85 @@ const PatientProfile = () => {
       />
 
       <div className="mb-4">
-        <PatientInfoBanner patient={patient} />
+        <PatientInfoBanner patient={bannerPatient} />
       </div>
 
       <div className="row g-4">
         <div className="col-lg-4">
-          {renderContactInfo()}
-          {renderMedicalInfo()}
-          {renderInsuranceInfo()}
+          <PatientContactSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "contact"}
+            isSaving={savingSection === "contact"}
+            onEdit={() => startEditing("contact")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("contact")}
+            onChange={handleFieldChange}
+          />
+
+          <PatientMedicalSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "medical"}
+            isSaving={savingSection === "medical"}
+            onEdit={() => startEditing("medical")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("medical")}
+            onChange={handleFieldChange}
+            onAllergyChange={handleAllergyChange}
+          />
+
+          <PatientInsuranceSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "insurance"}
+            isSaving={savingSection === "insurance"}
+            onEdit={() => startEditing("insurance")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("insurance")}
+            onChange={handleFieldChange}
+          />
         </div>
 
         <div className="col-lg-8">
-          {renderEmergencyContact()}
-          {renderPhysicianInfo()}
-          {renderMedicalConditions()}
-          {renderCareNotes()}
+          <EmergencyContactsSection patient={patient} />
+
+          <PatientPhysicianSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "physician"}
+            isSaving={savingSection === "physician"}
+            onEdit={() => startEditing("physician")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("physician")}
+            onChange={handleFieldChange}
+          />
+
+          <PatientConditionsSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "conditions"}
+            isSaving={savingSection === "conditions"}
+            onEdit={() => startEditing("conditions")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("conditions")}
+            onConditionChange={handleConditionChange}
+            onAddCondition={addCondition}
+            onRemoveCondition={removeCondition}
+          />
+
+          <PatientNotesSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "notes"}
+            isSaving={savingSection === "notes"}
+            onEdit={() => startEditing("notes")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("notes")}
+            onChange={handleFieldChange}
+            onViewNotes={() => navigate("/notes")}
+          />
+
           {renderCareHistorySummary()}
         </div>
       </div>

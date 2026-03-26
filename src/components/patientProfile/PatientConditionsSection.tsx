@@ -1,15 +1,86 @@
-import { HeartPulse } from "lucide-react";
+import { HeartPulse, Plus, Trash2 } from "lucide-react";
 import CustomSection from "../ui/CustomSection";
+import Button from "../ui/Button";
 import type { PatientInfo } from "../../types/Types";
+import SectionEditActions from "./SectionEditActions";
 
 interface Props {
   patient: PatientInfo;
+  draft: PatientInfo;
+  isEditing: boolean;
+  isSaving: boolean;
+  onEdit: () => void;
+  onCancel: () => void;
+  onSave: () => void;
+  onConditionChange: (index: number, value: string) => void;
+  onAddCondition: () => void;
+  onRemoveCondition: (index: number) => void;
 }
 
-const PatientConditionsSection = ({ patient }: Props) => {
+const PatientConditionsSection = ({
+  patient,
+  draft,
+  isEditing,
+  isSaving,
+  onEdit,
+  onCancel,
+  onSave,
+  onConditionChange,
+  onAddCondition,
+  onRemoveCondition,
+}: Props) => {
   return (
-    <CustomSection title="Medical Conditions">
-      {patient.conditions?.length ? (
+    <CustomSection
+      title="Medical Conditions"
+      rightAction={
+        <SectionEditActions
+          isEditing={isEditing}
+          isSaving={isSaving}
+          onEdit={onEdit}
+          onCancel={onCancel}
+          onSave={onSave}
+        />
+      }
+    >
+      {isEditing ? (
+        <div className="d-flex flex-column gap-3">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <div className="text-muted small">Conditions</div>
+            <Button
+              color="outline-primary"
+              icon={<Plus size={16} />}
+              onClick={onAddCondition}
+            >
+              Add Condition
+            </Button>
+          </div>
+
+          <div className="d-flex flex-column gap-2">
+            {(draft.conditions || []).map((condition, index) => (
+              <div key={index} className="d-flex gap-2">
+                <input
+                  type="text"
+                  className="form-control"
+                  value={condition}
+                  onChange={(e) => onConditionChange(index, e.target.value)}
+                  placeholder="Enter condition"
+                />
+                <Button
+                  color="outline-danger"
+                  icon={<Trash2 size={16} />}
+                  onClick={() => onRemoveCondition(index)}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+
+            {(!draft.conditions || draft.conditions.length === 0) && (
+              <div className="text-muted">No conditions added yet.</div>
+            )}
+          </div>
+        </div>
+      ) : patient.conditions?.length ? (
         <div className="d-flex flex-column gap-2">
           {patient.conditions.map((condition, index) => (
             <div
