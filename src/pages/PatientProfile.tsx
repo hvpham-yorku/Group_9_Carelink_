@@ -18,7 +18,6 @@ import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
 import Button from "../components/ui/Button";
 import StatCard from "../components/ui/StatCard";
-import PatientContactSection from "../components/patientProfile/PatientContactSection";
 import type { PatientInfo } from "../types/Types";
 import { usePatient } from "../contexts/patient/usePatient";
 import { patientService } from "../services/patientService";
