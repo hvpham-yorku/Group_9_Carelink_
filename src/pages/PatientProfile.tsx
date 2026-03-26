@@ -4,11 +4,9 @@ import {
   Mail,
   MapPin,
   Phone,
-  AlertCircle,
   UserRound,
   Stethoscope,
   Shield,
-  FileText,
   Calendar,
   CheckCircle,
 } from "lucide-react";
@@ -78,8 +76,44 @@ const PatientProfile = () => {
     </CustomSection>
   );
 
+  const renderMedicalInfo = () => (
+    <CustomSection title="Medical Information">
+      <div className="mb-3">
+        <div className="text-muted small">Blood Type</div>
+        <div>{patient?.bloodType || "Not Available"}</div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-muted small">Height</div>
+        <div>{patient?.height || "Not Available"}</div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-muted small">Weight</div>
+        <div>{patient?.weight || "Not Available"}</div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-muted small">Allergies</div>
+        <div>
+          {patient?.allergies?.length ? patient.allergies.join(", ") : "Not Available"}
+        </div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-muted small">Mobility</div>
+        <div>Not Available</div>
+      </div>
+
+      <div>
+        <div className="text-muted small">Dietary Requirements</div>
+        <div>Not Available</div>
+      </div>
+    </CustomSection>
+  );
+
   const renderInsuranceInfo = () => (
-    <CustomSection title="Insurance">
+    <CustomSection title="Insurance Information">
       <div className="d-flex align-items-start gap-3">
         <div
           className="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle"
@@ -108,131 +142,147 @@ const PatientProfile = () => {
     </CustomSection>
   );
 
-  const renderMedicalInfo = () => (
-    <CustomSection title="Medical Information">
-      <div className="mb-3">
-        <div className="text-muted small">Blood Type</div>
-        <div>{patient?.bloodType || "Not Available"}</div>
-      </div>
-
-      <div className="mb-3">
-        <div className="text-muted small">Height</div>
-        <div>{patient?.height || "Not Available"}</div>
-      </div>
-
-      <div className="mb-3">
-        <div className="text-muted small">Weight</div>
-        <div>{patient?.weight || "Not Available"}</div>
-      </div>
-
-      <div className="mb-3">
-        <div className="text-muted small">Mobility</div>
-        <div>Not Available</div>
-      </div>
-
-      <div className="mb-3">
-        <div className="text-muted small">Dietary Requirements</div>
-        <div>Not Available</div>
-      </div>
-
-      <div className="mb-3">
-        <div className="text-muted small mb-2">Allergies</div>
-        {patient?.allergies?.length ? (
-          <div className="d-flex flex-wrap gap-2">
-            {patient.allergies.map((a, i) => (
-              <span key={i} className="badge rounded-pill text-bg-danger">
-                <AlertCircle size={14} className="me-1" />
-                {a}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <div className="text-muted">Not Available</div>
-        )}
-      </div>
-
-      <div>
-        <div className="text-muted small mb-2">Conditions</div>
-        {patient?.conditions?.length ? (
-          <div className="d-flex flex-wrap gap-2">
-            {patient.conditions.map((c, i) => (
-              <span
-                key={i}
-                className="badge rounded-pill text-bg-light border"
-              >
-                {c}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <div className="text-muted">Not Available</div>
-        )}
-      </div>
-    </CustomSection>
-  );
-
   const renderEmergencyContact = () => (
-    <CustomSection title="Emergency Contact">
-      <div className="d-flex align-items-start gap-3">
-        <UserRound size={20} className="text-danger" />
-        <div>
-          <div>{patient?.emergencyContactName || "Not Available"}</div>
-          <div className="text-muted small">
-            {patient?.emergencyContactRelationship || "—"}
+    <CustomSection title="Emergency Contacts">
+      <div className="row g-3">
+        <div className="col-md-6">
+          <div
+            className="p-3 h-100"
+            style={{
+              border: "1px solid #f1c3c3",
+              borderRadius: "12px",
+              backgroundColor: "#fff8f8",
+            }}
+          >
+            <div className="text-danger small fw-semibold mb-2">PRIMARY CONTACT</div>
+            <div className="fw-semibold">
+              {patient?.emergencyContactName || "Not Available"}
+            </div>
+            <div className="text-muted small mb-2">
+              {patient?.emergencyContactRelationship || "Not Available"}
+            </div>
+            <div>{patient?.emergencyContactPhone || "Not Available"}</div>
+            <div className="text-muted small mt-1">Not Available</div>
           </div>
-          <div>{patient?.emergencyContactPhone || "—"}</div>
+        </div>
+
+        <div className="col-md-6">
+          <div
+            className="p-3 h-100"
+            style={{
+              border: "1px solid #e9ecef",
+              borderRadius: "12px",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            <div className="text-muted small fw-semibold mb-2">SECONDARY CONTACT</div>
+            <div className="fw-semibold">Not Available</div>
+            <div className="text-muted small mb-2">Not Available</div>
+            <div>Not Available</div>
+            <div className="text-muted small mt-1">Not Available</div>
+          </div>
         </div>
       </div>
     </CustomSection>
   );
 
   const renderPhysicianInfo = () => (
-    <CustomSection title="Primary Physician">
+    <CustomSection title="Primary Care Physician">
       <div className="d-flex align-items-start gap-3">
-        <Stethoscope size={20} className="text-primary" />
-        <div>
-          <div>{patient?.physicianName || "Not Available"}</div>
-          <div className="text-muted small">
-            {patient?.physicianPhone || "—"}
+        <div
+          className="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle"
+          style={{ width: "44px", height: "44px" }}
+        >
+          <Stethoscope size={20} className="text-primary" />
+        </div>
+
+        <div className="flex-grow-1">
+          <div className="fw-semibold">
+            {patient?.physicianName || "Not Available"}
           </div>
-          <div>{patient?.physicianAddress || "—"}</div>
+          <div className="text-muted small mb-2">Not Available</div>
+
+          <div className="d-flex flex-column flex-md-row gap-2 gap-md-4">
+            <div>{patient?.physicianPhone || "Not Available"}</div>
+            <div>{patient?.physicianAddress || "Not Available"}</div>
+          </div>
         </div>
       </div>
     </CustomSection>
   );
 
+  const renderMedicalConditions = () => (
+    <CustomSection title="Medical Conditions">
+      {patient?.conditions?.length ? (
+        <div className="d-flex flex-column gap-2">
+          {patient.conditions.map((condition, index) => (
+            <div
+              key={index}
+              className="d-flex align-items-center p-3"
+              style={{
+                backgroundColor: "#f8f9fa",
+                borderRadius: "10px",
+                border: "1px solid #e9ecef",
+              }}
+            >
+              <span>{condition}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-muted">Not Available</div>
+      )}
+    </CustomSection>
+  );
+
   const renderCareNotes = () => (
     <CustomSection
-      title="Care Notes"
+      title="Care Notes & Preferences"
       rightAction={
         <Button color="outline-primary" onClick={() => navigate("/notes")}>
           View Notes
         </Button>
       }
     >
-      <div className="d-flex align-items-start gap-3">
-        <FileText size={20} className="text-warning-emphasis" />
-        <div>
-          <div className="text-muted small mb-2">Latest Note</div>
-          <div>{patient?.careNotes || "Not Available"}</div>
+      <div
+        className="p-3"
+        style={{
+          backgroundColor: "#fff3cd",
+          borderRadius: "12px",
+          border: "1px solid #ffe69c",
+        }}
+      >
+        <div className="fw-semibold mb-1">Important Care Information</div>
+        <div style={{ fontSize: "0.95rem" }}>
+          {patient?.careNotes || "Not Available"}
         </div>
       </div>
     </CustomSection>
   );
 
   const renderCareHistorySummary = () => (
-    <div className="mt-4">
-      <h3 className="fw-semibold mb-3">Care History Summary</h3>
-
+    <CustomSection
+      title="Care History Summary"
+      rightAction={
+        <button
+          type="button"
+          className="btn btn-link p-0 text-decoration-none"
+          style={{ fontSize: "0.9rem" }}
+        >
+          View Full History →
+        </button>
+      }
+    >
       <div className="row g-3">
         <div className="col-md-4">
           <StatCard
             title="Care Days"
             value="—"
-            description="Total days under care"
+            description="Total care days"
             icon={<Calendar size={18} />}
           />
         </div>
+
         <div className="col-md-4">
           <StatCard
             title="Tasks Completed"
@@ -241,6 +291,7 @@ const PatientProfile = () => {
             icon={<CheckCircle size={18} />}
           />
         </div>
+
         <div className="col-md-4">
           <StatCard
             title="Appointments"
@@ -250,7 +301,7 @@ const PatientProfile = () => {
           />
         </div>
       </div>
-    </div>
+    </CustomSection>
   );
 
   if (loading) {
@@ -284,18 +335,18 @@ const PatientProfile = () => {
       <div className="row g-4">
         <div className="col-lg-4">
           {renderContactInfo()}
+          {renderMedicalInfo()}
           {renderInsuranceInfo()}
         </div>
 
         <div className="col-lg-8">
-          {renderMedicalInfo()}
           {renderEmergencyContact()}
           {renderPhysicianInfo()}
+          {renderMedicalConditions()}
           {renderCareNotes()}
+          {renderCareHistorySummary()}
         </div>
       </div>
-
-      {renderCareHistorySummary()}
     </div>
   );
 };
