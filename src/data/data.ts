@@ -7,8 +7,8 @@ import type {
 
 import type { AllPatientInfo } from "../types/patient";
 import type { Note } from "../types/note";
-
 import type { Task, TaskLogEntry } from "../types/task";
+import type { Medication } from "../types/medication";
 
 // patient ids
 const patientId1 = crypto.randomUUID();
@@ -232,5 +232,54 @@ export let notes: Note[] = [
     isUrgent: true,
     categories: { name: "Appointments", color: "text-bg-success" },
     caregivers: { firstName: "Bob", lastName: "Williams" },
+  },
+];
+
+/*
+  Medication Related Data
+*/
+
+export let medications: Medication[] = [
+  {
+    medicationId: crypto.randomUUID(),
+    careTeamId: careTeamId1,
+    patientId: patientId1,
+    name: "Metformin",
+    dosage: "500 mg",
+    frequency: "Twice a day",
+    purpose: "Manage blood sugar levels",
+    instructions: "Take with meals",
+    prescribedBy: "Dr. Smith",
+    warnings: "May cause dizziness",
+    isActive: true,
+    scheduledAt: [new Date().toISOString()],
+  },
+  {
+    medicationId: crypto.randomUUID(),
+    careTeamId: careTeamId1,
+    patientId: patientId2,
+    name: "Lisinopril",
+    dosage: "10 mg",
+    frequency: "Once a day",
+    purpose: "Manage blood pressure",
+    instructions: "Take in the morning",
+    prescribedBy: "Dr. Johnson",
+    warnings: "May cause dizziness",
+    isActive: true,
+    scheduledAt: [new Date().toISOString()],
+  },
+  {
+    medicationId: crypto.randomUUID(),
+    careTeamId: careTeamId1,
+    patientId: patientId1,
+    name: "Aspirin",
+    dosage: "100 mg",
+    frequency: "Once a day",
+    purpose: "Prevent blood clots",
+    instructions: "Take with water",
+    prescribedBy: "Dr. Brown",
+    warnings: "May cause stomach upset",
+    isActive: false,
+    scheduledAt: [new Date().toISOString()],
   },
 ];

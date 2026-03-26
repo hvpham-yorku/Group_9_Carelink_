@@ -74,17 +74,17 @@ CREATE TABLE public.medications (
   medication_id uuid NOT NULL DEFAULT gen_random_uuid(),
   team_id uuid NOT NULL,
   patient_id uuid NOT NULL,
-  caregiver_id uuid NOT NULL,
   name text,
   dosage text,
   frequency text,
   purpose text,
   instructions text,
   is_active boolean,
+  prescribed_by text,
+  warnings text,
   CONSTRAINT medications_pkey PRIMARY KEY (medication_id),
   CONSTRAINT medications_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.teams(team_id),
-  CONSTRAINT medications_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(patient_id),
-  CONSTRAINT medications_caregiver_id_fkey FOREIGN KEY (caregiver_id) REFERENCES public.caregivers(caregiver_id)
+  CONSTRAINT medications_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(patient_id)
 );
 CREATE TABLE public.notes (
   note_id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -96,6 +96,7 @@ CREATE TABLE public.notes (
   description text,
   created_at timestamp with time zone,
   updated_at timestamp with time zone,
+  is_urgent boolean DEFAULT false,
   CONSTRAINT notes_pkey PRIMARY KEY (note_id),
   CONSTRAINT notes_caregiver_id_fkey FOREIGN KEY (caregiver_id) REFERENCES public.caregivers(caregiver_id),
   CONSTRAINT notes_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.teams(team_id),
@@ -136,8 +137,8 @@ CREATE TABLE public.task_logs (
   completed_at timestamp with time zone,
   is_completed boolean,
   CONSTRAINT task_logs_pkey PRIMARY KEY (id),
-  CONSTRAINT task_logs_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(task_id),
-  CONSTRAINT task_logs_caregiver_id_fkey FOREIGN KEY (caregiver_id) REFERENCES public.caregivers(caregiver_id)
+  CONSTRAINT task_logs_caregiver_id_fkey FOREIGN KEY (caregiver_id) REFERENCES public.caregivers(caregiver_id),
+  CONSTRAINT task_logs_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(task_id)
 );
 CREATE TABLE public.tasks (
   task_id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -146,7 +147,7 @@ CREATE TABLE public.tasks (
   category_id uuid NOT NULL,
   title text,
   description text,
-  scheduled_at timestamp with time zone,
+  scheduled_at timestamp without time zone,
   CONSTRAINT tasks_pkey PRIMARY KEY (task_id),
   CONSTRAINT tasks_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.teams(team_id),
   CONSTRAINT tasks_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patients(patient_id),
