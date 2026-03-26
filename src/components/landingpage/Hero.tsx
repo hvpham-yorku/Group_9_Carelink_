@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 
 export default function Hero() {
     return (
@@ -19,9 +20,11 @@ export default function Hero() {
             shared system—built specifically for home healthcare teams.
             </h5>
             <div className="buttons d-flex gap-3 justify-content-start mt-4">
+                <Link to="/login" className="text-decoration-none">
                 <button className="btn btn-primary btn-lg px-4">
-                Get Started!
+                    Get Started!
                 </button>
+                </Link>
                 <a href="#about" className="btn btn-outline-primary border border-2 border-primary btn-lg px-4">
                 Learn More
                 </a>
