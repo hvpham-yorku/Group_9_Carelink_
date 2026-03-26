@@ -5,7 +5,13 @@
 export const formatToTime = (dateString: string | null): string => {
   if (!dateString) return "";
 
-  const date = new Date(dateString);
+  // Handle time-only strings like "08:00:00" or "08:00"
+  const timeOnly = /^\d{1,2}:\d{2}(:\d{2})?$/.test(dateString);
+  const date = timeOnly
+    ? new Date(`1970-01-01T${dateString}`)
+    : new Date(dateString);
+
+  if (isNaN(date.getTime())) return dateString;
 
   return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",

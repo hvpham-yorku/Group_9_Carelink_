@@ -123,9 +123,7 @@ const MedicationScheduleItem = ({
                 }}
               >
                 {primaryScheduledTime
-                  ? hasValidScheduledDate
-                    ? formatToTime(primaryScheduledTime)
-                    : primaryScheduledTime
+                  ? formatToTime(primaryScheduledTime)
                   : "No time"}
               </span>
             </div>
@@ -145,7 +143,11 @@ const MedicationScheduleItem = ({
             <div className="mb-2">
               <span className="text-muted" style={{ fontSize: "0.88rem" }}>
                 Additional times:{" "}
-                {scheduledAt!.slice(1).filter(Boolean).join(", ")}
+                {scheduledAt!
+                  .slice(1)
+                  .filter(Boolean)
+                  .map(formatToTime)
+                  .join(", ")}
               </span>
             </div>
           )}

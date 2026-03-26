@@ -1,4 +1,5 @@
 import type { Medication } from "../../types/medication";
+import { formatToTime } from "../../utils/formatters";
 import Button from "../ui/Button";
 
 interface MedicationDetailsCardProps {
@@ -61,7 +62,7 @@ const MedicationDetailsCard = ({
                   fontSize: "0.8rem",
                 }}
               >
-                {time}
+                {formatToTime(time)}
               </span>
             ))}
           </div>
