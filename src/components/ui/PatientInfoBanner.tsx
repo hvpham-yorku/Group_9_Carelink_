@@ -1,17 +1,10 @@
 import type { PatientInfo } from "../../types/Types";
+import { UserRound } from "lucide-react";
 import {
   formatDayLabel,
   formatDayKey,
   calculateAge,
 } from "../../utils/formatters";
-
-const styles = {
-  banner: {
-    background: "linear-gradient(135deg, #1a6b4a 0%, #2d9c6e 100%)",
-    borderRadius: "18px",
-    color: "#fff",
-  },
-};
 
 interface PatientInfoBannerProps {
   patient: PatientInfo;
@@ -23,49 +16,75 @@ const PatientInfoBanner = ({ patient }: PatientInfoBannerProps) => {
   const age = patient.dob ? calculateAge(patient.dob) : null;
 
   return (
-    <div className="p-4 mb-4" style={styles.banner}>
-      <div className="d-flex flex-column flex-md-row justify-content-between gap-3">
-        <div>
-          <div
-            className="fw-bold"
-            style={{ fontSize: "2.6rem", lineHeight: 1.1 }}
-          >
-            {fullName}
-          </div>
-
-          <div className="mt-1" style={{ color: "rgba(255,255,255,0.85)" }}>
-            Date of Birth: {dob}
-            {age !== null ? ` (Age ${age})` : ""}
-          </div>
-
-          <div style={{ color: "rgba(255,255,255,0.85)" }}>
-            Address: {patient.address || "—"}
-          </div>
-
-          <div style={{ color: "rgba(255,255,255,0.85)" }}>
-            Phone: {patient.phoneNumber || "—"}
-          </div>
-        </div>
-
+    <div
+      className="p-4 p-md-5 mb-4"
+      style={{
+        background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%)",
+        borderRadius: "20px",
+        color: "#fff",
+        boxShadow: "0 10px 30px rgba(37, 99, 235, 0.18)",
+      }}
+    >
+      <div className="d-flex align-items-start gap-4">
         <div
-          className="p-3"
+          className="d-flex align-items-center justify-content-center flex-shrink-0"
           style={{
-            borderRadius: "14px",
-            backgroundColor: "rgba(255,255,255,0.12)",
-            border: "1px solid rgba(255,255,255,0.15)",
-            minWidth: "240px",
-            alignSelf: "flex-start",
+            width: "72px",
+            height: "72px",
+            borderRadius: "16px",
+            background: "rgba(255,255,255,0.14)",
+            border: "1px solid rgba(255,255,255,0.16)",
           }}
         >
-          <div style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.9rem" }}>
-            Emergency Contact
+          <UserRound size={34} color="white" />
+        </div>
+
+        <div className="flex-grow-1">
+          <h1 className="fw-bold mb-1" style={{ fontSize: "2rem" }}>
+            {fullName}
+          </h1>
+
+          <div
+            className="mb-1"
+            style={{
+              color: "rgba(255,255,255,0.88)",
+              fontSize: "0.98rem",
+            }}
+          >
+            {patient.gender || "Not Available"}
+            {age !== null ? ` • Age ${age}` : ""}
           </div>
 
           <div
-            className="fw-semibold mt-1"
-            style={{ color: "rgba(255,255,255,0.6)", fontStyle: "italic" }}
+            className="mb-3"
+            style={{
+              color: "rgba(255,255,255,0.82)",
+              fontSize: "0.92rem",
+            }}
           >
-            {patient.emergencyContactName || "Not Available"}
+            Born: {dob}
+          </div>
+
+          <div className="d-flex flex-wrap gap-2">
+            {(patient.conditions && patient.conditions.length > 0
+              ? patient.conditions
+              : ["No Conditions Listed"]
+            ).map((condition, index) => (
+              <span
+                key={index}
+                style={{
+                  background: "rgba(255,255,255,0.14)",
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  color: "#fff",
+                  padding: "4px 10px",
+                  borderRadius: "999px",
+                  fontSize: "0.78rem",
+                  fontWeight: 500,
+                }}
+              >
+                {condition}
+              </span>
+            ))}
           </div>
         </div>
       </div>
