@@ -202,8 +202,8 @@ const Teams = () => {
 
         <div className="col-12 col-md-6 col-xl-3">
           <StatCard
-            title="Team Code"
-            value={joinCode ?? "—"}
+            title="Project Demo Code"
+            value={"C42411"}
             description="Share to invite caregivers"
             icon={<Hash size={20} color="#fd7e14" />}
           />
