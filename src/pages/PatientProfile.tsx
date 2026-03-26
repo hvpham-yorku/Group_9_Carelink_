@@ -26,6 +26,7 @@ type EditableSection =
   | "physician"
   | "notes"
   | "conditions"
+  | "emergency"
   | null;
 
 const PatientProfile = () => {
@@ -128,10 +129,19 @@ const PatientProfile = () => {
         };
       }
 
-      const updated = await patientService.updateProfile(
-        patient.patientId,
-        updates as never,
-      );
+      if (section === "emergency") {
+        updates = {
+          emergencyContactName: draftPatient.emergencyContactName,
+          emergencyContactPhone: draftPatient.emergencyContactPhone,
+          emergencyContactRelationship: draftPatient.emergencyContactRelationship,
+          secondaryEmergencyContactName: draftPatient.secondaryEmergencyContactName,
+          secondaryEmergencyContactPhone: draftPatient.secondaryEmergencyContactPhone,
+          secondaryEmergencyContactRelationship:
+            draftPatient.secondaryEmergencyContactRelationship,
+        };
+      }
+
+      const updated = await patientService.updateProfile(patient.patientId, updates);
 
       const updatedPatient = updated as PatientInfo;
       setPatient(updatedPatient);
@@ -317,7 +327,16 @@ const PatientProfile = () => {
         </div>
 
         <div className="col-lg-8">
-          <EmergencyContactsSection patient={patient} />
+          <EmergencyContactsSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "emergency"}
+            isSaving={savingSection === "emergency"}
+            onEdit={() => startEditing("emergency")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("emergency")}
+            onChange={handleFieldChange}
+          />
 
           <PatientPhysicianSection
             patient={patient}

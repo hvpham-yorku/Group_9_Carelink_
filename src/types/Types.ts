@@ -134,6 +134,9 @@ export interface PatientInfo {
   emergencyContactName?: string;
   emergencyContactPhone?: string;
   emergencyContactRelationship?: string;
+  secondaryEmergencyContactName?: string;
+  secondaryEmergencyContactPhone?: string;
+  secondaryEmergencyContactRelationship?: string;
   physicianName?: string;
   physicianPhone?: string;
   physicianAddress?: string;
