@@ -1,16 +1,8 @@
-import type { MedicationScheduleItemProps } from "../../types/Types";
+import type { Medication } from "../../types/medication";
 import Button from "../ui/Button";
 
-type Prescription = Omit<MedicationScheduleItemProps, "onToggle"> & {
-  purpose?: string;
-  instructions?: string;
-  warnings?: string;
-  prescribedBy?: string;
-  startDate?: string;
-};
-
 interface MedicationDetailsCardProps {
-  medication: Prescription | null;
+  medication: Medication | null;
   onArchive?: () => void;
 }
 
@@ -56,9 +48,9 @@ const MedicationDetailsCard = ({
       <div>
         <p className="text-muted mb-1 small fw-semibold">Scheduled Times</p>
 
-        {medication.scheduledAt ? (
+        {medication.scheduledAt && medication.scheduledAt.length > 0 ? (
           <div className="d-flex flex-wrap gap-2">
-            {medication.scheduledAt.split(",").map((time, index) => (
+            {medication.scheduledAt.map((time, index) => (
               <span
                 key={index}
                 className="badge rounded-pill"
@@ -69,22 +61,13 @@ const MedicationDetailsCard = ({
                   fontSize: "0.8rem",
                 }}
               >
-                {time.trim()}
+                {time}
               </span>
             ))}
           </div>
         ) : (
           <div>Not available</div>
         )}
-      </div>
-
-      <div>
-        <p className="text-muted mb-1 small fw-semibold">Start Date</p>
-        <div>
-          {medication.startDate
-            ? new Date(medication.startDate).toLocaleDateString()
-            : "Not available"}
-        </div>
       </div>
 
       <div>

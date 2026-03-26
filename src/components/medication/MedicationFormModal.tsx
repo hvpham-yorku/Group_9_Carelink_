@@ -4,8 +4,26 @@ import Button from "../ui/Button";
 interface MedicationFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
-  initialData?: any;
+  onSave: (data: {
+    name: string;
+    dosage: string;
+    frequency: string;
+    scheduledAt: string[];
+    purpose: string;
+    instructions: string;
+    prescribedBy: string;
+    warnings: string;
+  }) => void;
+  initialData?: {
+    name?: string | null;
+    dosage?: string | null;
+    frequency?: string | null;
+    scheduledAt?: string[];
+    purpose?: string | null;
+    instructions?: string | null;
+    prescribedBy?: string | null;
+    warnings?: string | null;
+  };
 }
 
 const MedicationFormModal = ({
@@ -17,26 +35,30 @@ const MedicationFormModal = ({
   const [name, setName] = useState("");
   const [dosage, setDosage] = useState("");
   const [frequency, setFrequency] = useState("");
-  const [scheduledAt, setScheduledAt] = useState("08:00");
+  const [scheduledAt, setScheduledAt] = useState<string[]>(["08:00"]);
 
   const [purpose, setPurpose] = useState("");
   const [instructions, setInstructions] = useState("");
   const [prescribedBy, setPrescribedBy] = useState("");
   const [warnings, setWarnings] = useState("");
-  const [startDate, setStartDate] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       setName(initialData?.name ?? "");
       setDosage(initialData?.dosage ?? "");
       setFrequency(initialData?.frequency ?? "");
-      setScheduledAt(initialData?.scheduledAt || "08:00");
+      setScheduledAt(
+        Array.isArray(initialData?.scheduledAt)
+          ? initialData.scheduledAt
+          : initialData?.scheduledAt
+            ? [initialData.scheduledAt]
+            : ["08:00"],
+      );
 
       setPurpose(initialData?.purpose ?? "");
       setInstructions(initialData?.instructions ?? "");
       setPrescribedBy(initialData?.prescribedBy ?? "");
       setWarnings(initialData?.warnings ?? "");
-      setStartDate(initialData?.startDate ?? "");
     }
   }, [isOpen, initialData]);
 
@@ -52,7 +74,6 @@ const MedicationFormModal = ({
       instructions,
       prescribedBy,
       warnings,
-      startDate,
     });
   };
 
@@ -107,27 +128,23 @@ const MedicationFormModal = ({
               <label className="form-label">Scheduled Times</label>
 
               <div className="d-flex flex-column gap-2">
-                {scheduledAt.split(",").map((time, index) => (
+                {scheduledAt.map((time, index) => (
                   <input
                     key={index}
                     type="time"
                     className="form-control"
-                    value={time.trim()}
+                    value={time}
                     onChange={(e) => {
-                      const times = scheduledAt.split(",");
+                      const times = [...scheduledAt];
                       times[index] = e.target.value;
-                      setScheduledAt(times.join(","));
+                      setScheduledAt(times);
                     }}
                   />
                 ))}
 
                 <Button
                   color="outline-primary"
-                  onClick={() =>
-                    setScheduledAt(
-                      scheduledAt ? `${scheduledAt},` : "",
-                    )
-                  }
+                  onClick={() => setScheduledAt([...scheduledAt, "08:00"])}
                 >
                   + Add Time
                 </Button>
@@ -159,16 +176,6 @@ const MedicationFormModal = ({
                 className="form-control"
                 value={prescribedBy}
                 onChange={(e) => setPrescribedBy(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="form-label">Start Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
 
