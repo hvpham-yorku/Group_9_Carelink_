@@ -154,15 +154,17 @@ const SideBar = ({ username }: SideBarProps) => {
           </button>
           <ul className="dropdown-menu">
             <li>
-              <hr className="dropdown-divider" />
-            </li>
-            <li>
               <NavLink
                 className="dropdown-item"
                 to="/accountsettings"
               >
                 Account Settings
               </NavLink>
+            </li>
+            <li>
+              <hr className="dropdown-divider" />
+            </li>
+            <li>
               <button 
               className="dropdown-item text-danger border-0 bg-transparent w-100 text-start"
               onClick={async () => {
