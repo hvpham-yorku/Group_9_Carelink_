@@ -5,14 +5,15 @@ import NotesHeader from "../components/note/NotesHeader";
 import NotesStatCard from "../components/note/NotesStatCard";
 import CareTimelineContainer from "../components/note/CareTimelineContainer";
 import NewNoteContainer from "../components/note/NewNoteContainer";
-import type { Note, NoteCategory } from "../components/note/types";
+import type { Note } from "../types/note";
+import type { Category } from "../types/teams";
 import {
   dayKey,
   formatDateTime,
   formatDayLabel,
 } from "../components/note/noteUtils";
 
-import { noteService } from "../services/noteService";
+import { repositories } from "../data";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 
@@ -32,7 +33,7 @@ export default function Notes() {
 
   // ===== STATE: DATA =====
   const [notes, setNotes] = useState<Note[]>([]);
-  const [categories, setCategories] = useState<NoteCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -54,24 +55,25 @@ export default function Notes() {
   // ===== DERIVED STATE: SELECTED NOTE =====
   const selectedNote = useMemo(
     () => notes.find((note) => note.noteId === selectedId) ?? null,
-    [notes, selectedId]
+    [notes, selectedId],
   );
 
   // ===== FETCH: CATEGORIES =====
   useEffect(() => {
     if (!careTeamId) return;
 
-    noteService
+    repositories.note
       .getCategories(careTeamId)
-      .then((data: NoteCategory[] | null) => {
-        const loadedCategories = data ?? [];
-        setCategories(loadedCategories);
+      .then((data: Category[]) => {
+        setCategories(data);
 
-        if (loadedCategories.length > 0) {
-          setCategoryId(loadedCategories[0].categoryId);
+        if (data.length > 0) {
+          setCategoryId(data[0].categoryId);
         }
       })
-      .catch((err: unknown) => console.error("Failed to load categories:", err));
+      .catch((err: unknown) =>
+        console.error("Failed to load categories:", err),
+      );
   }, [careTeamId]);
 
   // ===== FETCH: NOTES =====
@@ -85,9 +87,9 @@ export default function Notes() {
 
     setLoadingNotes(true);
 
-    noteService
+    repositories.note
       .getNotesByPatient(selectedPatientId)
-      .then((data: Note[] | null) => setNotes(data ?? []))
+      .then((data: Note[]) => setNotes(data))
       .catch((err: unknown) => console.error("Failed to load notes:", err))
       .finally(() => setLoadingNotes(false));
   }, [selectedPatientId]);
@@ -200,6 +202,7 @@ export default function Notes() {
     const map = new Map<string, Note[]>();
 
     for (const note of filteredNotes) {
+      if (!note.createdAt) continue;
       const key = dayKey(note.createdAt);
       const group = map.get(key) ?? [];
       group.push(note);
@@ -263,19 +266,22 @@ export default function Notes() {
 
     try {
       if (selectedNote) {
-        const updated = await noteService.updateNote(selectedNote.noteId, {
-          title: title.trim(),
-          description: description.trim(),
-          categoryId,
-        });
+        const updated = await repositories.note.updateNote(
+          selectedNote.noteId,
+          {
+            title: title.trim(),
+            description: description.trim(),
+            categoryId,
+          },
+        );
 
         setNotes((prev) =>
           prev.map((note) =>
-            note.noteId === selectedNote.noteId ? (updated as Note) : note
-          )
+            note.noteId === selectedNote.noteId ? updated : note,
+          ),
         );
       } else {
-        const created = await noteService.addNote({
+        const created = await repositories.note.addNote({
           patientId: selectedPatientId,
           caregiverId: user.id,
           careTeamId: careTeamId ?? "",
@@ -284,8 +290,8 @@ export default function Notes() {
           categoryId,
         });
 
-        setNotes((prev) => [created as Note, ...prev]);
-        setSelectedId((created as Note).noteId);
+        setNotes((prev) => [created, ...prev]);
+        setSelectedId(created.noteId);
       }
 
       flashSaved();
@@ -299,7 +305,7 @@ export default function Notes() {
   // ===== ACTIONS: DELETE =====
   async function handleDelete(noteId: string) {
     try {
-      await noteService.deleteNote(noteId);
+      await repositories.note.deleteNote(noteId);
       setNotes((prev) => prev.filter((note) => note.noteId !== noteId));
 
       if (selectedId === noteId) {

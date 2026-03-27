@@ -1,17 +1,17 @@
 import { MapPin, Phone, Stethoscope } from "lucide-react";
 import CustomSection from "../ui/CustomSection";
-import type { PatientInfo } from "../../types/Types";
+import type { AllPatientInfo } from "../../types/patient";
 import SectionEditActions from "./SectionEditActions";
 
 interface Props {
-  patient: PatientInfo;
-  draft: PatientInfo;
+  patient: AllPatientInfo;
+  draft: AllPatientInfo;
   isEditing: boolean;
   isSaving: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
-  onChange: (field: keyof PatientInfo, value: string) => void;
+  onChange: (field: keyof AllPatientInfo, value: string) => void;
 }
 
 const PatientPhysicianSection = ({
@@ -109,7 +109,11 @@ const PatientPhysicianSection = ({
 
               <div
                 className="text-muted"
-                style={{ fontSize: "0.9rem", marginTop: "2px", marginBottom: "10px" }}
+                style={{
+                  fontSize: "0.9rem",
+                  marginTop: "2px",
+                  marginBottom: "10px",
+                }}
               >
                 {patient.physicianSpecialty || "Not Available"}
               </div>

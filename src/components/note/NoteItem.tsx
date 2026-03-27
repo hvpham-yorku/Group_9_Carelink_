@@ -84,13 +84,15 @@ export default function NoteItem({
         </div>
 
         <div className={active ? "text-white-50 small" : "text-muted small"}>
-          {formatDateTime(note.createdAt)}
+          {note.createdAt ? formatDateTime(note.createdAt) : ""}
         </div>
       </div>
 
       <button
         type="button"
-        className={"btn btn-sm " + (active ? "btn-light" : "btn-outline-danger")}
+        className={
+          "btn btn-sm " + (active ? "btn-light" : "btn-outline-danger")
+        }
         onClick={(e) => {
           e.stopPropagation();
           onDelete();
