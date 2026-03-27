@@ -128,12 +128,9 @@ const PatientProfile = () => {
           },
         );
       } else if (section === "conditions") {
-        updated = await patientRepo.updatePatientMedicalInfo(
-          patient.patientId,
-          {
-            conditions: draftPatient.conditions,
-          },
-        );
+        updated = await patientRepo.updatePatientConditions(patient.patientId, {
+          conditions: draftPatient.conditions,
+        });
       } else if (section === "emergency") {
         updated = await patientRepo.updatePatientEmergencyContact(
           patient.patientId,
