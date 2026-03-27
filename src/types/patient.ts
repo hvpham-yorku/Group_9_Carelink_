@@ -8,12 +8,16 @@ export interface PatientBasicInfo {
 }
 
 export interface PatientContactInfo {
+  firstName?: string;
+  lastName?: string;
   address?: string | null;
   phoneNumber?: string | null;
   email?: string | null;
 }
 
 export interface PatientMedicalInfo {
+  dob?: string;
+  gender?: string;
   bloodType?: string | null;
   height?: string | null;
   weight?: string | null;

@@ -82,7 +82,7 @@ export class ApiPatientRepo implements PatientRepo {
         gender: updates.gender,
       })
       .eq("patient_id", patientId)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
 
@@ -96,12 +96,13 @@ export class ApiPatientRepo implements PatientRepo {
     const { error } = await supabase
       .from("patients")
       .update({
+        first_name: contactInfo.firstName,
+        last_name: contactInfo.lastName,
         address: contactInfo.address,
         phone_number: contactInfo.phoneNumber,
         email: contactInfo.email,
       })
-      .eq("patient_id", patientId)
-      .single();
+      .eq("patient_id", patientId);
 
     if (error) throw error;
 
@@ -115,13 +116,14 @@ export class ApiPatientRepo implements PatientRepo {
     const { error } = await supabase
       .from("patients")
       .update({
+        dob: medicalInfo.dob,
+        gender: medicalInfo.gender,
         blood_type: medicalInfo.bloodType,
         height: medicalInfo.height,
         weight: medicalInfo.weight,
         dietary_requirements: medicalInfo.dietaryRequirements,
       })
-      .eq("patient_id", patientId)
-      .single();
+      .eq("patient_id", patientId);
 
     if (error) throw error;
 
@@ -154,7 +156,7 @@ export class ApiPatientRepo implements PatientRepo {
       .from("emergency_contacts")
       .select("contact_id")
       .eq("patient_id", patientId)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
 
@@ -186,8 +188,7 @@ export class ApiPatientRepo implements PatientRepo {
         policy_number: insuranceInfo.insurancePolicyNumber,
         group_number: insuranceInfo.groupNumber,
       })
-      .eq("patient_id", patientId)
-      .single();
+      .eq("patient_id", patientId);
 
     if (error) throw error;
 
@@ -206,8 +207,7 @@ export class ApiPatientRepo implements PatientRepo {
         phys_phone: physicianInfo.physicianPhone,
         phys_address: physicianInfo.physicianAddress,
       })
-      .eq("patient_id", patientId)
-      .single();
+      .eq("patient_id", patientId);
 
     if (error) throw error;
 

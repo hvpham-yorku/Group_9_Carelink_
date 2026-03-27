@@ -85,26 +85,22 @@ const PatientProfile = () => {
       let updated: AllPatientInfo;
 
       if (section === "contact") {
-        await patientRepo.updatePatientBasicInfo(patient.patientId, {
-          firstName: draftPatient.firstName,
-          lastName: draftPatient.lastName,
-        });
         updated = await patientRepo.updatePatientContactInfo(
           patient.patientId,
           {
+            firstName: draftPatient.firstName,
+            lastName: draftPatient.lastName,
             address: draftPatient.address,
             phoneNumber: draftPatient.phoneNumber,
             email: draftPatient.email,
           },
         );
       } else if (section === "medical") {
-        await patientRepo.updatePatientBasicInfo(patient.patientId, {
-          dob: draftPatient.dob,
-          gender: draftPatient.gender,
-        });
         updated = await patientRepo.updatePatientMedicalInfo(
           patient.patientId,
           {
+            dob: draftPatient.dob,
+            gender: draftPatient.gender,
             bloodType: draftPatient.bloodType,
             height: draftPatient.height,
             weight: draftPatient.weight,
@@ -155,8 +151,18 @@ const PatientProfile = () => {
       setPatient(updated);
       setDraftPatient(updated);
       setEditingSection(null);
-    } catch (err) {
-      console.error(`Failed to save ${section} section:`, err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(`Failed to save ${section} section:`, {
+          message: err.message,
+          stack: err.stack,
+        });
+      } else {
+        console.error(
+          `Failed to save ${section} section - raw error:`,
+          JSON.stringify(err, null, 2),
+        );
+      }
     } finally {
       setSavingSection(null);
     }
