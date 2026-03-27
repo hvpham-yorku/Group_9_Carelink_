@@ -1,15 +1,14 @@
-import * as React from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Activity,
+  AlertTriangle,
   CalendarDays,
   CheckCircle2,
+  ClipboardList,
   Clock3,
+  FileText,
   Pill,
   UserRound,
-  AlertTriangle,
-  FileText,
-  StickyNote,
 } from "lucide-react";
 import { useDashboardData } from "../hooks/useDashBoardData";
 
@@ -21,14 +20,9 @@ type StatCard = {
 };
 
 type ActivityItem = {
-  icon?: string;
-  text?: string;
-  message?: string;
-  title?: string;
-  description?: string;
+  icon: string;
+  text: string;
   time?: string;
-  timestamp?: string;
-  createdAt?: string;
 };
 
 type MedItem = {
@@ -41,8 +35,12 @@ type MedItem = {
 type AppointmentItem = {
   day?: string;
   title: string;
-  location: string;
+  location?: string;
   time?: string;
+  primary?: string;
+  secondary?: string;
+  scheduledAt?: string;
+  description?: string;
 };
 
 type DashboardPatient = {
@@ -63,35 +61,33 @@ type DashboardData = {
   patient: DashboardPatient;
   stats: StatCard[];
   recentActivity: ActivityItem[];
-  recentNotes: ActivityItem[];
+  recentNotes?: ActivityItem[];
   todaysMeds: MedItem[];
   upcomingAppointments: AppointmentItem[];
 };
 
-
-
 const styles = {
   pageBg: {
     minHeight: "100vh",
-    width: "100%",
     background:
-      "linear-gradient(180deg, #f8fbff 0%, #f3f6fb 45%, #eef2f7 100%)",
+      "linear-gradient(180deg, #F8FBFF 0%, #F3F6FB 45%, #EEF2F7 100%)",
   } as React.CSSProperties,
 
   containerMax: {
-    maxWidth: "1180px",
-  } as React.CSSProperties,
-
-  cardLike: {
-    borderRadius: "20px",
-    border: "1px solid #E5E7EB",
-    boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-    background: "#FFFFFF",
+    maxWidth: "1400px",
   } as React.CSSProperties,
 
   hero: {
     borderRadius: "24px",
-    background: "linear-gradient(135deg, #eff6ff 0%, #eef2ff 55%, #f8fafc 100%)",
+    background:
+      "linear-gradient(135deg, rgba(219,234,254,0.9) 0%, rgba(255,255,255,0.98) 48%, rgba(237,242,247,0.96) 100%)",
+    border: "1px solid rgba(226,232,240,0.95)",
+    boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
+  } as React.CSSProperties,
+
+  cardLike: {
+    borderRadius: "20px",
+    background: "#FFFFFF",
     border: "1px solid #E5E7EB",
     boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
   } as React.CSSProperties,
@@ -116,8 +112,30 @@ function iconWrap(bg: string): React.CSSProperties {
   };
 }
 
+function getAppointmentPrimary(appointment: AppointmentItem): string {
+  if (appointment.primary) return appointment.primary;
+  if (appointment.day) return appointment.day;
+  if (appointment.scheduledAt) {
+    return new Date(appointment.scheduledAt).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+  }
+  return "—";
+}
+
+function getAppointmentSecondary(appointment: AppointmentItem): string {
+  if (appointment.secondary) return appointment.secondary;
+
+  const title = appointment.title || appointment.description || "Appointment";
+  const time = appointment.time ? ` • ${appointment.time}` : "";
+
+  return `${title}${time}`;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
+
   const { data, loading, error } = useDashboardData() as {
     data: DashboardData | null;
     loading: boolean;
@@ -126,7 +144,7 @@ export default function Dashboard() {
 
   const goTasks = () => navigate("/task-manager");
   const goMeds = () => navigate("/medication-tracker");
-  const goProfile = () => navigate("/patient-profile");
+  const goAppointments = () => navigate("/appointments");
   const goNotes = () => navigate("/notes");
 
   const stats = data?.stats ?? [];
@@ -161,7 +179,7 @@ export default function Dashboard() {
         appointments.length > 0
           ? getAppointmentSecondary(appointments[0])
           : "No data yet",
-      route: "/patient-profile",
+      route: "/appointments",
     },
     {
       title: "Care Notes",
@@ -258,33 +276,30 @@ export default function Dashboard() {
                       {data.patient?.name ?? "Selected Patient"}
                     </div>
                     <div className="text-secondary small">
-                      {data.patient?.meta ?? "Patient information"}
+                      {data.patient?.meta ?? "Patient overview"}
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-3 d-flex flex-wrap gap-2">
-                  <span className="badge text-bg-primary px-3 py-2 rounded-pill fw-medium">
-                    Active Care Plan
-                  </span>
-                  <span className="badge text-bg-light border text-secondary px-3 py-2 rounded-pill fw-medium">
-                    {formatFullDate(new Date())}
-                  </span>
-                </div>
-
-                <div className="mt-3 small text-secondary">
-                  <span className="fw-semibold text-dark">Caregiver:</span>{" "}
-                  {data.caregiver?.name ?? "Unknown"}
-                  {data.caregiver?.role ? ` • ${data.caregiver.role}` : ""}
+                <div className="mt-3 pt-3 border-top">
+                  <div className="small text-uppercase text-secondary fw-semibold mb-2">
+                    Caregiver
+                  </div>
+                  <div className="fw-semibold">
+                    {data.caregiver?.name ?? "Caregiver"}
+                  </div>
+                  <div className="text-secondary small">
+                    {data.caregiver?.role ?? "Care team member"}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="row g-3 g-md-4 mb-4">
+        <section className="row g-4 mb-4">
           {displayStats.map((stat, index) => (
-            <div className="col-12 col-sm-6 col-xl-3" key={`${stat.title}-${index}`}>
+            <div key={`${stat.title}-${index}`} className="col-12 col-sm-6 col-xl-3">
               <button
                 type="button"
                 className="w-100 text-start p-4 border-0"
@@ -292,94 +307,75 @@ export default function Dashboard() {
                   ...styles.cardLike,
                   cursor: stat.route ? "pointer" : "default",
                 }}
-                onClick={() => stat.route && navigate(stat.route)}
+                onClick={() => {
+                  if (stat.route) navigate(stat.route);
+                }}
               >
-                <div className="d-flex justify-content-between align-items-start gap-3">
-                  <div>
-                    <div className="text-secondary fw-medium small mb-2">
-                      {stat.title}
-                    </div>
-                    <div className="display-6 fw-bold text-dark mb-1">
-                      {stat.primary}
-                    </div>
-                    <div className="small text-secondary">{stat.secondary}</div>
-                  </div>
-                  <div>{getStatIcon(index)}</div>
+                <div className="text-secondary small fw-semibold text-uppercase mb-2">
+                  {stat.title}
                 </div>
+                <div className="fw-bold fs-2 text-dark">{stat.primary}</div>
+                <div className="text-secondary mt-1">{stat.secondary}</div>
               </button>
             </div>
           ))}
         </section>
 
-        <section className="row g-4 mb-4">
-          <div className="col-12 col-xl-8">
+        <section className="row g-4">
+          <div className="col-12 col-xl-4">
             <div className="p-4 h-100" style={styles.cardLike}>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                  <h4 className="fw-bold mb-1">Today’s Med Schedule</h4>
-                  <p className="text-secondary mb-0 small">
-                    Medication times and completion status for the selected patient.
-                  </p>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex align-items-center gap-2">
+                  <div style={iconWrap("rgba(34, 197, 94, 0.12)")}>
+                    <Pill size={20} className="text-success" />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-0">Today’s Med Schedule</h5>
+                    <div className="text-secondary small">
+                      Track today’s medication plan
+                    </div>
+                  </div>
                 </div>
-                <button className="btn btn-outline-primary btn-sm" onClick={goMeds}>
-                  Medication Tracker
+
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary rounded-pill"
+                  onClick={goMeds}
+                >
+                  Open
                 </button>
               </div>
 
               {meds.length === 0 ? (
-                <EmptyState
-                  icon={<Pill size={20} className="text-secondary" />}
-                  title="No medications scheduled yet"
-                  subtitle="Medication entries for today will appear here."
-                />
+                <div className="text-secondary">No medications scheduled yet.</div>
               ) : (
                 <div className="d-flex flex-column gap-3">
                   {meds.map((med, index) => (
                     <div
-                      key={`${med.name}-${index}`}
-                      className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 p-3"
-                      style={{
-                        borderRadius: "16px",
-                        background: med.taken ? "#F0FDF4" : "#FFFFFF",
-                        border: med.taken
-                          ? "1px solid #BBF7D0"
-                          : "1px solid #E5E7EB",
-                      }}
+                      key={`${med.name}-${med.time}-${index}`}
+                      className="p-3"
+                      style={styles.softPanel}
                     >
-                      <div className="d-flex align-items-start gap-3">
-                        <div
-                          style={iconWrap(
-                            med.taken
-                              ? "rgba(34,197,94,0.14)"
-                              : "rgba(59,130,246,0.12)",
-                          )}
-                        >
-                          {med.taken ? (
-                            <CheckCircle2 size={20} className="text-success" />
-                          ) : (
-                            <Clock3 size={20} className="text-primary" />
-                          )}
+                      <div className="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                          <div className="fw-semibold">{med.name}</div>
+                          <div className="text-secondary small">
+                            {med.dose || "Dose not specified"}
+                          </div>
                         </div>
 
-                        <div>
-                          <div className="fw-semibold text-dark">
-                            {med.time} — {med.name}
-                            {med.dose ? ` (${med.dose})` : ""}
-                          </div>
-                          <div className="small text-secondary">
-                            {med.taken ? "Marked as taken" : "Pending administration"}
-                          </div>
-                        </div>
+                        <span
+                          className={`badge rounded-pill ${med.taken ? "text-bg-success" : "text-bg-light"
+                            }`}
+                        >
+                          {med.taken ? "Taken" : "Pending"}
+                        </span>
                       </div>
 
-                      <span
-                        className={`badge rounded-pill px-3 py-2 ${med.taken
-                          ? "text-bg-success"
-                          : "text-bg-light border text-secondary"
-                          }`}
-                      >
-                        {med.taken ? "Taken" : "Pending"}
-                      </span>
+                      <div className="mt-2 d-flex align-items-center gap-2 text-secondary small">
+                        <Clock3 size={14} />
+                        <span>{med.time}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -389,47 +385,60 @@ export default function Dashboard() {
 
           <div className="col-12 col-xl-4">
             <div className="p-4 h-100" style={styles.cardLike}>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                  <h4 className="fw-bold mb-1">Upcoming Appointments</h4>
-                  <p className="text-secondary mb-0 small">
-                    Scheduled visits and upcoming care events.
-                  </p>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex align-items-center gap-2">
+                  <div style={iconWrap("rgba(59, 130, 246, 0.12)")}>
+                    <CalendarDays size={20} className="text-primary" />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-0">Upcoming Appointments</h5>
+                    <div className="text-secondary small">
+                      Scheduled visits and events
+                    </div>
+                  </div>
                 </div>
-                <button className="btn btn-outline-primary btn-sm" onClick={goProfile}>
-                  Patient Profile
+
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary rounded-pill"
+                  onClick={goAppointments}
+                >
+                  Open
                 </button>
               </div>
 
               {appointments.length === 0 ? (
-                <EmptyState
-                  icon={<CalendarDays size={20} className="text-secondary" />}
-                  title="No upcoming appointments yet"
-                  subtitle="Future appointments and visits will appear here."
-                />
+                <div className="text-secondary">No upcoming appointments yet.</div>
               ) : (
                 <div className="d-flex flex-column gap-3">
                   {appointments.map((appointment, index) => (
                     <div
-                      key={`${appointment.title}-${index}`}
+                      key={`${appointment.title}-${appointment.time}-${index}`}
                       className="p-3"
                       style={styles.softPanel}
                     >
-                      <div className="d-flex align-items-start gap-3">
-                        <div style={iconWrap("rgba(99,102,241,0.12)")}>
-                          <CalendarDays className="text-primary" size={20} />
-                        </div>
-                        <div className="flex-grow-1">
-                          <div className="fw-semibold text-dark">{appointment.title}</div>
-                          <div className="small text-secondary mt-1">
-                            {getAppointmentLabel(appointment)}
+                      <div className="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                          <div className="fw-semibold">
+                            {appointment.title || appointment.description || "Appointment"}
                           </div>
-                          {appointment.location && (
-                            <div className="small text-secondary mt-1">
-                              {appointment.location}
-                            </div>
-                          )}
+                          <div className="text-secondary small">
+                            {appointment.location || "Location not specified"}
+                          </div>
                         </div>
+
+                        <span className="badge text-bg-light rounded-pill">
+                          {appointment.day || appointment.primary || "Upcoming"}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 d-flex align-items-center gap-2 text-secondary small">
+                        <Clock3 size={14} />
+                        <span>
+                          {appointment.time ||
+                            appointment.secondary ||
+                            "Time not specified"}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -437,50 +446,127 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-        </section>
 
-        <section className="row g-4">
-          <div className="col-12 col-lg-6">
+          <div className="col-12 col-xl-4">
             <div className="p-4 h-100" style={styles.cardLike}>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                  <h4 className="fw-bold mb-1">Recent Activity</h4>
-                  <p className="text-secondary mb-0 small">
-                    Recently completed task activity only.
-                  </p>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex align-items-center gap-2">
+                  <div style={iconWrap("rgba(249, 115, 22, 0.12)")}>
+                    <ClipboardList size={20} className="text-warning" />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-0">Recent Activity</h5>
+                    <div className="text-secondary small">
+                      Latest task and care updates
+                    </div>
+                  </div>
                 </div>
-                <button className="btn btn-outline-primary btn-sm" onClick={goTasks}>
-                  View Tasks
+
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary rounded-pill"
+                  onClick={goTasks}
+                >
+                  Open
                 </button>
               </div>
 
               {taskOnlyActivity.length === 0 ? (
-                <EmptyState
-                  icon={<Activity size={20} className="text-secondary" />}
-                  title="No recent task activity yet"
-                  subtitle="Completed task activity will appear here."
-                />
+                <div className="text-secondary">No recent activity yet.</div>
               ) : (
                 <div className="d-flex flex-column gap-3">
                   {taskOnlyActivity.map((item, index) => (
                     <div
-                      key={`${getActivityText(item)}-${index}`}
+                      key={`${item.text}-${index}`}
                       className="d-flex align-items-start gap-3 p-3"
                       style={styles.softPanel}
                     >
-                      <div style={iconWrap("rgba(59,130,246,0.12)")}>
-                        <FileText size={18} className="text-primary" />
+                      <div style={iconWrap("rgba(34, 197, 94, 0.12)")}>
+                        <CheckCircle2 size={18} className="text-success" />
                       </div>
-
-                      <div className="flex-grow-1">
-                        <div className="fw-medium text-dark">
-                          {getActivityText(item)}
+                      <div>
+                        <div className="fw-semibold">{item.text}</div>
+                        <div className="text-secondary small">
+                          {item.time || "Recently updated"}
                         </div>
-                        {getActivityTime(item) && (
-                          <div className="small text-secondary mt-1">
-                            {getActivityTime(item)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="row g-4 mt-1">
+          <div className="col-12 col-xl-7">
+            <div className="p-4 h-100" style={styles.cardLike}>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex align-items-center gap-2">
+                  <div style={iconWrap("rgba(99, 102, 241, 0.12)")}>
+                    <CalendarDays size={20} className="text-primary" />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-0">Schedule Overview</h5>
+                    <div className="text-secondary small">
+                      Combined view of medication and appointment timing
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary rounded-pill"
+                  onClick={goAppointments}
+                >
+                  View Appointments
+                </button>
+              </div>
+
+              {meds.length === 0 && appointments.length === 0 ? (
+                <div className="text-secondary">No schedule items available yet.</div>
+              ) : (
+                <div className="d-flex flex-column gap-3">
+                  {appointments.map((appointment, index) => (
+                    <div
+                      key={`schedule-appt-${index}`}
+                      className="p-3"
+                      style={styles.softPanel}
+                    >
+                      <div className="d-flex align-items-start gap-3">
+                        <div style={iconWrap("rgba(59, 130, 246, 0.12)")}>
+                          <CalendarDays size={18} className="text-primary" />
+                        </div>
+                        <div>
+                          <div className="fw-semibold">
+                            {appointment.title || appointment.description || "Appointment"}
                           </div>
-                        )}
+                          <div className="text-secondary small">
+                            {appointment.day || "Upcoming"}
+                            {appointment.time ? ` • ${appointment.time}` : ""}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {meds.map((med, index) => (
+                    <div
+                      key={`schedule-med-${index}`}
+                      className="p-3"
+                      style={styles.softPanel}
+                    >
+                      <div className="d-flex align-items-start gap-3">
+                        <div style={iconWrap("rgba(34, 197, 94, 0.12)")}>
+                          <Pill size={18} className="text-success" />
+                        </div>
+                        <div>
+                          <div className="fw-semibold">{med.name}</div>
+                          <div className="text-secondary small">
+                            {med.time}
+                            {med.dose ? ` • ${med.dose}` : ""}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -489,47 +575,43 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="col-12 col-lg-6">
+          <div className="col-12 col-xl-5">
             <div className="p-4 h-100" style={styles.cardLike}>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                  <h4 className="fw-bold mb-1">Recent Notes</h4>
-                  <p className="text-secondary mb-0 small">
-                    Latest notes added for this patient.
-                  </p>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex align-items-center gap-2">
+                  <div style={iconWrap("rgba(168, 85, 247, 0.12)")}>
+                    <FileText size={20} className="text-primary" />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-0">Recent Notes</h5>
+                    <div className="text-secondary small">
+                      Latest care documentation
+                    </div>
+                  </div>
                 </div>
-                <button className="btn btn-outline-primary btn-sm" onClick={goNotes}>
-                  Open Notes
+
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary rounded-pill"
+                  onClick={goNotes}
+                >
+                  Open
                 </button>
               </div>
 
               {recentNotes.length === 0 ? (
-                <EmptyState
-                  icon={<StickyNote size={20} className="text-secondary" />}
-                  title="No recent notes yet"
-                  subtitle="New notes will appear here."
-                />
+                <div className="text-secondary">No notes yet.</div>
               ) : (
                 <div className="d-flex flex-column gap-3">
-                  {recentNotes.map((item, index) => (
+                  {recentNotes.map((note, index) => (
                     <div
-                      key={`${getActivityText(item)}-${index}`}
-                      className="d-flex align-items-start gap-3 p-3"
+                      key={`${note.text}-${index}`}
+                      className="p-3"
                       style={styles.softPanel}
                     >
-                      <div style={iconWrap("rgba(245,158,11,0.12)")}>
-                        <StickyNote size={18} className="text-warning" />
-                      </div>
-
-                      <div className="flex-grow-1">
-                        <div className="fw-medium text-dark">
-                          {cleanNoteText(getActivityText(item))}
-                        </div>
-                        {getActivityTime(item) && (
-                          <div className="small text-secondary mt-1">
-                            {getActivityTime(item)}
-                          </div>
-                        )}
+                      <div className="fw-semibold">{note.text}</div>
+                      <div className="text-secondary small mt-1">
+                        {note.time || "Recently updated"}
                       </div>
                     </div>
                   ))}
@@ -539,113 +621,6 @@ export default function Dashboard() {
           </div>
         </section>
       </div>
-    </div>
-  );
-}
-
-function getStatIcon(index: number) {
-  switch (index) {
-    case 0:
-      return (
-        <div style={iconWrap("rgba(37,99,235,0.12)")}>
-          <CheckCircle2 className="text-primary" size={20} />
-        </div>
-      );
-    case 1:
-      return (
-        <div style={iconWrap("rgba(16,185,129,0.12)")}>
-          <Pill className="text-success" size={20} />
-        </div>
-      );
-    case 2:
-      return (
-        <div style={iconWrap("rgba(99,102,241,0.12)")}>
-          <CalendarDays className="text-primary" size={20} />
-        </div>
-      );
-    default:
-      return (
-        <div style={iconWrap("rgba(245,158,11,0.12)")}>
-          <StickyNote className="text-warning" size={20} />
-        </div>
-      );
-  }
-}
-
-function getActivityText(item: ActivityItem): string {
-  return (
-    item.text ??
-    item.message ??
-    item.title ??
-    item.description ??
-    "Care activity recorded"
-  );
-}
-
-function getActivityTime(item: ActivityItem): string {
-  return item.time ?? item.timestamp ?? item.createdAt ?? "";
-}
-
-function cleanNoteText(text: string): string {
-  return text.replace(/^note added:\s*/i, "");
-}
-
-function getAppointmentPrimary(item: AppointmentItem): string {
-  return item.day ?? item.time ?? "—";
-}
-
-function getAppointmentSecondary(item: AppointmentItem): string {
-  return item.title ?? "Upcoming appointment";
-}
-
-function getAppointmentLabel(item: AppointmentItem): string {
-  const day = item.day ?? item.time ?? "Time not set";
-  return item.location ? `${day} • ${item.location}` : day;
-}
-
-function formatFullDate(date: Date): string {
-  return date.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function EmptyState({
-  icon,
-  title,
-  subtitle,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-}) {
-  return (
-    <div
-      className="text-center p-4"
-      style={{
-        borderRadius: "16px",
-        border: "1px dashed #D1D5DB",
-        background: "#F8FAFC",
-      }}
-    >
-      <div
-        className="mx-auto mb-3"
-        style={{
-          width: 46,
-          height: 46,
-          borderRadius: 14,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#EEF2F7",
-        }}
-      >
-        {icon}
-      </div>
-      <div className="fw-semibold text-dark mb-1">{title}</div>
-      <div className="small text-secondary">{subtitle}</div>
     </div>
   );
 }

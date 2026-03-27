@@ -1,30 +1,48 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Mail,
-  MapPin,
-  Phone,
-  AlertCircle,
-  UserRound,
-  Stethoscope,
-  Shield,
-  FileText,
-} from "lucide-react";
+import { Calendar, CheckCircle } from "lucide-react";
+
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
+import CustomTitleBanner from "../components/ui/CustomTitleBanner";
+import CustomSection from "../components/ui/CustomSection";
+import StatCard from "../components/ui/StatCard";
+
+import PatientContactSection from "../components/patientProfile/PatientContactSection";
+import PatientMedicalSection from "../components/patientProfile/PatientMedicalSection";
+import PatientInsuranceSection from "../components/patientProfile/PatientInsuranceSection";
+import PatientPhysicianSection from "../components/patientProfile/PatientPhysicianSection";
+import PatientNotesSection from "../components/patientProfile/PatientNotesSection";
+import PatientConditionsSection from "../components/patientProfile/PatientConditionsSection";
+import EmergencyContactsSection from "../components/patientProfile/EmergencyContactsSection";
+
 import type { PatientInfo } from "../types/Types";
 import { usePatient } from "../contexts/patient/usePatient";
 import { patientService } from "../services/patientService";
+
+type EditableSection =
+  | "contact"
+  | "medical"
+  | "insurance"
+  | "physician"
+  | "notes"
+  | "conditions"
+  | "emergency"
+  | null;
 
 const PatientProfile = () => {
   const { selectedPatientId } = usePatient();
   const navigate = useNavigate();
 
   const [patient, setPatient] = useState<PatientInfo | null>(null);
+  const [draftPatient, setDraftPatient] = useState<PatientInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const [savingSection, setSavingSection] = useState<EditableSection>(null);
+  const [editingSection, setEditingSection] = useState<EditableSection>(null);
 
   useEffect(() => {
     if (!selectedPatientId) {
       setPatient(null);
+      setDraftPatient(null);
       return;
     }
 
@@ -32,10 +50,13 @@ const PatientProfile = () => {
       setLoading(true);
       try {
         const data = await patientService.getFullProfile(selectedPatientId);
-        setPatient(data as PatientInfo);
+        const typedData = data as PatientInfo;
+        setPatient(typedData);
+        setDraftPatient(typedData);
       } catch (err) {
         console.error("Failed to load patient profile:", err);
         setPatient(null);
+        setDraftPatient(null);
       } finally {
         setLoading(false);
       }
@@ -43,6 +64,207 @@ const PatientProfile = () => {
 
     fetchPatient();
   }, [selectedPatientId]);
+
+  const startEditing = (section: EditableSection) => {
+    if (!patient) return;
+    setDraftPatient({ ...patient });
+    setEditingSection(section);
+  };
+
+  const cancelEditing = () => {
+    setDraftPatient(patient ? { ...patient } : null);
+    setEditingSection(null);
+  };
+
+  const saveSection = async (section: EditableSection) => {
+    if (!patient || !draftPatient || !section) return;
+
+    setSavingSection(section);
+
+    try {
+      let updates: Partial<PatientInfo> = {};
+
+      if (section === "contact") {
+        updates = {
+          firstName: draftPatient.firstName,
+          lastName: draftPatient.lastName,
+          address: draftPatient.address,
+          phoneNumber: draftPatient.phoneNumber,
+          email: draftPatient.email,
+        };
+      }
+
+      if (section === "medical") {
+        updates = {
+          dob: draftPatient.dob,
+          gender: draftPatient.gender,
+          bloodType: draftPatient.bloodType,
+          height: draftPatient.height,
+          weight: draftPatient.weight,
+          allergies: draftPatient.allergies,
+          mobility: draftPatient.mobility,
+          diet: draftPatient.diet,
+        };
+      }
+
+      if (section === "insurance") {
+        updates = {
+          insuranceProvider: draftPatient.insuranceProvider,
+          insurancePolicyNumber: draftPatient.insurancePolicyNumber,
+        };
+      }
+
+      if (section === "physician") {
+        updates = {
+          physicianName: draftPatient.physicianName,
+          physicianPhone: draftPatient.physicianPhone,
+          physicianAddress: draftPatient.physicianAddress,
+          physicianSpecialty: draftPatient.physicianSpecialty,
+        };
+      }
+
+      if (section === "notes") {
+        updates = {
+          careNotes: draftPatient.careNotes,
+        };
+      }
+
+      if (section === "conditions") {
+        updates = {
+          conditions: draftPatient.conditions,
+        };
+      }
+
+      if (section === "emergency") {
+        updates = {
+          emergencyContactName: draftPatient.emergencyContactName,
+          emergencyContactPhone: draftPatient.emergencyContactPhone,
+          emergencyContactRelationship: draftPatient.emergencyContactRelationship,
+          secondaryEmergencyContactName: draftPatient.secondaryEmergencyContactName,
+          secondaryEmergencyContactPhone: draftPatient.secondaryEmergencyContactPhone,
+          secondaryEmergencyContactRelationship:
+            draftPatient.secondaryEmergencyContactRelationship,
+        };
+      }
+
+      const updated = await patientService.updateProfile(
+        patient.patientId,
+        updates,
+      );
+
+      const updatedPatient = updated as PatientInfo;
+      setPatient(updatedPatient);
+      setDraftPatient(updatedPatient);
+      setEditingSection(null);
+    } catch (err) {
+      console.error(`Failed to save ${section} section:`, err);
+    } finally {
+      setSavingSection(null);
+    }
+  };
+
+  const handleFieldChange = (field: keyof PatientInfo, value: string) => {
+    if (!draftPatient) return;
+
+    setDraftPatient({
+      ...draftPatient,
+      [field]: value,
+    });
+  };
+
+  const handleAllergyChange = (value: string) => {
+    if (!draftPatient) return;
+
+    const allergyArray = value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    setDraftPatient({
+      ...draftPatient,
+      allergies: allergyArray,
+    });
+  };
+
+  const handleConditionChange = (index: number, value: string) => {
+    if (!draftPatient) return;
+
+    const updatedConditions = [...(draftPatient.conditions || [])];
+    updatedConditions[index] = value;
+
+    setDraftPatient({
+      ...draftPatient,
+      conditions: updatedConditions,
+    });
+  };
+
+  const addCondition = () => {
+    if (!draftPatient) return;
+
+    setDraftPatient({
+      ...draftPatient,
+      conditions: [...(draftPatient.conditions || []), ""],
+    });
+  };
+
+  const removeCondition = (index: number) => {
+    if (!draftPatient) return;
+
+    const updatedConditions = [...(draftPatient.conditions || [])];
+    updatedConditions.splice(index, 1);
+
+    setDraftPatient({
+      ...draftPatient,
+      conditions: updatedConditions,
+    });
+  };
+
+  const renderCareHistorySummary = () => (
+    <CustomSection
+      title="Care History Summary"
+      rightAction={
+        <button
+          type="button"
+          className="btn btn-link p-0 text-decoration-none"
+          style={{ fontSize: "0.88rem", color: "#2563eb" }}
+        >
+          View Full History →
+        </button>
+      }
+    >
+      <div className="row g-3">
+        <div className="col-md-4">
+          <StatCard
+            title="Care Days"
+            value="—"
+            description="Total care days"
+            icon={<Calendar size={16} color="#2563eb" />}
+            backgroundColor="#e0ecff"
+          />
+        </div>
+
+        <div className="col-md-4">
+          <StatCard
+            title="Tasks Completed"
+            value="—"
+            description="Completed care tasks"
+            icon={<CheckCircle size={16} color="#16a34a" />}
+            backgroundColor="#dcfce7"
+          />
+        </div>
+
+        <div className="col-md-4">
+          <StatCard
+            title="Appointments"
+            value="—"
+            description="Scheduled appointments"
+            icon={<Calendar size={16} color="#9333ea" />}
+            backgroundColor="#f3e8ff"
+          />
+        </div>
+      </div>
+    </CustomSection>
+  );
 
   if (loading) {
     return (
@@ -53,7 +275,7 @@ const PatientProfile = () => {
     );
   }
 
-  if (!patient) {
+  if (!patient || !draftPatient) {
     return (
       <div className="container py-4 text-center text-muted">
         No patient selected.
@@ -61,232 +283,112 @@ const PatientProfile = () => {
     );
   }
 
+  const bannerPatient =
+    editingSection === "medical" ||
+      editingSection === "conditions" ||
+      editingSection === "contact"
+      ? draftPatient
+      : patient;
+
   return (
     <div className="container py-4">
+      <CustomTitleBanner
+        title="Patient Profile"
+        subheader="View and manage patient details"
+      />
+
       <div className="mb-4">
-        <PatientInfoBanner patient={patient} />
+        <PatientInfoBanner patient={bannerPatient} />
       </div>
 
       <div className="row g-4">
         <div className="col-lg-4">
-          <div
-            className="card border-0 shadow"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4 text-dark">
-                Contact Information
-              </h3>
+          <PatientContactSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "contact"}
+            isSaving={savingSection === "contact"}
+            onEdit={() => startEditing("contact")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("contact")}
+            onChange={handleFieldChange}
+          />
 
-              <div className="d-flex gap-3 mb-4">
-                <MapPin size={18} className="text-muted mt-1" />
-                <div>
-                  <div className="text-muted small">Address</div>
-                  <div>{patient.address || "Not Available"}</div>
-                </div>
-              </div>
+          <PatientMedicalSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "medical"}
+            isSaving={savingSection === "medical"}
+            onEdit={() => startEditing("medical")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("medical")}
+            onChange={handleFieldChange}
+            onAllergyChange={handleAllergyChange}
+          />
 
-              <div className="d-flex gap-3 mb-4">
-                <Phone size={18} className="text-muted mt-1" />
-                <div>
-                  <div className="text-muted small">Phone</div>
-                  <div>{patient.phoneNumber || "Not Available"}</div>
-                </div>
-              </div>
-
-              <div className="d-flex gap-3">
-                <Mail size={18} className="text-muted mt-1" />
-                <div>
-                  <div className="text-muted small">Email</div>
-                  <div>{patient.email || "Not Available"}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4 text-dark">Insurance</h3>
-
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-success-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <Shield size={20} className="text-success" />
-                </div>
-
-                <div className="flex-grow-1">
-                  <div className="mb-3">
-                    <div className="text-muted small">Provider</div>
-                    <div>{patient.insuranceProvider || "Not Available"}</div>
-                  </div>
-
-                  <div>
-                    <div className="text-muted small">Policy Number</div>
-                    <div>{patient.insurancePolicyNumber || "Not Available"}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <PatientInsuranceSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "insurance"}
+            isSaving={savingSection === "insurance"}
+            onEdit={() => startEditing("insurance")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("insurance")}
+            onChange={handleFieldChange}
+          />
         </div>
 
         <div className="col-lg-8">
-          <div
-            className="card border-0 shadow"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4 text-dark">
-                Medical Information
-              </h3>
+          <EmergencyContactsSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "emergency"}
+            isSaving={savingSection === "emergency"}
+            onEdit={() => startEditing("emergency")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("emergency")}
+            onChange={handleFieldChange}
+          />
 
-              <div className="mb-3">
-                <div className="text-muted small">Blood Type</div>
-                <div>{patient.bloodType || "Not Available"}</div>
-              </div>
+          <PatientPhysicianSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "physician"}
+            isSaving={savingSection === "physician"}
+            onEdit={() => startEditing("physician")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("physician")}
+            onChange={handleFieldChange}
+          />
 
-              <div className="mb-3">
-                <div className="text-muted small">Height</div>
-                <div>{patient.height || "Not Available"}</div>
-              </div>
+          <PatientConditionsSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "conditions"}
+            isSaving={savingSection === "conditions"}
+            onEdit={() => startEditing("conditions")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("conditions")}
+            onConditionChange={handleConditionChange}
+            onAddCondition={addCondition}
+            onRemoveCondition={removeCondition}
+          />
 
-              <div className="mb-3">
-                <div className="text-muted small">Weight</div>
-                <div>{patient.weight || "Not Available"}</div>
-              </div>
+          <PatientNotesSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "notes"}
+            isSaving={savingSection === "notes"}
+            onEdit={() => startEditing("notes")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("notes")}
+            onChange={handleFieldChange}
+            onViewNotes={() => navigate("/notes")}
+          />
 
-              <div>
-                <div className="text-muted small mb-2">Allergies</div>
-
-                {patient.allergies && patient.allergies.length > 0 ? (
-                  <div className="d-flex flex-wrap gap-2">
-                    {patient.allergies.map((allergy, index) => (
-                      <span
-                        key={index}
-                        className="badge rounded-pill text-bg-danger"
-                      >
-                        <AlertCircle size={14} className="me-1" />
-                        {allergy}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-muted">Not Available</div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4 text-dark">Emergency Contact</h3>
-
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-danger-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <UserRound size={20} className="text-danger" />
-                </div>
-
-                <div className="flex-grow-1">
-                  <div className="mb-3">
-                    <div className="text-muted small">Name</div>
-                    <div>{patient.emergencyContactName || "Not Available"}</div>
-                  </div>
-
-                  <div className="mb-3">
-                    <div className="text-muted small">Relationship</div>
-                    <div>
-                      {patient.emergencyContactRelationship || "Not Available"}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-muted small">Phone</div>
-                    <div>{patient.emergencyContactPhone || "Not Available"}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <h3 className="fw-semibold mb-4 text-dark">Primary Physician</h3>
-
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <Stethoscope size={20} className="text-primary" />
-                </div>
-
-                <div className="flex-grow-1">
-                  <div className="mb-3">
-                    <div className="text-muted small">Name</div>
-                    <div>{patient.physicianName || "Not Available"}</div>
-                  </div>
-
-                  <div className="mb-3">
-                    <div className="text-muted small">Phone</div>
-                    <div>{patient.physicianPhone || "Not Available"}</div>
-                  </div>
-
-                  <div>
-                    <div className="text-muted small">Address</div>
-                    <div>{patient.physicianAddress || "Not Available"}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="card border-0 shadow mt-4"
-            style={{ borderRadius: "18px" }}
-          >
-            <div className="card-body p-4">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h3 className="fw-semibold mb-0 text-dark">Care Notes</h3>
-
-                <button
-                  className="btn btn-sm btn-outline-primary"
-                  onClick={() => navigate("/notes")}
-                >
-                  View Notes
-                </button>
-              </div>
-
-              <div className="d-flex align-items-start gap-3">
-                <div
-                  className="d-flex align-items-center justify-content-center rounded-circle bg-warning-subtle"
-                  style={{ width: "44px", height: "44px" }}
-                >
-                  <FileText size={20} className="text-warning-emphasis" />
-                </div>
-
-                <div className="flex-grow-1">
-                  <div className="text-muted small mb-2">Latest Note</div>
-                  <div>{patient.careNotes || "Not Available"}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {renderCareHistorySummary()}
         </div>
-      </div>      
+      </div>
     </div>
   );
 };

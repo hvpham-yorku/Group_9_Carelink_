@@ -45,18 +45,26 @@ const CustomSection = ({
     <section
       className="bg-white shadow-sm mb-4"
       style={{
-        borderRadius: "18px",
-        border: "1px solid #e9ecef",
+        borderRadius: "16px",
+        border: "1px solid #e5e7eb",
         overflow: "hidden",
       }}
     >
-      <div className="container px-4 py-3">
-        <div className="d-flex justify-content-between align-items-start mb-2">
+      <div className="px-4 px-md-4 py-3 py-md-3">
+        <div className="d-flex justify-content-between align-items-start gap-3 mb-2">
           <div>
-            <h3 className="mb-1 fw-semibold">{title}</h3>
+            <h3
+              className="mb-1 fw-semibold"
+              style={{ fontSize: "1rem", color: "#111827" }}
+            >
+              {title}
+            </h3>
 
             {subheader && (
-              <p className="text-muted mb-0" style={{ fontSize: "0.95rem" }}>
+              <p
+                className="mb-0"
+                style={{ fontSize: "0.9rem", color: "#6b7280" }}
+              >
                 {subheader}
               </p>
             )}
@@ -65,9 +73,15 @@ const CustomSection = ({
           {rightAction && <div>{rightAction}</div>}
         </div>
 
-        <hr style={{ opacity: 0.08 }} />
+        <div
+          style={{
+            height: "1px",
+            backgroundColor: "#eef2f7",
+            margin: "0 -1rem",
+          }}
+        />
 
-        <div className="pt-2">{children}</div>
+        <div className="pt-3">{children}</div>
       </div>
     </section>
   );
