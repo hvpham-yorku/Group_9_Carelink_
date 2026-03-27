@@ -52,7 +52,8 @@ export default function NewNoteContainer({
               style={{
                 padding: "2px",
                 borderRadius: "1rem",
-                background: "linear-gradient(135deg, #b7f0c2 0%, #d7f8df 45%, #eefcf1 100%)",
+                background:
+                  "linear-gradient(135deg, #b7f0c2 0%, #d7f8df 45%, #eefcf1 100%)",
               }}
             >
               <div
@@ -65,7 +66,8 @@ export default function NewNoteContainer({
                 <div
                   className="modal-header border-0"
                   style={{
-                    background: "linear-gradient(135deg, #dff7e6 0%, #edfdf2 100%)",
+                    background:
+                      "linear-gradient(135deg, #dff7e6 0%, #edfdf2 100%)",
                     paddingTop: "1rem",
                     paddingBottom: "0.75rem",
                   }}
@@ -76,7 +78,7 @@ export default function NewNoteContainer({
                     </h5>
                     <div className="text-muted small">
                       {selectedNote
-                        ? `Created: ${formatDateTime(selectedNote.createdAt)}`
+                        ? `Created: ${selectedNote.createdAt ? formatDateTime(selectedNote.createdAt) : ""}`
                         : "Not saved yet"}
                     </div>
                   </div>

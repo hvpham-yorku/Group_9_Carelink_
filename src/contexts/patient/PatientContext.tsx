@@ -1,5 +1,10 @@
 import { createContext } from "react";
 
+export interface Team {
+  id: string;
+  name: string;
+}
+
 export interface Patient {
   patientId: string;
   firstName: string;
@@ -7,10 +12,12 @@ export interface Patient {
 }
 
 interface PatientContextType {
+  teams: Team[];
+  careTeamId: string | null;
+  setCareTeamId: (id: string) => void;
+  patients: Patient[];
   selectedPatientId: string | null;
   setSelectedPatientId: (id: string) => void;
-  patients: Patient[];
-  careTeamId: string | null;
   loading: boolean;
 }
 

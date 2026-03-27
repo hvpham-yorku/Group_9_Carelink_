@@ -1,6 +1,11 @@
 import { useState, type FormEvent } from "react";
-import type { Task, Category } from "../../types/Types";
-import { formatToDateTimeLocal } from "../../utils/formatters";
+import type { Task } from "../../types/task";
+import type { Category } from "../../types/teams";
+
+import {
+  formatToDateTimeLocal,
+  toDateTimeInputValue,
+} from "../../utils/formatters";
 
 interface TaskEditProps {
   task: Task;
@@ -19,7 +24,9 @@ const TaskEdit = ({
 }: TaskEditProps) => {
   const isCompleted = (task.taskLogs?.length ?? 0) > 0;
   const completedAt = task.taskLogs?.[0]?.completedAt;
-  const completedBy = task.taskLogs?.[0]?.caregivers?.firstName;
+  const completedBy = task.taskLogs?.[0]?.caregivers
+    ? `${task.taskLogs[0].caregivers.firstName} ${task.taskLogs[0].caregivers.lastName}`
+    : undefined;
 
   // Format the completion time for display in the form
   const completedDateTimeLocal = formatToDateTimeLocal(
@@ -29,7 +36,7 @@ const TaskEdit = ({
   const [formState, setFormState] = useState({
     title: task.title,
     description: task.description,
-    time: task.scheduledAt ?? "",
+    time: toDateTimeInputValue(task.scheduledAt ?? null),
     categoryId: task.categoryId,
   });
 
@@ -45,7 +52,7 @@ const TaskEdit = ({
       scheduledAt: formState.time,
       categoryId: formState.categoryId,
       categories: updatedCategory
-        ? { name: updatedCategory.name }
+        ? { name: updatedCategory.name, color: updatedCategory.color }
         : task.categories,
     });
   };
@@ -59,7 +66,7 @@ const TaskEdit = ({
         type="text"
         className="form-control"
         id="edit-task-title"
-        value={formState.title}
+        value={formState.title ?? ""}
         onChange={(e) =>
           setFormState((prev) => ({ ...prev, title: e.target.value }))
         }
@@ -73,7 +80,7 @@ const TaskEdit = ({
         className="form-control"
         id="edit-task-description"
         rows={2}
-        value={formState.description}
+        value={formState.description ?? ""}
         onChange={(e) =>
           setFormState((prev) => ({ ...prev, description: e.target.value }))
         }

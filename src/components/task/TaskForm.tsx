@@ -3,11 +3,7 @@
     It includes input fields for task title, description, due date, and category level. 
 */
 import { useState } from "react";
-
-interface Category {
-  categoryId: string;
-  name: string;
-}
+import type { Category } from "../../types/teams";
 
 interface TaskFormProps {
   categories: Category[];

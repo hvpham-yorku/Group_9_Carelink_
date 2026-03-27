@@ -1,205 +1,315 @@
 import { useEffect, useState } from "react";
+import {
+  Users,
+  UserRound,
+  ShieldCheck,
+  Hash,
+  UserPlus,
+  LogIn,
+  Settings,
+} from "lucide-react";
 
 // Services
-import { teamService } from "../services/teamService";
-import { patientService } from "../services/patientService";
+import { repositories } from "../data/index";
 import { useAuth } from "../hooks/useAuth";
+import { usePatient } from "../contexts/patient/usePatient";
 
 // Types
-import type { CaregiverInfo, PatientInfo } from "../types/Types";
+import type { CaregiverInfo, PatientInfo, Category } from "../types/teams";
 import type { NewPatientFormData } from "../components/team/ModalForm";
 
 // Components
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import CustomSection from "../components/ui/CustomSection";
+import StatCard from "../components/ui/StatCard";
 import PatientList from "../components/team/PatientList";
 import TeamList from "../components/team/TeamList";
 import JoinTeamForm from "../components/team/JoinTeamForm";
 import ModalForm from "../components/team/ModalForm";
+import EditTeamNameForm from "../components/team/EditTeam";
 
 const Teams = () => {
   const { user } = useAuth();
+  const { teams, careTeamId, setCareTeamId } = usePatient();
+
   const [teamId, setTeamId] = useState<string | null>(null);
-  const [joinCode, setJoinCode] = useState<string | null>(null);
+  const [teamName, setTeamName] = useState<string | null>(null);
   const [caregivers, setCaregivers] = useState<CaregiverInfo[]>([]);
   const [patients, setPatients] = useState<PatientInfo[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [joinCode, setJoinCode] = useState<string | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
 
-  // map raw Supabase
-  const mapCaregivers = (rows: any[]): CaregiverInfo[] =>
-    rows.map((row) => ({
-      caregiverId: row.caregiverId as string,
-      firstName: (row.caregivers?.firstName as string) ?? "",
-      lastName: (row.caregivers?.lastName as string) ?? "",
-      email: (row.caregivers?.email as string) ?? "",
-      phone: (row.caregivers?.phone as string) ?? "",
-      jobTitle: (row.caregivers?.jobTitle as string) ?? "",
-      role: (row.role as string) ?? "",
-      dateAssigned: (row.dateAssigned as string) ?? "",
-    }));
-
-  // map raw Supabase join rows to flat PatientInfo[]
-  const mapPatients = (rows: any[]): PatientInfo[] =>
-    rows.map((row) => ({
-      patientId: row.patientId as string,
-      firstName: (row.patients?.firstName as string) ?? "",
-      lastName: (row.patients?.lastName as string) ?? "",
-      dob: (row.patients?.dob as string) ?? "",
-      address: (row.patients?.address as string) ?? "",
-      phoneNumber: (row.patients?.phoneNumber as string) ?? "",
-    }));
-
-  useEffect(() => {
-    if (!user) return;
-
-    let isActive = true;
-
-    const TEAM_KEY = "carelink_selectedTeamId";
-
-    const loadTeamData = async () => {
-      try {
-        const storedTeamId = localStorage.getItem(TEAM_KEY);
-        const context = await patientService.getInitialContext(
-          user.id,
-          storedTeamId,
-        );
-        if (!isActive) return;
-
-        setTeamId(context?.careTeamId ?? null);
-
-        if (!context?.careTeamId) return;
-
-        const [caregiverRows, patientRows, code] = await Promise.all([
-          teamService.getCaregivers(context.careTeamId),
-          teamService.getPatients(context.careTeamId),
-          teamService.getTeamJoinCode(context.careTeamId),
+  const loadTeamData = async (id: string) => {
+    try {
+      const [caregiverData, patientData, code, name, categoryData] =
+        await Promise.all([
+          repositories.team.getCaregivers(id),
+          repositories.team.getPatients(id),
+          repositories.team.getJoinCode(id),
+          repositories.team.getName(id),
+          repositories.team.getCategories(id),
         ]);
 
-        if (!isActive) return;
-        setCaregivers(mapCaregivers(caregiverRows));
-        setPatients(mapPatients(patientRows));
-        setJoinCode(code);
-      } catch (error) {
-        console.error("Failed to load team data:", error);
-      }
+      setTeamId(id);
+      setCaregivers(caregiverData);
+      setPatients(patientData);
+      setJoinCode(code);
+      setTeamName(name);
+      setCategories(categoryData);
+    } catch (error) {
+      console.error("Failed to load team data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!careTeamId) return;
+    let isActive = true;
+
+    const run = async () => {
+      await loadTeamData(careTeamId);
+      if (!isActive) return;
     };
 
-    void loadTeamData();
+    void run();
 
     return () => {
       isActive = false;
     };
-  }, [user]);
+  }, [careTeamId]);
 
-  const handleJoinTeam = async (joinCode: string) => {
+  const handleJoinTeam = async (code: string) => {
     if (!user) return;
     setJoinError(null);
     try {
-      const newTeamId = await teamService.joinTeamWithCode(user.id, joinCode);
-      // Persist so this team is restored on the next page refresh
-      localStorage.setItem("carelink_selectedTeamId", newTeamId);
-      window.location.reload();
-    } catch (error: any) {
-      // change to "any" if error does show
-      setJoinError(error?.message ?? "Failed to join team");
+      const newTeamId = await repositories.team.joinTeamWithCode(user.id, code);
+      setCareTeamId(newTeamId);
+      await loadTeamData(newTeamId);
+    } catch (error: unknown) {
+      setJoinError((error as Error)?.message ?? "Failed to join team");
     }
   };
 
   const handleAddPatient = async (data: NewPatientFormData) => {
     if (!teamId) return;
     try {
-      await teamService.addPatientToTeam(teamId, {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        dob: data.dob,
-      });
-      const patientRows = await teamService.getPatients(teamId);
-      setPatients(mapPatients(patientRows));
+      await repositories.team.addPatientToTeam(teamId, data);
+      const patientData = await repositories.team.getPatients(teamId);
+      setPatients(patientData);
     } catch (error) {
       console.error("Failed to add patient:", error);
     }
   };
 
+  const handleAddCategory = async (name: string, color: string) => {
+    if (!teamId) return;
+    try {
+      await repositories.team.addCategory(teamId, name, color);
+      const categoryData = await repositories.team.getCategories(teamId);
+      setCategories(categoryData);
+    } catch (error) {
+      console.error("Failed to add category:", error);
+    }
+  };
+
+  const currentUserRole = user
+    ? (caregivers.find((c) => c.caregiverId === user.id)?.teamRole ?? null)
+    : null;
+
+  const handleUpdateTeamName = async (newName: string) => {
+    if (!teamId) return;
+    try {
+      await repositories.team.updateTeamName(teamId, newName);
+      setTeamName(newName);
+    } catch (error) {
+      console.error("Failed to update team name:", error);
+    }
+  };
+
+  const handleUpdateRole = async (caregiverId: string, newRole: string) => {
+    if (!teamId) return;
+    try {
+      await repositories.team.editCaregiverRole(teamId, caregiverId, newRole);
+      setCaregivers((prev) =>
+        prev.map((c) =>
+          c.caregiverId === caregiverId ? { ...c, teamRole: newRole } : c,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to update role:", error);
+    }
+  };
+
+  const handleRemoveCaregiver = async (caregiverId: string) => {
+    if (!teamId) return;
+    try {
+      await repositories.team.removeCaregiver(teamId, caregiverId);
+      setCaregivers((prev) =>
+        prev.filter((c) => c.caregiverId !== caregiverId),
+      );
+    } catch (error) {
+      console.error("Failed to remove caregiver:", error);
+    }
+  };
+
   return (
-    <>
-      <div className="container">
-        <CustomTitleBanner
-          title="Care Team"
-          subheader="Manage Your Team or Join One"
-        >
-          {joinCode && (
-            <div className="text-end">
-              <span className="text-muted small">Team Code</span>
-              <p className="fw-bold mb-0 fs-5">{joinCode}</p>
-            </div>
-          )}
-        </CustomTitleBanner>
-
-        <CustomSection
-          title="Join for full Project Demo"
-          subheader="Code: 5BE3CB"
-        />
-
-        <div className="row mb-2">
-          <div className="col-md-6">
-            <CustomSection
-              title="Join a Team"
-              subheader="Enter a team code to join"
-            >
-              <JoinTeamForm onJoinTeam={handleJoinTeam} />
-              {joinError && (
-                <div
-                  className="alert alert-danger mt-2 py-2 px-3 mb-0"
-                  role="alert"
-                >
-                  {joinError}
-                </div>
-              )}
-            </CustomSection>
+    <div className="container">
+      {/* Header */}
+      <CustomTitleBanner
+        title={teamName ?? "Care Team"}
+        subheader="Manage your care team members and patients"
+      >
+        {joinCode && (
+          <div
+            className="d-flex align-items-center gap-2 px-3 py-2 rounded-3"
+            style={{ background: "#f1f3f5", border: "1px solid #e9ecef" }}
+          >
+            <Hash size={16} className="text-muted" />
+            <span className="text-muted small fw-semibold">Team Code:</span>
+            <span className="fw-bold">{joinCode}</span>
           </div>
+        )}
+      </CustomTitleBanner>
 
-          <div className="col-md-6">
-            <CustomSection
-              title="Add a Patient to Your Team"
-              subheader="Create a new Patient and add them to your team"
+      {/* Stat Cards */}
+      <div className="row g-3 mb-4">
+        <div className="col-12 col-md-6 col-xl-3">
+          <StatCard
+            title="Team Members"
+            value={caregivers.length}
+            description="Active caregivers on this team"
+            icon={<Users size={20} color="#0d6efd" />}
+          />
+        </div>
+
+        <div className="col-12 col-md-6 col-xl-3">
+          <StatCard
+            title="Patients"
+            value={patients.length}
+            description="Patients currently being cared for"
+            icon={<UserRound size={20} color="#198754" />}
+          />
+        </div>
+
+        <div className="col-12 col-md-6 col-xl-3 stat-card-sm">
+          <StatCard
+            title="Your Role"
+            value={currentUserRole ?? "—"}
+            description="Your role on this team"
+            icon={<ShieldCheck size={20} color="#6f42c1" />}
+          />
+        </div>
+
+        <div className="col-12 col-md-6 col-xl-3">
+          <StatCard
+            title="Project Demo Code"
+            value={"C42411"}
+            description="Share to invite caregivers"
+            icon={<Hash size={20} color="#fd7e14" />}
+          />
+        </div>
+      </div>
+
+      {/* Switch Teams & Team Options */}
+      <div className="row g-3 mb-4">
+        <div className="col-md-6">
+          <CustomSection
+            title="Switch Teams"
+            subheader="Switch to a different team"
+          >
+            <select
+              value={careTeamId || ""}
+              onChange={(e) => setCareTeamId(e.target.value)}
+              className="form-select"
             >
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </select>
+          </CustomSection>
+        </div>
+
+        <div className="col-md-6">
+          <CustomSection
+            title="Team Options"
+            subheader="Add patients or join another team"
+          >
+            <div className="d-flex flex-wrap gap-2">
+              {currentUserRole === "Primary Caregiver" && (
+                <button
+                  className="btn btn-outline-secondary d-inline-flex align-items-center gap-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editTeamNameModal"
+                >
+                  <Settings size={16} />
+                  Edit Team Details
+                </button>
+              )}
+
               <button
-                className="btn btn-success mb-2"
+                className="btn btn-primary d-inline-flex align-items-center gap-2"
                 data-bs-toggle="modal"
                 data-bs-target="#addPatientModal"
               >
+                <UserPlus size={16} />
                 Add Patient
               </button>
 
-              <ModalForm
-                modalId="addPatientModal"
-                onSubmit={handleAddPatient}
-              />
-            </CustomSection>
-          </div>
-        </div>
+              <button
+                className="btn btn-outline-primary d-inline-flex align-items-center gap-2"
+                data-bs-toggle="modal"
+                data-bs-target="#joinTeamModal"
+              >
+                <LogIn size={16} />
+                Join a Team
+              </button>
+            </div>
 
-        <div className="row">
-          <div className="col-md-6 mb-4">
-            <CustomSection
-              title="Team Members"
-              subheader="Current caregivers on this team"
-            >
-              <TeamList caregivers={caregivers} />
-            </CustomSection>
-          </div>
-
-          <div className="col-md-6 mb-4">
-            <CustomSection
-              title="Patients"
-              subheader="Patients currently being cared for"
-            >
-              <PatientList patients={patients} />
-            </CustomSection>
-          </div>
+            {/* Hidden modals */}
+            <ModalForm modalId="addPatientModal" onSubmit={handleAddPatient} />
+            <JoinTeamForm
+              modalId="joinTeamModal"
+              onJoinTeam={handleJoinTeam}
+              error={joinError}
+            />
+            <EditTeamNameForm
+              key={teamName}
+              modalId="editTeamNameModal"
+              currentName={teamName}
+              caregivers={caregivers}
+              categories={categories}
+              onUpdateName={handleUpdateTeamName}
+              onUpdateRole={handleUpdateRole}
+              onRemoveCaregiver={handleRemoveCaregiver}
+              onAddCategory={handleAddCategory}
+            />
+          </CustomSection>
         </div>
       </div>
-    </>
+
+      {/* Team Members & Patients */}
+      <div className="row g-3 mb-4">
+        <div className="col-md-6">
+          <CustomSection
+            title="Team Members"
+            subheader="Current caregivers on this team"
+          >
+            <TeamList caregivers={caregivers} />
+          </CustomSection>
+        </div>
+
+        <div className="col-md-6">
+          <CustomSection
+            title="Patients"
+            subheader="Patients currently being cared for"
+          >
+            <PatientList patients={patients} />
+          </CustomSection>
+        </div>
+      </div>
+    </div>
   );
 };
 

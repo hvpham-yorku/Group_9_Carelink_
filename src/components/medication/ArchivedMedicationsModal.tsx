@@ -1,16 +1,10 @@
+import type { Medication } from "../../types/medication";
 import Button from "../ui/Button";
-
-interface ArchivedMedication {
-  prescriptionId: string;
-  name: string;
-  dosage: string;
-  frequency?: string;
-}
 
 interface ArchivedMedicationsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  medications: ArchivedMedication[];
+  medications: Medication[];
 }
 
 const ArchivedMedicationsModal = ({
@@ -39,9 +33,7 @@ const ArchivedMedicationsModal = ({
 
           <div className="modal-body">
             {medications.length === 0 ? (
-              <div className="text-muted">
-                No archived medications found.
-              </div>
+              <div className="text-muted">No archived medications found.</div>
             ) : (
               <div
                 className="d-flex flex-column gap-3"
@@ -49,7 +41,7 @@ const ArchivedMedicationsModal = ({
               >
                 {medications.map((med) => (
                   <div
-                    key={med.prescriptionId}
+                    key={med.medicationId}
                     style={{
                       borderRadius: "16px",
                       border: "1px solid #e9ecef",

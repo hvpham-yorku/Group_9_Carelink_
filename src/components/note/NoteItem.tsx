@@ -30,9 +30,7 @@ export default function NoteItem({
       }}
     >
       <div className="me-2">
-        <div className="fw-semibold">
-          {note.title || "(Untitled)"}
-        </div>
+        <div className="fw-semibold">{note.title || "(Untitled)"}</div>
 
         <div className={active ? "text-white-50 small" : "text-muted small"}>
           {note.categories?.name}
@@ -45,7 +43,9 @@ export default function NoteItem({
         </div>
 
         <div
-          className={active ? "text-white-50 small mt-1" : "text-muted small mt-1"}
+          className={
+            active ? "text-white-50 small mt-1" : "text-muted small mt-1"
+          }
           style={{
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -57,13 +57,15 @@ export default function NoteItem({
         </div>
 
         <div className={active ? "text-white-50 small" : "text-muted small"}>
-          {formatDateTime(note.createdAt)}
+          {note.createdAt ? formatDateTime(note.createdAt) : ""}
         </div>
       </div>
 
       <button
         type="button"
-        className={"btn btn-sm " + (active ? "btn-light" : "btn-outline-danger")}
+        className={
+          "btn btn-sm " + (active ? "btn-light" : "btn-outline-danger")
+        }
         onClick={(e) => {
           e.stopPropagation();
           onDelete();

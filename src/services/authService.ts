@@ -58,7 +58,7 @@ export const authService = {
     const { data, error } = await supabase
       .from("caregivers")
       .select("*")
-      .eq("caregiverId", userId)
+      .eq("caregiver_id", userId)
       .single();
 
     if (error) throw error;

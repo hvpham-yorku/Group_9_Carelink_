@@ -1,17 +1,17 @@
 import { Mail, MapPin, Phone, UserRound } from "lucide-react";
 import CustomSection from "../ui/CustomSection";
-import type { PatientInfo } from "../../types/Types";
+import type { AllPatientInfo } from "../../types/patient";
 import SectionEditActions from "./SectionEditActions";
 
 interface PatientContactSectionProps {
-  patient: PatientInfo;
-  draft: PatientInfo;
+  patient: AllPatientInfo;
+  draft: AllPatientInfo;
   isEditing: boolean;
   isSaving: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
-  onChange: (field: keyof PatientInfo, value: string) => void;
+  onChange: (field: keyof AllPatientInfo, value: string) => void;
 }
 
 const PatientContactSection = ({
@@ -41,7 +41,13 @@ const PatientContactSection = ({
         <div className="d-flex gap-3">
           <UserRound size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
           <div className="w-100">
-            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "6px" }}>
+            <div
+              style={{
+                color: "#6b7280",
+                fontSize: "0.8rem",
+                marginBottom: "6px",
+              }}
+            >
               First Name
             </div>
 
@@ -63,7 +69,13 @@ const PatientContactSection = ({
         <div className="d-flex gap-3">
           <UserRound size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
           <div className="w-100">
-            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "6px" }}>
+            <div
+              style={{
+                color: "#6b7280",
+                fontSize: "0.8rem",
+                marginBottom: "6px",
+              }}
+            >
               Last Name
             </div>
 
@@ -85,7 +97,13 @@ const PatientContactSection = ({
         <div className="d-flex gap-3">
           <MapPin size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
           <div className="w-100">
-            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "6px" }}>
+            <div
+              style={{
+                color: "#6b7280",
+                fontSize: "0.8rem",
+                marginBottom: "6px",
+              }}
+            >
               Address
             </div>
 
@@ -107,7 +125,13 @@ const PatientContactSection = ({
         <div className="d-flex gap-3">
           <Phone size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
           <div className="w-100">
-            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "6px" }}>
+            <div
+              style={{
+                color: "#6b7280",
+                fontSize: "0.8rem",
+                marginBottom: "6px",
+              }}
+            >
               Phone
             </div>
 
@@ -129,7 +153,13 @@ const PatientContactSection = ({
         <div className="d-flex gap-3">
           <Mail size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
           <div className="w-100">
-            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "6px" }}>
+            <div
+              style={{
+                color: "#6b7280",
+                fontSize: "0.8rem",
+                marginBottom: "6px",
+              }}
+            >
               Email
             </div>
 

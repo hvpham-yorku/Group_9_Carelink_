@@ -3,14 +3,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import NotesHeader from "../components/note/NotesHeader";
 import CareTimelineContainer from "../components/note/CareTimelineContainer";
 import NewNoteContainer from "../components/note/NewNoteContainer";
-import type { Note, NoteCategory } from "../components/note/types";
+import type { Note } from "../types/note";
+import type { Category } from "../types/teams";
 import {
   dayKey,
   formatDateTime,
   formatDayLabel,
 } from "../components/note/noteUtils";
 
-import { noteService } from "../services/noteService";
+import { repositories } from "../data";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 
@@ -29,7 +30,7 @@ export default function Notes() {
 
   // ===== STATE: DATA =====
   const [notes, setNotes] = useState<Note[]>([]);
-  const [categories, setCategories] = useState<NoteCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -49,24 +50,25 @@ export default function Notes() {
   // ===== DERIVED STATE =====
   const selectedNote = useMemo(
     () => notes.find((note) => note.noteId === selectedId) ?? null,
-    [notes, selectedId]
+    [notes, selectedId],
   );
 
   // ===== FETCH: CATEGORIES =====
   useEffect(() => {
     if (!careTeamId) return;
 
-    noteService
+    repositories.note
       .getCategories(careTeamId)
-      .then((data: NoteCategory[] | null) => {
-        const loadedCategories = data ?? [];
-        setCategories(loadedCategories);
+      .then((data: Category[]) => {
+        setCategories(data);
 
-        if (loadedCategories.length > 0) {
-          setCategoryId(loadedCategories[0].categoryId);
+        if (data.length > 0) {
+          setCategoryId(data[0].categoryId);
         }
       })
-      .catch((err: unknown) => console.error("Failed to load categories:", err));
+      .catch((err: unknown) =>
+        console.error("Failed to load categories:", err),
+      );
   }, [careTeamId]);
 
   // ===== FETCH: NOTES =====
@@ -80,9 +82,9 @@ export default function Notes() {
 
     setLoadingNotes(true);
 
-    noteService
+    repositories.note
       .getNotesByPatient(selectedPatientId)
-      .then((data: Note[] | null) => setNotes(data ?? []))
+      .then((data: Note[]) => setNotes(data))
       .catch((err: unknown) => console.error("Failed to load notes:", err))
       .finally(() => setLoadingNotes(false));
   }, [selectedPatientId]);
@@ -116,6 +118,7 @@ export default function Notes() {
     const now = new Date();
 
     return notes.filter((note) => {
+      if (!note.createdAt) return false;
       const created = new Date(note.createdAt);
 
       const matchesTime = (() => {
@@ -163,6 +166,7 @@ export default function Notes() {
     const map = new Map<string, Note[]>();
 
     for (const note of filteredNotes) {
+      if (!note.createdAt) continue;
       const key = dayKey(note.createdAt);
       const group = map.get(key) ?? [];
       group.push(note);
@@ -214,19 +218,22 @@ export default function Notes() {
 
     try {
       if (selectedNote) {
-        const updated = await noteService.updateNote(selectedNote.noteId, {
-          title: title.trim(),
-          description: description.trim(),
-          categoryId,
-        });
+        const updated = await repositories.note.updateNote(
+          selectedNote.noteId,
+          {
+            title: title.trim(),
+            description: description.trim(),
+            categoryId,
+          },
+        );
 
         setNotes((prev) =>
           prev.map((note) =>
-            note.noteId === selectedNote.noteId ? (updated as Note) : note
-          )
+            note.noteId === selectedNote.noteId ? updated : note,
+          ),
         );
       } else {
-        const created = await noteService.addNote({
+        const created = await repositories.note.addNote({
           patientId: selectedPatientId,
           caregiverId: user.id,
           careTeamId: careTeamId ?? "",
@@ -235,8 +242,8 @@ export default function Notes() {
           categoryId,
         });
 
-        setNotes((prev) => [created as Note, ...prev]);
-        setSelectedId((created as Note).noteId);
+        setNotes((prev) => [created, ...prev]);
+        setSelectedId(created.noteId);
       }
 
       flashSaved();
@@ -249,7 +256,7 @@ export default function Notes() {
 
   async function handleDelete(noteId: string) {
     try {
-      await noteService.deleteNote(noteId);
+      await repositories.note.deleteNote(noteId);
       setNotes((prev) => prev.filter((note) => note.noteId !== noteId));
 
       if (selectedId === noteId) {
@@ -275,7 +282,6 @@ export default function Notes() {
       ) : (
         <>
           <div className="row g-3 mb-3">
-
             {/* ===== STATS CARD: TODAY ===== */}
             <div className="col-12">
               <div className="row g-3">
@@ -291,8 +297,9 @@ export default function Notes() {
                         {
                           notes.filter(
                             (n) =>
+                              !!n.createdAt &&
                               new Date(n.createdAt).toDateString() ===
-                              new Date().toDateString()
+                                new Date().toDateString(),
                           ).length
                         }
                       </div>
@@ -309,7 +316,10 @@ export default function Notes() {
                 <div className="card-body">
                   <div className="row g-3">
                     <div className="col-12 col-lg-8">
-                      <label htmlFor="noteSearch" className="form-label fw-semibold">
+                      <label
+                        htmlFor="noteSearch"
+                        className="form-label fw-semibold"
+                      >
                         Search
                       </label>
                       <input
@@ -323,14 +333,19 @@ export default function Notes() {
                     </div>
 
                     <div className="col-12 col-lg-4">
-                      <label htmlFor="noteTimeFilter" className="form-label fw-semibold">
+                      <label
+                        htmlFor="noteTimeFilter"
+                        className="form-label fw-semibold"
+                      >
                         Filter
                       </label>
                       <select
                         id="noteTimeFilter"
                         className="form-select"
                         value={timeFilter}
-                        onChange={(e) => setTimeFilter(e.target.value as TimeFilter)}
+                        onChange={(e) =>
+                          setTimeFilter(e.target.value as TimeFilter)
+                        }
                       >
                         <option value="all">All Time</option>
                         <option value="today">Today</option>

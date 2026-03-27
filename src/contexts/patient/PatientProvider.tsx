@@ -1,96 +1,116 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { patientService } from "../../services/patientService";
 import { supabase } from "../../lib/supabase";
+import { careTeams } from "../../data/data";
+import { repositories } from "../../data/index";
 
 import { PatientContext } from "./PatientContext";
-import type { Patient } from "./PatientContext";
+import type { Patient, Team } from "./PatientContext";
+
+const STUB_MODE = import.meta.env.VITE_STUB_MODE === "stub";
 
 export const PatientProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user } = useAuth();
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [careTeamId, setCareTeamId] = useState<string | null>(null);
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     null,
   );
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [careTeamId, setCareTeamId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const TEAM_KEY = "carelink_selectedTeamId";
+  const initialTeamSet = useRef(false);
 
   useEffect(() => {
-    async function loadPatientData() {
-      if (!user) {
-        // Clear state and stored preference when user logs out
-        localStorage.removeItem(TEAM_KEY);
-        setCareTeamId(null);
-        setSelectedPatientId(null);
-        setPatients([]);
-        return;
+    if (STUB_MODE) {
+      const stubTeams: Team[] = careTeams.map((t) => ({
+        id: t.careTeamId,
+        name: t.teamName,
+      }));
+      setTeams(stubTeams);
+      if (stubTeams.length > 0 && !initialTeamSet.current) {
+        initialTeamSet.current = true;
+        setCareTeamId(stubTeams[0].id);
       }
+      setLoading(false);
+      return;
+    }
+
+    async function loadTeams() {
+      if (!user) return;
 
       try {
         setLoading(true);
-        // Pass any stored preference so the last-joined team is restored on refresh
-        const storedTeamId = localStorage.getItem(TEAM_KEY);
-        const contextData = await patientService.getInitialContext(
-          user.id,
-          storedTeamId,
-        );
 
-        // Check specifically if we have a team ID
-        if (contextData?.careTeamId) {
-          // Persist the resolved team so next refresh returns the same one
-          localStorage.setItem(TEAM_KEY, contextData.careTeamId);
-          setCareTeamId(contextData.careTeamId);
-          setSelectedPatientId(contextData.patientId);
+        const { data, error } = await supabase
+          .from("team_members")
+          .select(`team_id, teams(team_name)`)
+          .eq("caregiver_id", user.id)
+          .order("date_assigned", { ascending: false });
 
-          // Fetch ALL patients for this team
-          const { data, error: patientError } = await supabase
-            .from("careTeamMembers")
-            .select(`patientId, patients(firstName, lastName)`)
-            .eq("careTeamId", contextData.careTeamId)
-            .not("patientId", "is", null);
+        if (error) throw error;
 
-          if (patientError) throw patientError;
+        const formattedTeams: Team[] = data.map((item: any) => ({
+          id: item.team_id,
+          name: item.teams.team_name,
+        }));
 
-          const formattedPatients =
-            data?.map((item: any) => ({
-              patientId: item.patientId,
-              firstName: item.patients.firstName,
-              lastName: item.patients.lastName,
-            })) || [];
+        setTeams(formattedTeams);
 
-          setPatients(formattedPatients);
-        } else {
-          // IMPORTANT: Reset state for users with no team
-          localStorage.removeItem(TEAM_KEY);
-          setCareTeamId(null);
-          setSelectedPatientId(null);
-          setPatients([]);
+        if (formattedTeams.length > 0 && !initialTeamSet.current) {
+          initialTeamSet.current = true;
+          setCareTeamId(formattedTeams[0].id);
         }
-      } catch (err) {
-        console.error("Error loading patient context:", err);
-        // Reset state on error to avoid "stuck" UI
-        localStorage.removeItem(TEAM_KEY);
-        setCareTeamId(null);
-        setSelectedPatientId(null);
-        setPatients([]);
+      } catch (error) {
+        console.error("Error loading teams:", error);
       } finally {
         setLoading(false);
       }
     }
-    loadPatientData();
+
+    loadTeams();
   }, [user]);
+
+  useEffect(() => {
+    if (!careTeamId) {
+      setPatients([]);
+      setSelectedPatientId(null);
+      return;
+    }
+
+    let isActive = true;
+
+    repositories.team
+      .getPatients(careTeamId)
+      .then((patientData) => {
+        if (!isActive) return;
+        const mapped: Patient[] = patientData.map((p) => ({
+          patientId: p.patientId,
+          firstName: p.firstName,
+          lastName: p.lastName,
+        }));
+        setPatients(mapped);
+        setSelectedPatientId(mapped.length > 0 ? mapped[0].patientId : null);
+      })
+      .catch((err) => {
+        console.error("Error loading patients:", err);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [careTeamId]);
 
   return (
     <PatientContext.Provider
       value={{
+        teams,
+        careTeamId,
+        setCareTeamId,
+        patients,
         selectedPatientId,
         setSelectedPatientId,
-        patients,
-        careTeamId,
         loading,
       }}
     >
