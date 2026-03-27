@@ -3,7 +3,6 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 
-// 1. Mocks must be at the very top to intercept imports inside the components
 vi.mock("../../../src/hooks/useAuth", () => ({
   useAuth: () => ({ 
     user: null,
@@ -16,7 +15,6 @@ vi.mock("../../../src/services/authService", () => ({
   },
 }));
 
-// 2. Import components after mocks
 import LoginText from "../../../src/components/login/LoginText";
 import LoginTextBox from "../../../src/components/login/LoginTextBox";
 import Login from "../../../src/pages/Login";
@@ -24,7 +22,6 @@ import Login from "../../../src/pages/Login";
 describe("LoginText", () => {
   it("renders the correct heading text", () => {
     render(<LoginText />);
-    // Matches the "Login to CareLink!" header
     const heading = screen.getByText(/login/i); 
     expect(heading).toBeInTheDocument();
   });
@@ -71,10 +68,8 @@ describe("Login Component - Passing Tests", () => {
     const passwordInput = screen.getByPlaceholderText("••••••••") as HTMLInputElement;
     const toggleBtn = screen.getByRole("button", { name: /show/i });
 
-    // Initial check
     expect(passwordInput.type).toBe("password");
 
-    // Click Show
     fireEvent.click(toggleBtn);
     expect(passwordInput.type).toBe("text");
   });
@@ -84,13 +79,11 @@ describe("Login Component - Passing Tests", () => {
   renderComponent();
   const passwordInput = screen.getByPlaceholderText("••••••••");
 
-  // Create a custom event that explicitly returns true for CapsLock
   const capsLockEvent = new KeyboardEvent('keyup', {
     bubbles: true,
     cancelable: true,
   });
   
-  // Manually define the getModifierState behavior for this specific event
   Object.defineProperty(capsLockEvent, 'getModifierState', {
     value: (key: string) => key === 'CapsLock',
   });
@@ -105,7 +98,6 @@ describe("Login Component - Passing Tests", () => {
   it("renders the loading bar during submission", async () => {
     renderComponent();
     
-    // Using the exact placeholder from the UI: "name@company.com"
     const emailInput = screen.getByPlaceholderText(/name@company.com/i);
     const passwordInput = screen.getByPlaceholderText("••••••••");
     const submitBtn = screen.getByRole("button", { name: /sign in/i });
@@ -115,7 +107,6 @@ describe("Login Component - Passing Tests", () => {
 
     fireEvent.click(submitBtn);
 
-    // Verify progress bar appears in the DOM
     const progressBar = document.querySelector(".progress-bar");
     expect(progressBar).toBeInTheDocument();
     expect(submitBtn).toBeDisabled();
