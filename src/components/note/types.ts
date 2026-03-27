@@ -14,6 +14,7 @@ export type Note = {
   description: string;
   categoryId: string;
   createdAt: string;
+  isUrgent?: boolean;
   patientId?: string;
   caregiverId?: string;
   careTeamId?: string;

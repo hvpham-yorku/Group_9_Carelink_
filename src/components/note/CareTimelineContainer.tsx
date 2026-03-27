@@ -16,6 +16,7 @@ type Props = {
   formatDayLabel: (key: string) => string;
   formatDateTime: (ts: string) => string;
   isLoading: boolean;
+  isUrgentMode: boolean;
 };
 
 export default function CareTimelineContainer({
@@ -27,6 +28,7 @@ export default function CareTimelineContainer({
   formatDayLabel,
   formatDateTime,
   isLoading,
+  isUrgentMode,
 }: Props) {
   return (
     <CustomSection
@@ -49,6 +51,7 @@ export default function CareTimelineContainer({
             handleDelete={handleDelete}
             formatDayLabel={formatDayLabel}
             formatDateTime={formatDateTime}
+            isUrgentMode={isUrgentMode}
           />
         ))
       )}

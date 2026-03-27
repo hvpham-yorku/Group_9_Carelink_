@@ -1,6 +1,8 @@
 // ===== IMPORTS =====
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AlertCircle, NotebookPen } from "lucide-react";
 import NotesHeader from "../components/note/NotesHeader";
+import NotesStatCard from "../components/note/NotesStatCard";
 import CareTimelineContainer from "../components/note/CareTimelineContainer";
 import NewNoteContainer from "../components/note/NewNoteContainer";
 import type { Note, NoteCategory } from "../components/note/types";
@@ -16,6 +18,7 @@ import { usePatient } from "../contexts/patient/usePatient";
 
 // ===== TYPES =====
 type TimeFilter = "all" | "today" | "week" | "month" | "year";
+type SortMode = "default" | "urgent";
 
 // ===== COMPONENT =====
 export default function Notes() {
@@ -37,6 +40,7 @@ export default function Notes() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [isUrgent, setIsUrgent] = useState(false);
 
   // ===== STATE: UI =====
   const [savedFlash, setSavedFlash] = useState(false);
@@ -44,9 +48,10 @@ export default function Notes() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
+  const [sortMode, setSortMode] = useState<SortMode>("default");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
-  // ===== DERIVED STATE =====
+  // ===== DERIVED STATE: SELECTED NOTE =====
   const selectedNote = useMemo(
     () => notes.find((note) => note.noteId === selectedId) ?? null,
     [notes, selectedId]
@@ -93,12 +98,14 @@ export default function Notes() {
       setTitle("");
       setDescription("");
       setCategoryId(categories[0]?.categoryId ?? "");
+      setIsUrgent(false);
       return;
     }
 
     setTitle(selectedNote.title ?? "");
     setDescription(selectedNote.description ?? "");
     setCategoryId(selectedNote.categoryId ?? categories[0]?.categoryId ?? "");
+    setIsUrgent(selectedNote.isUrgent ?? false);
   }, [selectedNote, categories]);
 
   // ===== CLEANUP =====
@@ -110,12 +117,27 @@ export default function Notes() {
     };
   }, []);
 
+  // ===== COUNTS: STATS CARDS =====
+  const todaysNotesCount = useMemo(
+    () =>
+      notes.filter(
+        (note) =>
+          new Date(note.createdAt).toDateString() === new Date().toDateString()
+      ).length,
+    [notes]
+  );
+
+  const urgentNotesCount = useMemo(
+    () => notes.filter((note) => note.isUrgent).length,
+    [notes]
+  );
+
   // ===== FILTER LOGIC =====
   const filteredNotes = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const now = new Date();
 
-    return notes.filter((note) => {
+    const results = notes.filter((note) => {
       const created = new Date(note.createdAt);
 
       const matchesTime = (() => {
@@ -156,7 +178,22 @@ export default function Notes() {
 
       return searchableText.includes(normalizedSearch);
     });
-  }, [notes, searchTerm, timeFilter]);
+
+    if (sortMode === "urgent") {
+      return [...results].sort((a, b) => {
+        const urgentA = a.isUrgent ? 1 : 0;
+        const urgentB = b.isUrgent ? 1 : 0;
+
+        if (urgentA !== urgentB) return urgentB - urgentA;
+
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+    }
+
+    return results;
+  }, [notes, searchTerm, timeFilter, sortMode]);
 
   // ===== TIMELINE GROUPING =====
   const timelineGroups = useMemo(() => {
@@ -190,12 +227,13 @@ export default function Notes() {
     }, 3000);
   }
 
-  // ===== ACTIONS =====
+  // ===== ACTIONS: EDITOR =====
   function handleNew() {
     setSelectedId(null);
     setTitle("");
     setDescription("");
     setCategoryId(categories[0]?.categoryId ?? "");
+    setIsUrgent(false);
     setIsEditorOpen(true);
   }
 
@@ -209,6 +247,17 @@ export default function Notes() {
     setSelectedId(null);
   }
 
+  // ===== ACTIONS: STATS CARDS =====
+  function handleTodayCardClick() {
+    setTimeFilter("today");
+    setSortMode("default");
+  }
+
+  function handleUrgentCardClick() {
+    setSortMode((prev) => (prev === "urgent" ? "default" : "urgent"));
+  }
+
+  // ===== ACTIONS: SAVE =====
   async function handleSave() {
     if (!description.trim() || !selectedPatientId || !user) return;
 
@@ -247,6 +296,7 @@ export default function Notes() {
     }
   }
 
+  // ===== ACTIONS: DELETE =====
   async function handleDelete(noteId: string) {
     try {
       await noteService.deleteNote(noteId);
@@ -261,6 +311,7 @@ export default function Notes() {
     }
   }
 
+  // ===== UI STATE =====
   const isLoading = contextLoading || loadingNotes;
 
   return (
@@ -275,106 +326,149 @@ export default function Notes() {
       ) : (
         <>
           <div className="row g-3 mb-3">
-
-            {/* ===== STATS CARD: TODAY ===== */}
+            {/* ===== TOP DASHBOARD ROW: STATS + SEARCH/FILTER ===== */}
             <div className="col-12">
-              <div className="row g-3">
-                <div className="col-12 col-md-3">
-                  <div
-                    className="card shadow-sm border-0 h-100"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => setTimeFilter("today")}
-                  >
-                    <div className="card-body">
-                      <div className="text-muted small">Today's Notes</div>
-                      <div className="fs-4 fw-bold">
-                        {
-                          notes.filter(
-                            (n) =>
-                              new Date(n.createdAt).toDateString() ===
-                              new Date().toDateString()
-                          ).length
-                        }
-                      </div>
-                      <div className="text-muted small">Current day</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ===== SEARCH + FILTER ===== */}
-            <div className="col-12">
-              <div className="card shadow-sm border-0">
-                <div className="card-body">
-                  <div className="row g-3">
-                    <div className="col-12 col-lg-8">
-                      <label htmlFor="noteSearch" className="form-label fw-semibold">
-                        Search
-                      </label>
-                      <input
-                        id="noteSearch"
-                        type="text"
-                        className="form-control"
-                        placeholder="Search notes by content or author..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+              <div className="row g-3 align-items-stretch">
+                {/* ===== STATS CARDS ===== */}
+                <div className="col-12 col-xl-5">
+                  <div className="row g-3 h-100">
+                    <div className="col-12 col-md-6">
+                      <NotesStatCard
+                        title="Today's Notes"
+                        value={todaysNotesCount}
+                        subtitle="Current day"
+                        icon={<NotebookPen size={18} className="text-primary" />}
+                        onClick={handleTodayCardClick}
+                        accentClassName="bg-info-subtle"
+                        isActive={timeFilter === "today"}
                       />
                     </div>
 
-                    <div className="col-12 col-lg-4">
-                      <label htmlFor="noteTimeFilter" className="form-label fw-semibold">
-                        Filter
-                      </label>
-                      <select
-                        id="noteTimeFilter"
-                        className="form-select"
-                        value={timeFilter}
-                        onChange={(e) => setTimeFilter(e.target.value as TimeFilter)}
-                      >
-                        <option value="all">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">Past Week</option>
-                        <option value="month">Past Month</option>
-                        <option value="year">Past Year</option>
-                      </select>
+                    <div className="col-12 col-md-6">
+                      <NotesStatCard
+                        title="Urgent Notes"
+                        value={urgentNotesCount}
+                        subtitle="Needs review"
+                        icon={
+                          <AlertCircle
+                            size={18}
+                            className="text-warning-emphasis"
+                          />
+                        }
+                        onClick={handleUrgentCardClick}
+                        accentClassName="bg-warning-subtle"
+                        isActive={sortMode === "urgent"}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ===== SEARCH + FILTER ===== */}
+                <div className="col-12 col-xl-7">
+                  <div className="card shadow-sm border-0 h-100">
+                    <div className="card-body d-flex flex-column justify-content-center">
+                      <div className="row g-3">
+                        <div className="col-12 col-lg-8">
+                          <label
+                            htmlFor="noteSearch"
+                            className="form-label fw-semibold"
+                          >
+                            Search
+                          </label>
+                          <input
+                            id="noteSearch"
+                            type="text"
+                            className="form-control"
+                            style={{
+                              backgroundColor: "#e6f4ea",
+                              borderColor: "#7aa58b",
+                              color: "#234031",
+                              boxShadow: "none",
+                            }}
+                            placeholder="Search notes by content or author..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="col-12 col-lg-4">
+                          <label
+                            htmlFor="noteTimeFilter"
+                            className="form-label fw-semibold"
+                          >
+                            Filter
+                          </label>
+                          <select
+                            id="noteTimeFilter"
+                            className="form-select"
+                            style={{
+                              backgroundColor: "#e6f4ea",
+                              borderColor: "#7aa58b",
+                              color: "#234031",
+                              boxShadow: "none",
+                            }}
+                            value={timeFilter}
+                            onChange={(e) =>
+                              setTimeFilter(e.target.value as TimeFilter)
+                            }
+                          >
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">Past Week</option>
+                            <option value="month">Past Month</option>
+                            <option value="year">Past Year</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* ===== TIMELINE ===== */}
+            {/* ===== TIMELINE + SIDE EDITOR LAYOUT ===== */}
             <div className="col-12">
-              <CareTimelineContainer
-                notes={filteredNotes}
-                timelineGroups={timelineGroups}
-                selectedId={selectedId}
-                setSelectedId={handleSelectNote}
-                handleDelete={handleDelete}
-                formatDateTime={formatDateTime}
-                formatDayLabel={formatDayLabel}
-                isLoading={isLoading}
-              />
+              <div className="row g-3 align-items-start">
+                {/* ===== TIMELINE ===== */}
+                <div className={isEditorOpen ? "col-12 col-xl-6" : "col-12"}>
+                  <CareTimelineContainer
+                    notes={filteredNotes}
+                    timelineGroups={timelineGroups}
+                    selectedId={selectedId}
+                    setSelectedId={handleSelectNote}
+                    handleDelete={handleDelete}
+                    formatDateTime={formatDateTime}
+                    formatDayLabel={formatDayLabel}
+                    isLoading={isLoading}
+                    isUrgentMode={sortMode === "urgent"}
+                  />
+                </div>
+
+                {/* ===== SIDE EDITOR ===== */}
+                {isEditorOpen && (
+                  <div className="col-12 col-xl-6">
+                    <NewNoteContainer
+                      isOpen={isEditorOpen}
+                      onClose={handleCloseEditor}
+                      selectedNote={selectedNote}
+                      formatDateTime={formatDateTime}
+                      title={title}
+                      description={description}
+                      categoryId={categoryId}
+                      isUrgent={isUrgent}
+                      setTitle={setTitle}
+                      setDescription={setDescription}
+                      setCategoryId={setCategoryId}
+                      setIsUrgent={setIsUrgent}
+                      handleSave={handleSave}
+                      handleDelete={handleDelete}
+                      categories={categories}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-
-          {/* ===== MODAL EDITOR ===== */}
-          <NewNoteContainer
-            isOpen={isEditorOpen}
-            onClose={handleCloseEditor}
-            selectedNote={selectedNote}
-            formatDateTime={formatDateTime}
-            title={title}
-            description={description}
-            categoryId={categoryId}
-            setTitle={setTitle}
-            setDescription={setDescription}
-            setCategoryId={setCategoryId}
-            handleSave={handleSave}
-            handleDelete={handleDelete}
-            categories={categories}
-          />
         </>
       )}
     </div>
