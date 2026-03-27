@@ -6,6 +6,7 @@ import type {
   PatientMedicalInfo,
   PatientEmergencyContact,
   PatientInsuranceInfo,
+  PatientPhysicianInfo,
 } from "../../../types/patient";
 
 import type { PatientRepo } from "./PatientRepo";
@@ -17,7 +18,7 @@ export class ApiPatientRepo implements PatientRepo {
       .select(
         `
                 *,
-                emergency_contacts (first_name, last_name, email, phone_number, relationship),
+                emergency_contacts (name, phone_number, relationship),
                 allergies (allergy_name),
                 patient_conditions (condition_name)
             `,
@@ -35,12 +36,14 @@ export class ApiPatientRepo implements PatientRepo {
       lastName: data.last_name,
       dob: data.dob,
       gender: data.gender,
+      isActive: data.is_active,
       address: data.address,
       email: data.email,
       phoneNumber: data.phone_number,
       bloodType: data.blood_type,
       height: data.height,
       weight: data.weight,
+      dietaryRequirements: data.dietary_requirements,
       allergies:
         data.allergies?.map((a: { allergy_name: string }) => a.allergy_name) ??
         [],
@@ -48,12 +51,16 @@ export class ApiPatientRepo implements PatientRepo {
         data.patient_conditions?.map(
           (c: { condition_name: string }) => c.condition_name,
         ) ?? [],
-      emergencyContactName: ec ? `${ec.first_name} ${ec.last_name}` : undefined,
-      emergencyContactEmail: ec?.email,
+      emergencyContactName: ec?.name,
       emergencyContactPhone: ec?.phone_number,
       emergencyContactRelationship: ec?.relationship,
+      physicianName: data.phys_name,
+      physicianSpecialty: data.phys_spec,
+      physicianPhone: data.phys_phone,
+      physicianAddress: data.phys_address,
       insuranceProvider: data.insurance_provider,
       insurancePolicyNumber: data.policy_number,
+      groupNumber: data.group_number,
     };
 
     return formattedData;
@@ -111,6 +118,7 @@ export class ApiPatientRepo implements PatientRepo {
         blood_type: medicalInfo.bloodType,
         height: medicalInfo.height,
         weight: medicalInfo.weight,
+        dietary_requirements: medicalInfo.dietaryRequirements,
       })
       .eq("patient_id", patientId)
       .single();
@@ -152,20 +160,12 @@ export class ApiPatientRepo implements PatientRepo {
 
     const contactId = data?.contact_id;
 
-    const nameParts = (emergencyContactInfo.emergencyContactName ?? "").split(
-      " ",
-    );
-    const firstName = nameParts[0] ?? "";
-    const lastName = nameParts.slice(1).join(" ");
-
     const { error: upsertError } = await supabase
       .from("emergency_contacts")
       .upsert({
         contact_id: contactId,
         patient_id: patientId,
-        first_name: firstName,
-        last_name: lastName,
-        email: emergencyContactInfo.emergencyContactEmail,
+        name: emergencyContactInfo.emergencyContactName as string,
         phone_number: emergencyContactInfo.emergencyContactPhone,
         relationship: emergencyContactInfo.emergencyContactRelationship,
       });
@@ -184,6 +184,27 @@ export class ApiPatientRepo implements PatientRepo {
       .update({
         insurance_provider: insuranceInfo.insuranceProvider,
         policy_number: insuranceInfo.insurancePolicyNumber,
+        group_number: insuranceInfo.groupNumber,
+      })
+      .eq("patient_id", patientId)
+      .single();
+
+    if (error) throw error;
+
+    return this.getPatientDetails(patientId);
+  }
+
+  async updatePatientPhysicianInfo(
+    patientId: string,
+    physicianInfo: Partial<PatientPhysicianInfo>,
+  ): Promise<AllPatientInfo> {
+    const { error } = await supabase
+      .from("patients")
+      .update({
+        phys_name: physicianInfo.physicianName,
+        phys_spec: physicianInfo.physicianSpecialty,
+        phys_phone: physicianInfo.physicianPhone,
+        phys_address: physicianInfo.physicianAddress,
       })
       .eq("patient_id", patientId)
       .single();

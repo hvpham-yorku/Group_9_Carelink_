@@ -5,6 +5,7 @@ import type {
   PatientMedicalInfo,
   PatientEmergencyContact,
   PatientInsuranceInfo,
+  PatientPhysicianInfo,
 } from "../../../types/patient";
 
 export interface PatientRepo {
@@ -31,10 +32,8 @@ export interface PatientRepo {
     patientId: string,
     insuranceInfo: Partial<PatientInsuranceInfo>,
   ): Promise<AllPatientInfo>;
-  /*
   updatePatientPhysicianInfo(
     patientId: string,
     physicianInfo: Partial<PatientPhysicianInfo>,
   ): Promise<AllPatientInfo>;
-    */
 }

@@ -4,6 +4,7 @@ export interface PatientBasicInfo {
   lastName: string;
   dob?: string;
   gender?: string;
+  isActive?: boolean;
 }
 
 export interface PatientContactInfo {
@@ -18,17 +19,18 @@ export interface PatientMedicalInfo {
   weight?: string | null;
   allergies?: string[] | null;
   conditions?: string[] | null;
+  dietaryRequirements?: string | null;
 }
 
 export interface PatientEmergencyContact {
   emergencyContactName?: string | null;
-  emergencyContactEmail?: string | null;
   emergencyContactPhone?: string | null;
   emergencyContactRelationship?: string | null;
 }
 
 export interface PatientPhysicianInfo {
   physicianName?: string | null;
+  physicianSpecialty?: string | null;
   physicianPhone?: string | null;
   physicianAddress?: string | null;
 }
@@ -36,6 +38,7 @@ export interface PatientPhysicianInfo {
 export interface PatientInsuranceInfo {
   insuranceProvider?: string | null;
   insurancePolicyNumber?: string | null;
+  groupNumber?: string | null;
 }
 
 // Full patient composed from all sections

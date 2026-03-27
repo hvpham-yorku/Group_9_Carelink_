@@ -15,16 +15,17 @@ import PatientNotesSection from "../components/patientProfile/PatientNotesSectio
 import PatientConditionsSection from "../components/patientProfile/PatientConditionsSection";
 import EmergencyContactsSection from "../components/patientProfile/EmergencyContactsSection";
 
-import type { PatientInfo } from "../types/Types";
+import type { AllPatientInfo } from "../types/patient";
 import { usePatient } from "../contexts/patient/usePatient";
-import { patientService } from "../services/patientService";
+import { repositories } from "../data";
+
+const patientRepo = repositories.patient;
 
 type EditableSection =
   | "contact"
   | "medical"
   | "insurance"
   | "physician"
-  | "notes"
   | "conditions"
   | "emergency"
   | null;
@@ -33,8 +34,8 @@ const PatientProfile = () => {
   const { selectedPatientId } = usePatient();
   const navigate = useNavigate();
 
-  const [patient, setPatient] = useState<PatientInfo | null>(null);
-  const [draftPatient, setDraftPatient] = useState<PatientInfo | null>(null);
+  const [patient, setPatient] = useState<AllPatientInfo | null>(null);
+  const [draftPatient, setDraftPatient] = useState<AllPatientInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [savingSection, setSavingSection] = useState<EditableSection>(null);
   const [editingSection, setEditingSection] = useState<EditableSection>(null);
@@ -49,10 +50,9 @@ const PatientProfile = () => {
     const fetchPatient = async () => {
       setLoading(true);
       try {
-        const data = await patientService.getFullProfile(selectedPatientId);
-        const typedData = data as PatientInfo;
-        setPatient(typedData);
-        setDraftPatient(typedData);
+        const data = await patientRepo.getPatientDetails(selectedPatientId);
+        setPatient(data);
+        setDraftPatient(data);
       } catch (err) {
         console.error("Failed to load patient profile:", err);
         setPatient(null);
@@ -82,79 +82,78 @@ const PatientProfile = () => {
     setSavingSection(section);
 
     try {
-      let updates: Partial<PatientInfo> = {};
+      let updated: AllPatientInfo;
 
       if (section === "contact") {
-        updates = {
+        await patientRepo.updatePatientBasicInfo(patient.patientId, {
           firstName: draftPatient.firstName,
           lastName: draftPatient.lastName,
-          address: draftPatient.address,
-          phoneNumber: draftPatient.phoneNumber,
-          email: draftPatient.email,
-        };
-      }
-
-      if (section === "medical") {
-        updates = {
+        });
+        updated = await patientRepo.updatePatientContactInfo(
+          patient.patientId,
+          {
+            address: draftPatient.address,
+            phoneNumber: draftPatient.phoneNumber,
+            email: draftPatient.email,
+          },
+        );
+      } else if (section === "medical") {
+        await patientRepo.updatePatientBasicInfo(patient.patientId, {
           dob: draftPatient.dob,
           gender: draftPatient.gender,
-          bloodType: draftPatient.bloodType,
-          height: draftPatient.height,
-          weight: draftPatient.weight,
-          allergies: draftPatient.allergies,
-          mobility: draftPatient.mobility,
-          diet: draftPatient.diet,
-        };
+        });
+        updated = await patientRepo.updatePatientMedicalInfo(
+          patient.patientId,
+          {
+            bloodType: draftPatient.bloodType,
+            height: draftPatient.height,
+            weight: draftPatient.weight,
+            dietaryRequirements: draftPatient.dietaryRequirements,
+            allergies: draftPatient.allergies,
+          },
+        );
+      } else if (section === "insurance") {
+        updated = await patientRepo.updatePatientInsuranceInfo(
+          patient.patientId,
+          {
+            insuranceProvider: draftPatient.insuranceProvider,
+            insurancePolicyNumber: draftPatient.insurancePolicyNumber,
+            groupNumber: draftPatient.groupNumber,
+          },
+        );
+      } else if (section === "physician") {
+        updated = await patientRepo.updatePatientPhysicianInfo(
+          patient.patientId,
+          {
+            physicianName: draftPatient.physicianName,
+            physicianSpecialty: draftPatient.physicianSpecialty,
+            physicianPhone: draftPatient.physicianPhone,
+            physicianAddress: draftPatient.physicianAddress,
+          },
+        );
+      } else if (section === "conditions") {
+        updated = await patientRepo.updatePatientMedicalInfo(
+          patient.patientId,
+          {
+            conditions: draftPatient.conditions,
+          },
+        );
+      } else if (section === "emergency") {
+        updated = await patientRepo.updatePatientEmergencyContact(
+          patient.patientId,
+          {
+            emergencyContactName: draftPatient.emergencyContactName,
+            emergencyContactPhone: draftPatient.emergencyContactPhone,
+            emergencyContactRelationship:
+              draftPatient.emergencyContactRelationship,
+          },
+        );
+      } else {
+        return;
       }
 
-      if (section === "insurance") {
-        updates = {
-          insuranceProvider: draftPatient.insuranceProvider,
-          insurancePolicyNumber: draftPatient.insurancePolicyNumber,
-        };
-      }
-
-      if (section === "physician") {
-        updates = {
-          physicianName: draftPatient.physicianName,
-          physicianPhone: draftPatient.physicianPhone,
-          physicianAddress: draftPatient.physicianAddress,
-          physicianSpecialty: draftPatient.physicianSpecialty,
-        };
-      }
-
-      if (section === "notes") {
-        updates = {
-          careNotes: draftPatient.careNotes,
-        };
-      }
-
-      if (section === "conditions") {
-        updates = {
-          conditions: draftPatient.conditions,
-        };
-      }
-
-      if (section === "emergency") {
-        updates = {
-          emergencyContactName: draftPatient.emergencyContactName,
-          emergencyContactPhone: draftPatient.emergencyContactPhone,
-          emergencyContactRelationship: draftPatient.emergencyContactRelationship,
-          secondaryEmergencyContactName: draftPatient.secondaryEmergencyContactName,
-          secondaryEmergencyContactPhone: draftPatient.secondaryEmergencyContactPhone,
-          secondaryEmergencyContactRelationship:
-            draftPatient.secondaryEmergencyContactRelationship,
-        };
-      }
-
-      const updated = await patientService.updateProfile(
-        patient.patientId,
-        updates,
-      );
-
-      const updatedPatient = updated as PatientInfo;
-      setPatient(updatedPatient);
-      setDraftPatient(updatedPatient);
+      setPatient(updated);
+      setDraftPatient(updated);
       setEditingSection(null);
     } catch (err) {
       console.error(`Failed to save ${section} section:`, err);
@@ -163,7 +162,7 @@ const PatientProfile = () => {
     }
   };
 
-  const handleFieldChange = (field: keyof PatientInfo, value: string) => {
+  const handleFieldChange = (field: keyof AllPatientInfo, value: string) => {
     if (!draftPatient) return;
 
     setDraftPatient({
@@ -285,8 +284,8 @@ const PatientProfile = () => {
 
   const bannerPatient =
     editingSection === "medical" ||
-      editingSection === "conditions" ||
-      editingSection === "contact"
+    editingSection === "conditions" ||
+    editingSection === "contact"
       ? draftPatient
       : patient;
 
@@ -374,17 +373,7 @@ const PatientProfile = () => {
             onRemoveCondition={removeCondition}
           />
 
-          <PatientNotesSection
-            patient={patient}
-            draft={draftPatient}
-            isEditing={editingSection === "notes"}
-            isSaving={savingSection === "notes"}
-            onEdit={() => startEditing("notes")}
-            onCancel={cancelEditing}
-            onSave={() => saveSection("notes")}
-            onChange={handleFieldChange}
-            onViewNotes={() => navigate("/notes")}
-          />
+          <PatientNotesSection onViewNotes={() => navigate("/notes")} />
 
           {renderCareHistorySummary()}
         </div>

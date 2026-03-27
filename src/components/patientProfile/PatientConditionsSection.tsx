@@ -1,12 +1,12 @@
 import { HeartPulse, Plus, Trash2 } from "lucide-react";
 import CustomSection from "../ui/CustomSection";
 import Button from "../ui/Button";
-import type { PatientInfo } from "../../types/Types";
+import type { AllPatientInfo } from "../../types/patient";
 import SectionEditActions from "./SectionEditActions";
 
 interface Props {
-  patient: PatientInfo;
-  draft: PatientInfo;
+  patient: AllPatientInfo;
+  draft: AllPatientInfo;
   isEditing: boolean;
   isSaving: boolean;
   onEdit: () => void;

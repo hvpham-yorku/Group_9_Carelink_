@@ -1,17 +1,17 @@
 import { Shield } from "lucide-react";
 import CustomSection from "../ui/CustomSection";
-import type { PatientInfo } from "../../types/Types";
+import type { AllPatientInfo } from "../../types/patient";
 import SectionEditActions from "./SectionEditActions";
 
 interface Props {
-  patient: PatientInfo;
-  draft: PatientInfo;
+  patient: AllPatientInfo;
+  draft: AllPatientInfo;
   isEditing: boolean;
   isSaving: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
-  onChange: (field: keyof PatientInfo, value: string) => void;
+  onChange: (field: keyof AllPatientInfo, value: string) => void;
 }
 
 const PatientInsuranceSection = ({
@@ -38,7 +38,6 @@ const PatientInsuranceSection = ({
       }
     >
       <div className="d-flex align-items-start gap-3">
-
         <div
           style={{
             width: "42px",
@@ -54,16 +53,13 @@ const PatientInsuranceSection = ({
         </div>
 
         <div className="flex-grow-1 d-flex flex-column gap-3">
-
           <div>
             <div className="text-muted small mb-1">Provider</div>
             {isEditing ? (
               <input
                 className="form-control"
                 value={draft.insuranceProvider || ""}
-                onChange={(e) =>
-                  onChange("insuranceProvider", e.target.value)
-                }
+                onChange={(e) => onChange("insuranceProvider", e.target.value)}
               />
             ) : (
               <div>{patient.insuranceProvider || "Not Available"}</div>
@@ -85,6 +81,18 @@ const PatientInsuranceSection = ({
             )}
           </div>
 
+          <div>
+            <div className="text-muted small mb-1">Group Number</div>
+            {isEditing ? (
+              <input
+                className="form-control"
+                value={draft.groupNumber || ""}
+                onChange={(e) => onChange("groupNumber", e.target.value)}
+              />
+            ) : (
+              <div>{patient.groupNumber || "Not Available"}</div>
+            )}
+          </div>
         </div>
       </div>
     </CustomSection>

@@ -1,17 +1,17 @@
 import { AlertCircle } from "lucide-react";
 import CustomSection from "../ui/CustomSection";
-import type { PatientInfo } from "../../types/Types";
+import type { AllPatientInfo } from "../../types/patient";
 import SectionEditActions from "./SectionEditActions";
 
 interface Props {
-  patient: PatientInfo;
-  draft: PatientInfo;
+  patient: AllPatientInfo;
+  draft: AllPatientInfo;
   isEditing: boolean;
   isSaving: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
-  onChange: (field: keyof PatientInfo, value: string) => void;
+  onChange: (field: keyof AllPatientInfo, value: string) => void;
   onAllergyChange: (value: string) => void;
 }
 
@@ -114,30 +114,16 @@ const PatientMedicalSection = ({
         </div>
 
         <div>
-          <div className="text-muted small mb-1">Mobility</div>
-          {isEditing ? (
-            <textarea
-              className="form-control"
-              rows={2}
-              value={draft.mobility || ""}
-              onChange={(e) => onChange("mobility", e.target.value)}
-            />
-          ) : (
-            <div>{patient.mobility || "Not Available"}</div>
-          )}
-        </div>
-
-        <div>
           <div className="text-muted small mb-1">Dietary Requirements</div>
           {isEditing ? (
             <textarea
               className="form-control"
               rows={2}
-              value={draft.diet || ""}
-              onChange={(e) => onChange("diet", e.target.value)}
+              value={draft.dietaryRequirements || ""}
+              onChange={(e) => onChange("dietaryRequirements", e.target.value)}
             />
           ) : (
-            <div>{patient.diet || "Not Available"}</div>
+            <div>{patient.dietaryRequirements || "Not Available"}</div>
           )}
         </div>
 

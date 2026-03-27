@@ -5,6 +5,7 @@ import type {
   PatientMedicalInfo,
   PatientEmergencyContact,
   PatientInsuranceInfo,
+  PatientPhysicianInfo,
 } from "../../../types/patient";
 
 import type { PatientRepo } from "./PatientRepo";
@@ -64,6 +65,15 @@ export class StubPatientRepo implements PatientRepo {
   ): Promise<AllPatientInfo> {
     const patient = await this.getPatientDetails(patientId);
     const updatedPatient = { ...patient, ...insuranceInfo };
+    return updatedPatient;
+  }
+
+  async updatePatientPhysicianInfo(
+    patientId: string,
+    physicianInfo: Partial<PatientPhysicianInfo>,
+  ): Promise<AllPatientInfo> {
+    const patient = await this.getPatientDetails(patientId);
+    const updatedPatient = { ...patient, ...physicianInfo };
     return updatedPatient;
   }
 }
