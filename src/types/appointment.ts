@@ -1,26 +1,17 @@
 export interface AppointmentRecord {
   appointmentId: string;
-  careTeamId: string;
+  teamId: string;
   caregiverId: string;
   patientId: string;
+  title: string | null;
   scheduledAt: string;
   description: string | null;
-  completedTime: string | null;
+  location: string | null;
+  createdAt: string | null;
+  completedAt: string | null;
+  isCompleted: boolean | null;
   caregivers?: {
     firstName?: string;
     lastName?: string;
   } | null;
-}
-
-export interface NewAppointment {
-  patientId: string;
-  careTeamId: string;
-  caregiverId: string;
-  scheduledAt: string;
-  description?: string;
-}
-
-export interface UpdateAppointmentInput {
-  scheduledAt?: string;
-  description?: string;
 }

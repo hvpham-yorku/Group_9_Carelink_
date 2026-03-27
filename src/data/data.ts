@@ -10,6 +10,7 @@ import type { Note } from "../types/note";
 import type { Task, TaskLogEntry } from "../types/task";
 import type { Medication } from "../types/medication";
 import type { Profile } from "../types/profile";
+import type { AppointmentRecord } from "../types/appointment";
 
 // patient ids
 const patientId1 = crypto.randomUUID();
@@ -304,5 +305,39 @@ export let profiles: Profile[] = [
     email: "bob.williams@example.com",
     phoneNumber: "(555) 987-6543",
     jobTitle: "Caregiver",
+  },
+];
+
+/*
+  Appointment Related Data
+*/
+export let appointments: AppointmentRecord[] = [
+  {
+    appointmentId: crypto.randomUUID(),
+    teamId: careTeamId1,
+    caregiverId: caregiverId1,
+    patientId: patientId1,
+    title: "Doctor's Visit",
+    scheduledAt: new Date().toISOString(),
+    description: "Visit to Dr. Smith for a routine check-up.",
+    location: "123 Main St, Anytown, USA",
+    createdAt: new Date().toISOString(),
+    completedAt: null,
+    isCompleted: false,
+    caregivers: { firstName: "Alice", lastName: "Johnson" },
+  },
+  {
+    appointmentId: crypto.randomUUID(),
+    teamId: careTeamId1,
+    caregiverId: caregiverId2,
+    patientId: patientId2,
+    title: "Follow-up Visit",
+    scheduledAt: new Date().toISOString(),
+    description: "Follow-up visit with Dr. Johnson.",
+    location: "456 Elm St, Anytown, USA",
+    createdAt: new Date().toISOString(),
+    completedAt: null,
+    isCompleted: false,
+    caregivers: { firstName: "Bob", lastName: "Williams" },
   },
 ];

@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 import { authService } from "../services/authService";
-import { appointmentService } from "../services/appointmentService";
-import type { AppointmentRecord } from "../services/appointmentService";
+import type { AppointmentRecord } from "../types/appointment";
 import { repositories } from "../data";
 import type { Task, TaskLogEntry } from "../types/task";
 import type { Medication } from "../types/medication";
@@ -93,7 +92,7 @@ export const useDashboardData = () => {
           repositories.task.getTasksByPatient(selectedPatientId),
           repositories.medication.getMedicationsByPatient(selectedPatientId),
           repositories.note.getNotesByPatient(selectedPatientId),
-          appointmentService.getAppointmentsByPatient(selectedPatientId),
+          repositories.appointment.getAppointmentsByPatient(selectedPatientId),
         ]);
 
         const tasks = tasksRaw ?? [];
@@ -135,19 +134,19 @@ export const useDashboardData = () => {
 
         const upcomingAppointments: AppointmentItem[] = appointments
           .filter((appointment: AppointmentRecord) => {
-            const isCompleted = !!appointment.is_completed;
+            const isCompleted = !!appointment.isCompleted;
             const isFuture =
-              new Date(appointment.scheduled_at).getTime() >= Date.now();
+              new Date(appointment.scheduledAt).getTime() >= Date.now();
             return !isCompleted && isFuture;
           })
           .sort(
             (a: AppointmentRecord, b: AppointmentRecord) =>
-              new Date(a.scheduled_at).getTime() -
-              new Date(b.scheduled_at).getTime(),
+              new Date(a.scheduledAt).getTime() -
+              new Date(b.scheduledAt).getTime(),
           )
           .slice(0, 4)
           .map((appointment: AppointmentRecord) => {
-            const date = new Date(appointment.scheduled_at);
+            const date = new Date(appointment.scheduledAt);
 
             return {
               day: date.toLocaleDateString(undefined, {

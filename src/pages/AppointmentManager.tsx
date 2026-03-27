@@ -8,11 +8,9 @@ import {
   Trash2,
   Pencil,
 } from "lucide-react";
-import {
-  appointmentService,
-  type AppointmentRecord,
-} from "../services/appointmentService";
 import { authService } from "../services/authService";
+import { repositories } from "../data";
+import type { AppointmentRecord } from "../types/appointment";
 import { usePatient } from "../contexts/patient/usePatient";
 import { useAuth } from "../hooks/useAuth";
 
@@ -89,7 +87,9 @@ export default function AppointmentManager() {
       setLoading(true);
       setError(null);
       const data =
-        await appointmentService.getAppointmentsByPatient(selectedPatientId);
+        await repositories.appointment.getAppointmentsByPatient(
+          selectedPatientId,
+        );
       setAppointments(data);
     } catch (err) {
       console.error("Error loading appointments:", err);
@@ -109,7 +109,7 @@ export default function AppointmentManager() {
     const groups: Record<string, AppointmentRecord[]> = {};
 
     appointments.forEach((appt) => {
-      const key = formatMonthKey(appt.scheduled_at);
+      const key = formatMonthKey(appt.scheduledAt);
       if (!groups[key]) groups[key] = [];
       groups[key].push(appt);
     });
@@ -117,8 +117,7 @@ export default function AppointmentManager() {
     Object.keys(groups).forEach((key) => {
       groups[key].sort(
         (a, b) =>
-          new Date(a.scheduled_at).getTime() -
-          new Date(b.scheduled_at).getTime(),
+          new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
       );
     });
 
@@ -130,12 +129,11 @@ export default function AppointmentManager() {
     return appointments
       .filter(
         (appt) =>
-          !appt.is_completed && new Date(appt.scheduled_at).getTime() >= now,
+          !appt.isCompleted && new Date(appt.scheduledAt).getTime() >= now,
       )
       .sort(
         (a, b) =>
-          new Date(a.scheduled_at).getTime() -
-          new Date(b.scheduled_at).getTime(),
+          new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
       );
   }, [appointments]);
 
@@ -146,9 +144,9 @@ export default function AppointmentManager() {
   };
 
   const openEditForm = (appointment: AppointmentRecord) => {
-    setEditingId(appointment.appointment_id);
+    setEditingId(appointment.appointmentId);
     setForm({
-      scheduledAt: toDatetimeLocalValue(appointment.scheduled_at),
+      scheduledAt: toDatetimeLocalValue(appointment.scheduledAt),
       description: appointment.description || "",
     });
     setShowForm(true);
@@ -183,16 +181,16 @@ export default function AppointmentManager() {
       }
 
       if (editingId) {
-        await appointmentService.updateAppointment(editingId, {
-          scheduled_at: new Date(form.scheduledAt).toISOString(),
+        await repositories.appointment.updateAppointment(editingId, {
+          scheduledAt: new Date(form.scheduledAt).toISOString(),
           description: form.description,
         });
       } else {
-        await appointmentService.addAppointment({
-          patient_id: selectedPatientId,
-          team_id: careTeamId,
-          caregiver_id: caregiver.caregiver_id,
-          scheduled_at: new Date(form.scheduledAt).toISOString(),
+        await repositories.appointment.addAppointment({
+          patientId: selectedPatientId,
+          teamId: careTeamId,
+          caregiverId: caregiver.caregiver_id,
+          scheduledAt: new Date(form.scheduledAt).toISOString(),
           description: form.description,
         });
       }
@@ -211,21 +209,21 @@ export default function AppointmentManager() {
     try {
       setError(null);
 
-      if (appointment.is_completed) {
-        await appointmentService.markAppointmentIncomplete(
-          appointment.appointment_id,
+      if (appointment.isCompleted) {
+        await repositories.appointment.markAppointmentIncomplete(
+          appointment.appointmentId,
         );
       } else {
-        await appointmentService.markAppointmentComplete(
-          appointment.appointment_id,
+        await repositories.appointment.markAppointmentComplete(
+          appointment.appointmentId,
         );
       }
 
       await loadAppointments();
 
-      if (selectedAppointment?.appointment_id === appointment.appointment_id) {
+      if (selectedAppointment?.appointmentId === appointment.appointmentId) {
         const refreshed = appointments.find(
-          (a) => a.appointment_id === appointment.appointment_id,
+          (a) => a.appointmentId === appointment.appointmentId,
         );
         setSelectedAppointment(refreshed || null);
       }
@@ -241,8 +239,8 @@ export default function AppointmentManager() {
 
     try {
       setError(null);
-      await appointmentService.deleteAppointment(appointmentId);
-      if (selectedAppointment?.appointment_id === appointmentId) {
+      await repositories.appointment.deleteAppointment(appointmentId);
+      if (selectedAppointment?.appointmentId === appointmentId) {
         setSelectedAppointment(null);
       }
       await loadAppointments();
@@ -328,12 +326,12 @@ export default function AppointmentManager() {
                       <div className="d-flex flex-column gap-2">
                         {items.map((appointment) => {
                           const isSelected =
-                            selectedAppointment?.appointment_id ===
-                            appointment.appointment_id;
+                            selectedAppointment?.appointmentId ===
+                            appointment.appointmentId;
 
                           return (
                             <button
-                              key={appointment.appointment_id}
+                              key={appointment.appointmentId}
                               type="button"
                               className={`btn text-start border rounded-4 p-3 ${
                                 isSelected
@@ -347,24 +345,24 @@ export default function AppointmentManager() {
                               <div className="d-flex justify-content-between align-items-start">
                                 <div>
                                   <div className="small text-secondary">
-                                    {formatWeekday(appointment.scheduled_at)}
+                                    {formatWeekday(appointment.scheduledAt)}
                                   </div>
                                   <div className="fw-bold fs-4 lh-1">
-                                    {formatDayNumber(appointment.scheduled_at)}
+                                    {formatDayNumber(appointment.scheduledAt)}
                                   </div>
                                 </div>
 
                                 <div className="text-end ms-3">
                                   <div className="fw-semibold">
                                     {new Date(
-                                      appointment.scheduled_at,
+                                      appointment.scheduledAt,
                                     ).toLocaleTimeString([], {
                                       hour: "numeric",
                                       minute: "2-digit",
                                     })}
                                   </div>
                                   <div className="small text-secondary">
-                                    {appointment.is_completed
+                                    {appointment.isCompleted
                                       ? "Completed"
                                       : "Scheduled"}
                                   </div>
@@ -400,7 +398,7 @@ export default function AppointmentManager() {
                 <div className="d-flex flex-column gap-3">
                   {upcomingAppointments.map((appointment) => (
                     <div
-                      key={appointment.appointment_id}
+                      key={appointment.appointmentId}
                       className="border rounded-4 p-3"
                       role="button"
                       onClick={() => setSelectedAppointment(appointment)}
@@ -408,7 +406,7 @@ export default function AppointmentManager() {
                       <div className="d-flex justify-content-between align-items-start gap-3">
                         <div>
                           <div className="fw-semibold">
-                            {formatDateTime(appointment.scheduled_at)}
+                            {formatDateTime(appointment.scheduledAt)}
                           </div>
                           <div className="small text-secondary mt-1">
                             {appointment.description?.trim() ||
@@ -510,13 +508,13 @@ export default function AppointmentManager() {
               ) : selectedAppointment ? (
                 <>
                   <div className="d-flex align-items-center gap-2 mb-3">
-                    {selectedAppointment.is_completed ? (
+                    {selectedAppointment.isCompleted ? (
                       <CheckCircle2 size={20} className="text-success" />
                     ) : (
                       <Circle size={20} className="text-secondary" />
                     )}
                     <span className="fw-semibold">
-                      {selectedAppointment.is_completed
+                      {selectedAppointment.isCompleted
                         ? "Completed"
                         : "Scheduled"}
                     </span>
@@ -525,7 +523,7 @@ export default function AppointmentManager() {
                   <div className="mb-3">
                     <div className="small text-secondary">Scheduled For</div>
                     <div className="fw-semibold">
-                      {formatDateTime(selectedAppointment.scheduled_at)}
+                      {formatDateTime(selectedAppointment.scheduledAt)}
                     </div>
                   </div>
 
@@ -540,8 +538,8 @@ export default function AppointmentManager() {
                   <div className="mb-4">
                     <div className="small text-secondary">Completed Time</div>
                     <div>
-                      {selectedAppointment.is_completed
-                        ? formatDateTime(selectedAppointment.completed_at)
+                      {selectedAppointment.isCompleted
+                        ? formatDateTime(selectedAppointment.completedAt)
                         : "Not completed yet"}
                     </div>
                   </div>
@@ -559,13 +557,13 @@ export default function AppointmentManager() {
                     <button
                       type="button"
                       className={`btn rounded-pill d-inline-flex align-items-center gap-2 ${
-                        selectedAppointment.is_completed
+                        selectedAppointment.isCompleted
                           ? "btn-outline-warning"
                           : "btn-outline-success"
                       }`}
                       onClick={() => handleToggleComplete(selectedAppointment)}
                     >
-                      {selectedAppointment.is_completed ? (
+                      {selectedAppointment.isCompleted ? (
                         <>
                           <Circle size={16} />
                           Mark Incomplete
@@ -582,7 +580,7 @@ export default function AppointmentManager() {
                       type="button"
                       className="btn btn-outline-danger rounded-pill d-inline-flex align-items-center gap-2"
                       onClick={() =>
-                        handleDelete(selectedAppointment.appointment_id)
+                        handleDelete(selectedAppointment.appointmentId)
                       }
                     >
                       <Trash2 size={16} />

@@ -10,6 +10,8 @@ import { ApiMedRepo } from "./repositories/medications/ApiMedRepo";
 import { StubMedRepo } from "./repositories/medications/StubMedRepo";
 import { ApiProfileRepo } from "./repositories/profile/ApiProfileRepo";
 import { StubProfileRepo } from "./repositories/profile/StubProfileRepo";
+import { ApiAppRepo } from "./repositories/appointments/ApiAppRepo";
+import { StubAppRepo } from "./repositories/appointments/StubAppRepo";
 
 // import.meta.env.VITE_STUB_MODE
 const mode = import.meta.env.VITE_STUB_MODE;
@@ -21,4 +23,5 @@ export const repositories = {
   note: mode === "stub" ? new StubNoteRepo() : new ApiNoteRepo(),
   medication: mode === "stub" ? new StubMedRepo() : new ApiMedRepo(),
   profile: mode === "stub" ? new StubProfileRepo() : new ApiProfileRepo(),
+  appointment: mode === "stub" ? new StubAppRepo() : new ApiAppRepo(),
 };
