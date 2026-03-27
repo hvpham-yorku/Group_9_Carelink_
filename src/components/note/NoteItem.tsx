@@ -17,7 +17,7 @@ export default function NoteItem({
   formatDateTime,
   isUrgentMode,
 }: Props) {
-  const isUrgentHighlighted = isUrgentMode && note.isUrgent;
+  const isUrgentHighlighted = note.isUrgent;
 
   return (
     <div

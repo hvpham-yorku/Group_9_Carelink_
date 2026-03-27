@@ -124,14 +124,14 @@ export default function Notes() {
     () =>
       notes.filter(
         (note) =>
-          new Date(note.createdAt).toDateString() === new Date().toDateString()
+          new Date(note.createdAt).toDateString() === new Date().toDateString(),
       ).length,
-    [notes]
+    [notes],
   );
 
   const urgentNotesCount = useMemo(
     () => notes.filter((note) => note.isUrgent).length,
-    [notes]
+    [notes],
   );
 
   // ===== FILTER LOGIC =====
@@ -272,6 +272,7 @@ export default function Notes() {
             title: title.trim(),
             description: description.trim(),
             categoryId,
+            isUrgent,
           },
         );
 
@@ -288,6 +289,7 @@ export default function Notes() {
           title: title.trim(),
           description: description.trim(),
           categoryId,
+          isUrgent,
         });
 
         setNotes((prev) => [created, ...prev]);
@@ -343,7 +345,9 @@ export default function Notes() {
                         title="Today's Notes"
                         value={todaysNotesCount}
                         subtitle="Current day"
-                        icon={<NotebookPen size={18} className="text-primary" />}
+                        icon={
+                          <NotebookPen size={18} className="text-primary" />
+                        }
                         onClick={handleTodayCardClick}
                         accentClassName="bg-info-subtle"
                         isActive={timeFilter === "today"}
