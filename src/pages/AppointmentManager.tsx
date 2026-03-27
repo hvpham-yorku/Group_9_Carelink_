@@ -1,5 +1,5 @@
 // src/pages/AppointmentManager.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -76,7 +76,7 @@ export default function AppointmentManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
 
-  const loadAppointments = async () => {
+  const loadAppointments = useCallback(async () => {
     if (!selectedPatientId) {
       setAppointments([]);
       setLoading(false);
@@ -97,13 +97,13 @@ export default function AppointmentManager() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPatientId]);
 
   useEffect(() => {
     if (!patientLoading) {
       loadAppointments();
     }
-  }, [selectedPatientId, patientLoading]);
+  }, [selectedPatientId, patientLoading, loadAppointments]);
 
   const groupedAppointments = useMemo(() => {
     const groups: Record<string, AppointmentRecord[]> = {};
