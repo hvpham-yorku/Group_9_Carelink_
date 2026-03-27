@@ -5,9 +5,9 @@ export interface ProfileRepo {
 
   updateFirstName(caregiverId: string, firstName: string): Promise<void>;
   updateLastName(caregiverId: string, lastName: string): Promise<void>;
-  updateEmail(caregiverId: string, email: string): Promise<void>;
+
   updatePhoneNumber(caregiverId: string, phoneNumber: string): Promise<void>;
   updateJobTitle(caregiverId: string, jobTitle: string): Promise<void>;
 
-  deleteProfile(caregiverId: string): Promise<void>;
+  // deleteProfile(caregiverId: string): Promise<void>;
 }

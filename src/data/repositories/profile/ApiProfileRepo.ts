@@ -42,15 +42,6 @@ export class ApiProfileRepo implements ProfileRepo {
     if (error) throw error;
   }
 
-  async updateEmail(caregiverId: string, email: string): Promise<void> {
-    const { error } = await supabase
-      .from("caregivers")
-      .update({ email })
-      .eq("caregiver_id", caregiverId);
-
-    if (error) throw error;
-  }
-
   async updateJobTitle(caregiverId: string, jobTitle: string): Promise<void> {
     const { error } = await supabase
       .from("caregivers")
@@ -67,15 +58,6 @@ export class ApiProfileRepo implements ProfileRepo {
     const { error } = await supabase
       .from("caregivers")
       .update({ phone_number: phoneNumber })
-      .eq("caregiver_id", caregiverId);
-
-    if (error) throw error;
-  }
-
-  async deleteProfile(caregiverId: string): Promise<void> {
-    const { error } = await supabase
-      .from("caregivers")
-      .delete()
       .eq("caregiver_id", caregiverId);
 
     if (error) throw error;
