@@ -38,7 +38,6 @@ const PatientPhysicianSection = ({
       }
     >
       <div className="d-flex align-items-start gap-3">
-
         <div
           style={{
             width: "42px",
@@ -54,35 +53,53 @@ const PatientPhysicianSection = ({
         </div>
 
         <div className="flex-grow-1">
-
           {isEditing ? (
             <>
-              <input
-                className="form-control mb-2"
-                placeholder="Name"
-                value={draft.physicianName || ""}
-                onChange={(e) =>
-                  onChange("physicianName", e.target.value)
-                }
-              />
+              <div className="mb-2">
+                <label className="form-label small text-muted mb-1">
+                  Physician Name
+                </label>
+                <input
+                  className="form-control"
+                  value={draft.physicianName || ""}
+                  onChange={(e) => onChange("physicianName", e.target.value)}
+                />
+              </div>
 
-              <input
-                className="form-control mb-2"
-                placeholder="Phone"
-                value={draft.physicianPhone || ""}
-                onChange={(e) =>
-                  onChange("physicianPhone", e.target.value)
-                }
-              />
+              <div className="mb-2">
+                <label className="form-label small text-muted mb-1">
+                  Specialty
+                </label>
+                <input
+                  className="form-control"
+                  value={draft.physicianSpecialty || ""}
+                  onChange={(e) =>
+                    onChange("physicianSpecialty", e.target.value)
+                  }
+                />
+              </div>
 
-              <input
-                className="form-control"
-                placeholder="Address"
-                value={draft.physicianAddress || ""}
-                onChange={(e) =>
-                  onChange("physicianAddress", e.target.value)
-                }
-              />
+              <div className="mb-2">
+                <label className="form-label small text-muted mb-1">
+                  Phone
+                </label>
+                <input
+                  className="form-control"
+                  value={draft.physicianPhone || ""}
+                  onChange={(e) => onChange("physicianPhone", e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="form-label small text-muted mb-1">
+                  Address
+                </label>
+                <input
+                  className="form-control"
+                  value={draft.physicianAddress || ""}
+                  onChange={(e) => onChange("physicianAddress", e.target.value)}
+                />
+              </div>
             </>
           ) : (
             <>
@@ -90,17 +107,34 @@ const PatientPhysicianSection = ({
                 {patient.physicianName || "Not Available"}
               </div>
 
-              <div className="d-flex gap-3 mt-2">
-                <span>
-                  <Phone size={14} /> {patient.physicianPhone || "—"}
-                </span>
-                <span>
-                  <MapPin size={14} /> {patient.physicianAddress || "—"}
-                </span>
+              <div
+                className="text-muted"
+                style={{ fontSize: "0.9rem", marginTop: "2px", marginBottom: "10px" }}
+              >
+                {patient.physicianSpecialty || "Not Available"}
+              </div>
+
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <div className="d-flex align-items-center gap-2">
+                    <Phone size={14} color="#9ca3af" />
+                    <span style={{ color: "#111827", fontSize: "0.92rem" }}>
+                      {patient.physicianPhone || "Not Available"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="d-flex align-items-center gap-2">
+                    <MapPin size={14} color="#9ca3af" />
+                    <span style={{ color: "#111827", fontSize: "0.92rem" }}>
+                      {patient.physicianAddress || "Not Available"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </>
           )}
-
         </div>
       </div>
     </CustomSection>

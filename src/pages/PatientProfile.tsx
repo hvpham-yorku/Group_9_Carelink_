@@ -285,8 +285,8 @@ const PatientProfile = () => {
 
   const bannerPatient =
     editingSection === "medical" ||
-    editingSection === "conditions" ||
-    editingSection === "contact"
+      editingSection === "conditions" ||
+      editingSection === "contact"
       ? draftPatient
       : patient;
 
