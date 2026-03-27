@@ -7,10 +7,12 @@ type Props = {
   title: string;
   description: string;
   categoryId: string;
+  isUrgent: boolean;
 
   setTitle: (value: string) => void;
   setDescription: (value: string) => void;
   setCategoryId: (value: string) => void;
+  setIsUrgent: (value: boolean) => void;
 
   handleSave: () => void;
   handleDelete: (id: string) => void;
@@ -24,9 +26,11 @@ export default function NoteForm({
   title,
   description,
   categoryId,
+  isUrgent,
   setTitle,
   setDescription,
   setCategoryId,
+  setIsUrgent,
   handleSave,
   handleDelete,
   onCancel,
@@ -87,6 +91,25 @@ export default function NoteForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+      </div>
+
+      <div className="mb-4">
+        <div className="form-check">
+          <input
+            id="noteIsUrgent"
+            name="noteIsUrgent"
+            type="checkbox"
+            className="form-check-input"
+            checked={isUrgent}
+            onChange={(e) => setIsUrgent(e.target.checked)}
+          />
+          <label
+            htmlFor="noteIsUrgent"
+            className="form-check-label fw-semibold"
+          >
+            Mark as urgent
+          </label>
+        </div>
       </div>
 
       <div className="d-flex justify-content-between align-items-center gap-2">
