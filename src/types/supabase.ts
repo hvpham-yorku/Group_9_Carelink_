@@ -188,27 +188,21 @@ export type Database = {
       emergency_contacts: {
         Row: {
           contact_id: string
-          email: string | null
-          first_name: string
-          last_name: string
+          name: string
           patient_id: string
           phone_number: string | null
           relationship: string | null
         }
         Insert: {
           contact_id?: string
-          email?: string | null
-          first_name: string
-          last_name: string
+          name: string
           patient_id: string
           phone_number?: string | null
           relationship?: string | null
         }
         Update: {
           contact_id?: string
-          email?: string | null
-          first_name?: string
-          last_name?: string
+          name?: string
           patient_id?: string
           phone_number?: string | null
           relationship?: string | null
@@ -458,6 +452,10 @@ export type Database = {
           last_name: string
           patient_id: string
           phone_number: string | null
+          phys_address: string | null
+          phys_name: string | null
+          phys_phone: string | null
+          phys_spec: string | null
           policy_number: string | null
           weight: string | null
         }
@@ -476,6 +474,10 @@ export type Database = {
           last_name: string
           patient_id?: string
           phone_number?: string | null
+          phys_address?: string | null
+          phys_name?: string | null
+          phys_phone?: string | null
+          phys_spec?: string | null
           policy_number?: string | null
           weight?: string | null
         }
@@ -494,6 +496,10 @@ export type Database = {
           last_name?: string
           patient_id?: string
           phone_number?: string | null
+          phys_address?: string | null
+          phys_name?: string | null
+          phys_phone?: string | null
+          phys_spec?: string | null
           policy_number?: string | null
           weight?: string | null
         }

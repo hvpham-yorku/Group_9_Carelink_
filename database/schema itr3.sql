@@ -45,9 +45,7 @@ CREATE TABLE public.categories (
 CREATE TABLE public.emergency_contacts (
   contact_id uuid NOT NULL DEFAULT gen_random_uuid(),
   patient_id uuid NOT NULL,
-  first_name text NOT NULL,
-  last_name text NOT NULL,
-  email text,
+  name text NOT NULL,
   phone_number text,
   relationship text,
   CONSTRAINT emergency_contacts_pkey PRIMARY KEY (contact_id),
@@ -66,7 +64,7 @@ CREATE TABLE public.medication_logs (
 CREATE TABLE public.medication_schedule (
   schedule_id uuid NOT NULL DEFAULT gen_random_uuid(),
   medication_id uuid NOT NULL,
-  scheduled_at timestamp with time zone,
+  scheduled_at time without time zone,
   CONSTRAINT medication_schedule_pkey PRIMARY KEY (schedule_id),
   CONSTRAINT medication_schedule_medication_id_fkey FOREIGN KEY (medication_id) REFERENCES public.medications(medication_id)
 );
@@ -128,6 +126,10 @@ CREATE TABLE public.patients (
   policy_number text,
   group_number text,
   is_active boolean NOT NULL DEFAULT true,
+  phys_name text,
+  phys_spec text,
+  phys_phone text,
+  phys_address text,
   CONSTRAINT patients_pkey PRIMARY KEY (patient_id)
 );
 CREATE TABLE public.task_logs (
