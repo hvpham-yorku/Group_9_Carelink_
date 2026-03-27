@@ -140,9 +140,12 @@ export interface PatientInfo {
   physicianName?: string;
   physicianPhone?: string;
   physicianAddress?: string;
+  physicianSpecialty?: string;
   insuranceProvider?: string;
   insurancePolicyNumber?: string;
   careNotes?: string;
+  mobility?: string;
+  diet?: string;
 }
 
 /**

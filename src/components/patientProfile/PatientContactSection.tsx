@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, UserRound } from "lucide-react";
 import CustomSection from "../ui/CustomSection";
 import type { PatientInfo } from "../../types/Types";
 import SectionEditActions from "./SectionEditActions";
@@ -38,6 +38,50 @@ const PatientContactSection = ({
       }
     >
       <div className="d-flex flex-column gap-4">
+        <div className="d-flex gap-3">
+          <UserRound size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
+          <div className="w-100">
+            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "6px" }}>
+              First Name
+            </div>
+
+            {isEditing ? (
+              <input
+                type="text"
+                className="form-control"
+                value={draft.firstName || ""}
+                onChange={(e) => onChange("firstName", e.target.value)}
+              />
+            ) : (
+              <div style={{ color: "#111827", fontSize: "0.95rem" }}>
+                {patient.firstName || "Not Available"}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="d-flex gap-3">
+          <UserRound size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
+          <div className="w-100">
+            <div style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "6px" }}>
+              Last Name
+            </div>
+
+            {isEditing ? (
+              <input
+                type="text"
+                className="form-control"
+                value={draft.lastName || ""}
+                onChange={(e) => onChange("lastName", e.target.value)}
+              />
+            ) : (
+              <div style={{ color: "#111827", fontSize: "0.95rem" }}>
+                {patient.lastName || "Not Available"}
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="d-flex gap-3">
           <MapPin size={16} style={{ color: "#9ca3af", marginTop: "4px" }} />
           <div className="w-100">

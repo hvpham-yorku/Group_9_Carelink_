@@ -41,6 +41,20 @@ const PatientMedicalSection = ({
     >
       <div className="d-flex flex-column gap-3">
         <div>
+          <div className="text-muted small mb-1">Date of Birth</div>
+          {isEditing ? (
+            <input
+              type="date"
+              className="form-control"
+              value={draft.dob || ""}
+              onChange={(e) => onChange("dob", e.target.value)}
+            />
+          ) : (
+            <div>{patient.dob || "Not Available"}</div>
+          )}
+        </div>
+
+        <div>
           <div className="text-muted small mb-1">Gender</div>
           {isEditing ? (
             <select
@@ -97,6 +111,34 @@ const PatientMedicalSection = ({
               <div>{patient.weight || "Not Available"}</div>
             )}
           </div>
+        </div>
+
+        <div>
+          <div className="text-muted small mb-1">Mobility</div>
+          {isEditing ? (
+            <textarea
+              className="form-control"
+              rows={2}
+              value={draft.mobility || ""}
+              onChange={(e) => onChange("mobility", e.target.value)}
+            />
+          ) : (
+            <div>{patient.mobility || "Not Available"}</div>
+          )}
+        </div>
+
+        <div>
+          <div className="text-muted small mb-1">Dietary Requirements</div>
+          {isEditing ? (
+            <textarea
+              className="form-control"
+              rows={2}
+              value={draft.diet || ""}
+              onChange={(e) => onChange("diet", e.target.value)}
+            />
+          ) : (
+            <div>{patient.diet || "Not Available"}</div>
+          )}
         </div>
 
         <div>

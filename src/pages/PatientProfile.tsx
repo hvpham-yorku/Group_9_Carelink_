@@ -86,6 +86,8 @@ const PatientProfile = () => {
 
       if (section === "contact") {
         updates = {
+          firstName: draftPatient.firstName,
+          lastName: draftPatient.lastName,
           address: draftPatient.address,
           phoneNumber: draftPatient.phoneNumber,
           email: draftPatient.email,
@@ -94,11 +96,14 @@ const PatientProfile = () => {
 
       if (section === "medical") {
         updates = {
+          dob: draftPatient.dob,
           gender: draftPatient.gender,
           bloodType: draftPatient.bloodType,
           height: draftPatient.height,
           weight: draftPatient.weight,
           allergies: draftPatient.allergies,
+          mobility: draftPatient.mobility,
+          diet: draftPatient.diet,
         };
       }
 
@@ -114,6 +119,7 @@ const PatientProfile = () => {
           physicianName: draftPatient.physicianName,
           physicianPhone: draftPatient.physicianPhone,
           physicianAddress: draftPatient.physicianAddress,
+          physicianSpecialty: draftPatient.physicianSpecialty,
         };
       }
 
@@ -141,7 +147,10 @@ const PatientProfile = () => {
         };
       }
 
-      const updated = await patientService.updateProfile(patient.patientId, updates);
+      const updated = await patientService.updateProfile(
+        patient.patientId,
+        updates,
+      );
 
       const updatedPatient = updated as PatientInfo;
       setPatient(updatedPatient);
@@ -156,6 +165,7 @@ const PatientProfile = () => {
 
   const handleFieldChange = (field: keyof PatientInfo, value: string) => {
     if (!draftPatient) return;
+
     setDraftPatient({
       ...draftPatient,
       [field]: value,
@@ -274,7 +284,9 @@ const PatientProfile = () => {
   }
 
   const bannerPatient =
-    editingSection === "medical" || editingSection === "conditions"
+    editingSection === "medical" ||
+    editingSection === "conditions" ||
+    editingSection === "contact"
       ? draftPatient
       : patient;
 
