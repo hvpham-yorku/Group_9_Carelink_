@@ -1,13 +1,5 @@
-export interface PatientBasicInfo {
-  patientId: string;
-  firstName: string;
-  lastName: string;
-  dob?: string;
-  gender?: string;
-  isActive?: boolean;
-}
-
 export interface PatientContactInfo {
+  patientId: string;
   firstName?: string;
   lastName?: string;
   address?: string | null;
@@ -21,9 +13,13 @@ export interface PatientMedicalInfo {
   bloodType?: string | null;
   height?: string | null;
   weight?: string | null;
-  allergies?: string[] | null;
-  conditions?: string[] | null;
   dietaryRequirements?: string | null;
+
+  allergies?: string[];
+}
+
+export interface PatientConditions {
+  conditions?: string[];
 }
 
 export interface PatientEmergencyContact {
@@ -46,9 +42,9 @@ export interface PatientInsuranceInfo {
 }
 
 // Full patient composed from all sections
-export type AllPatientInfo = PatientBasicInfo &
-  PatientContactInfo &
+export type AllPatientInfo = PatientContactInfo &
   PatientMedicalInfo &
+  PatientConditions &
   PatientEmergencyContact &
   PatientPhysicianInfo &
   PatientInsuranceInfo;

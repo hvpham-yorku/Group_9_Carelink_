@@ -1,8 +1,8 @@
 import type {
   AllPatientInfo,
-  PatientBasicInfo,
   PatientContactInfo,
   PatientMedicalInfo,
+  PatientConditions,
   PatientEmergencyContact,
   PatientInsuranceInfo,
   PatientPhysicianInfo,
@@ -12,10 +12,6 @@ export interface PatientRepo {
   getPatientDetails(patientId: string): Promise<AllPatientInfo>;
 
   // update patient fields
-  updatePatientBasicInfo(
-    patientId: string,
-    updates: Partial<PatientBasicInfo>,
-  ): Promise<AllPatientInfo>;
   updatePatientContactInfo(
     patientId: string,
     contactInfo: Partial<PatientContactInfo>,
@@ -23,6 +19,10 @@ export interface PatientRepo {
   updatePatientMedicalInfo(
     patientId: string,
     medicalInfo: Partial<PatientMedicalInfo>,
+  ): Promise<AllPatientInfo>;
+  updatePatientConditions(
+    patientId: string,
+    conditions: Partial<PatientConditions>,
   ): Promise<AllPatientInfo>;
   updatePatientEmergencyContact(
     patientId: string,

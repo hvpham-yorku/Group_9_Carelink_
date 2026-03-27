@@ -1,9 +1,9 @@
 import { supabase } from "../../../lib/supabase";
 import type {
   AllPatientInfo,
-  PatientBasicInfo,
   PatientContactInfo,
   PatientMedicalInfo,
+  PatientConditions,
   PatientEmergencyContact,
   PatientInsuranceInfo,
   PatientPhysicianInfo,
@@ -34,12 +34,11 @@ export class ApiPatientRepo implements PatientRepo {
       patientId: data.patient_id,
       firstName: data.first_name,
       lastName: data.last_name,
+      address: data.address,
+      phoneNumber: data.phone_number,
+      email: data.email,
       dob: data.dob,
       gender: data.gender,
-      isActive: data.is_active,
-      address: data.address,
-      email: data.email,
-      phoneNumber: data.phone_number,
       bloodType: data.blood_type,
       height: data.height,
       weight: data.weight,
@@ -69,26 +68,6 @@ export class ApiPatientRepo implements PatientRepo {
   /**
    * Update Methods for Patient Fields ---------
    */
-  async updatePatientBasicInfo(
-    patientId: string,
-    updates: Partial<PatientBasicInfo>,
-  ): Promise<AllPatientInfo> {
-    const { error } = await supabase
-      .from("patients")
-      .update({
-        first_name: updates.firstName,
-        last_name: updates.lastName,
-        dob: updates.dob,
-        gender: updates.gender,
-      })
-      .eq("patient_id", patientId)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    return this.getPatientDetails(patientId);
-  }
-
   async updatePatientContactInfo(
     patientId: string,
     contactInfo: Partial<PatientContactInfo>,
@@ -136,43 +115,71 @@ export class ApiPatientRepo implements PatientRepo {
 
     await Promise.all(allergyUpserts);
 
-    const conditionUpserts = (medicalInfo.conditions || []).map((condition) =>
-      supabase.from("patient_conditions").upsert({
-        patient_id: patientId,
-        condition_name: condition,
-      }),
-    );
+    return this.getPatientDetails(patientId);
+  }
 
-    await Promise.all(conditionUpserts);
+  // check if condition exists - if yes, update, if no, insert. all conditions are set as active
+  async updatePatientConditions(
+    patientId: string,
+    conditions: Partial<PatientConditions>,
+  ): Promise<AllPatientInfo> {
+    const existingConditions = await supabase
+      .from("patient_conditions")
+      .select("condition_id, condition_name")
+      .eq("patient_id", patientId);
+
+    const upsertPromises = (
+      conditions.conditions ? conditions.conditions : []
+    ).map((conditionName) => {
+      const existing = existingConditions.data?.find(
+        (c) => c.condition_name === conditionName,
+      );
+      return supabase.from("patient_conditions").upsert({
+        condition_id: existing?.condition_id,
+        patient_id: patientId,
+        condition_name: conditionName,
+        is_active: true,
+      });
+    });
+
+    await Promise.all(upsertPromises);
 
     return this.getPatientDetails(patientId);
   }
 
+  // check if emergency contact exists - if yes, update, if no, insert
   async updatePatientEmergencyContact(
     patientId: string,
     emergencyContactInfo: Partial<PatientEmergencyContact>,
   ): Promise<AllPatientInfo> {
-    const { data, error } = await supabase
+    const name = emergencyContactInfo.emergencyContactName ?? "";
+    const phone = emergencyContactInfo.emergencyContactPhone ?? null;
+    const relationship =
+      emergencyContactInfo.emergencyContactRelationship ?? null;
+
+    const { data: existingEC } = await supabase
       .from("emergency_contacts")
       .select("contact_id")
       .eq("patient_id", patientId)
       .maybeSingle();
 
-    if (error) throw error;
-
-    const contactId = data?.contact_id;
-
-    const { error: upsertError } = await supabase
-      .from("emergency_contacts")
-      .upsert({
-        contact_id: contactId,
+    if (existingEC) {
+      await supabase
+        .from("emergency_contacts")
+        .update({
+          name,
+          phone_number: phone,
+          relationship,
+        })
+        .eq("contact_id", existingEC.contact_id);
+    } else {
+      await supabase.from("emergency_contacts").insert({
         patient_id: patientId,
-        name: emergencyContactInfo.emergencyContactName as string,
-        phone_number: emergencyContactInfo.emergencyContactPhone,
-        relationship: emergencyContactInfo.emergencyContactRelationship,
+        name,
+        phone_number: phone,
+        relationship,
       });
-
-    if (upsertError) throw upsertError;
+    }
 
     return this.getPatientDetails(patientId);
   }

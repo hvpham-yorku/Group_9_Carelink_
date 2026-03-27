@@ -1,8 +1,8 @@
 import type {
   AllPatientInfo,
-  PatientBasicInfo,
   PatientContactInfo,
   PatientMedicalInfo,
+  PatientConditions,
   PatientEmergencyContact,
   PatientInsuranceInfo,
   PatientPhysicianInfo,
@@ -23,15 +23,6 @@ export class StubPatientRepo implements PatientRepo {
   /**
    * Update Methods for Patient Fields -----------------------------
    */
-  async updatePatientBasicInfo(
-    patientId: string,
-    updates: Partial<PatientBasicInfo>,
-  ): Promise<AllPatientInfo> {
-    const patient = await this.getPatientDetails(patientId);
-    const updatedPatient = { ...patient, ...updates };
-    return updatedPatient;
-  }
-
   async updatePatientContactInfo(
     patientId: string,
     contactInfo: Partial<PatientContactInfo>,
@@ -47,6 +38,15 @@ export class StubPatientRepo implements PatientRepo {
   ): Promise<AllPatientInfo> {
     const patient = await this.getPatientDetails(patientId);
     const updatedPatient = { ...patient, ...medicalInfo };
+    return updatedPatient;
+  }
+
+  async updatePatientConditions(
+    patientId: string,
+    conditions: Partial<PatientConditions>,
+  ): Promise<AllPatientInfo> {
+    const patient = await this.getPatientDetails(patientId);
+    const updatedPatient = { ...patient, ...conditions };
     return updatedPatient;
   }
 
