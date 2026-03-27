@@ -9,6 +9,7 @@ import type { AllPatientInfo } from "../types/patient";
 import type { Note } from "../types/note";
 import type { Task, TaskLogEntry } from "../types/task";
 import type { Medication } from "../types/medication";
+import type { Profile } from "../types/profile";
 
 // patient ids
 const patientId1 = crypto.randomUUID();
@@ -281,5 +282,27 @@ export let medications: Medication[] = [
     warnings: "May cause stomach upset",
     isActive: false,
     scheduledAt: [new Date().toISOString()],
+  },
+];
+
+/*
+  Profile Related Data
+*/
+export let profiles: Profile[] = [
+  {
+    caregiverId: caregiverId1,
+    firstName: "Alice",
+    lastName: "Johnson",
+    email: "alice.johnson@example.com",
+    phoneNumber: "(555) 123-4567",
+    jobTitle: "Nurse",
+  },
+  {
+    caregiverId: caregiverId2,
+    firstName: "Bob",
+    lastName: "Williams",
+    email: "bob.williams@example.com",
+    phoneNumber: "(555) 987-6543",
+    jobTitle: "Caregiver",
   },
 ];
