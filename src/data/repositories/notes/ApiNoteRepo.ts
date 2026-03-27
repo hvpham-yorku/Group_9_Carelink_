@@ -119,7 +119,13 @@ export class ApiNoteRepo implements NoteRepo {
     const { data, error } = await supabase
       .from("notes")
       .update({
-        ...updates,
+        patient_id: updates.patientId,
+        caregiver_id: updates.caregiverId,
+        team_id: updates.careTeamId,
+        category_id: updates.categoryId ?? "",
+        title: updates.title,
+        description: updates.description,
+        is_urgent: updates.isUrgent ?? false,
         updated_at: new Date().toISOString(),
       })
       .eq("note_id", noteId)
