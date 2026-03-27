@@ -73,13 +73,13 @@ const SideBar = ({ username }: SideBarProps) => {
 
             <li className="nav-item">
               <NavLink to="/task-manager" className={navLinkClass}>
-                Task Manager
+                Tasks
               </NavLink>
             </li>
 
             <li className="nav-item">
               <NavLink to="/medication-tracker" className={navLinkClass}>
-                Medication Tracker
+                Medications
               </NavLink>
             </li>
 
@@ -91,7 +91,7 @@ const SideBar = ({ username }: SideBarProps) => {
 
             <li className="nav-item">
               <NavLink to="/teams" className={navLinkClass}>
-                Care Team
+                 Team
               </NavLink>
             </li>
 
@@ -110,7 +110,7 @@ const SideBar = ({ username }: SideBarProps) => {
                   color: "#6B7280",
                 }}
               >
-                Active Patient
+                 Patient
               </span>
 
               <div className="dropdown">
@@ -185,7 +185,7 @@ const SideBar = ({ username }: SideBarProps) => {
             <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0">
               <li>
                 <NavLink className="dropdown-item" to="/accountsettings">
-                  Account Settings
+                   Settings
                 </NavLink>
               </li>
               <li>
