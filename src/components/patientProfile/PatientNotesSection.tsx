@@ -12,6 +12,7 @@ interface Props {
   onCancel: () => void;
   onSave: () => void;
   onChange: (field: keyof AllPatientInfo, value: string) => void;
+  onViewNotes: () => void;
 }
 
 const PatientNotesSection = ({
@@ -23,6 +24,7 @@ const PatientNotesSection = ({
   onCancel,
   onSave,
   onChange,
+  onViewNotes,
 }: Props) => {
   const displayNotes =
     patient.careNotes?.trim() || "No care notes or preferences added.";
@@ -32,23 +34,29 @@ const PatientNotesSection = ({
     <CustomSection
       title="Care Notes & Preferences"
       rightAction={
-        isEditing ? (
-          <div className="d-flex gap-2">
-            <Button color="outline-secondary" onClick={onCancel}>
-              <X size={16} className="me-1" />
-              Cancel
+        <div className="d-flex gap-2">
+          {isEditing ? (
+            <>
+              <Button color="outline-secondary" onClick={onCancel}>
+                <X size={16} className="me-1" />
+                Cancel
+              </Button>
+              <Button color="primary" onClick={onSave}>
+                <Save size={16} className="me-1" />
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+            </>
+          ) : (
+            <Button color="outline-primary" onClick={onEdit}>
+              <Edit2 size={16} className="me-1" />
+              Edit
             </Button>
-            <Button color="primary" onClick={onSave}>
-              <Save size={16} className="me-1" />
-              {isSaving ? "Saving..." : "Save"}
-            </Button>
-          </div>
-        ) : (
-          <Button color="outline-primary" onClick={onEdit}>
-            <Edit2 size={16} className="me-1" />
-            Edit
+          )}
+
+          <Button color="outline-secondary" onClick={onViewNotes}>
+            View Notes
           </Button>
-        )
+        </div>
       }
     >
       <div

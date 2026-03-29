@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
@@ -29,6 +30,7 @@ type EditableSection =
 
 const PatientProfile = () => {
   const { selectedPatientId } = usePatient();
+  const navigate = useNavigate();
 
   const [patient, setPatient] = useState<AllPatientInfo | null>(null);
   const [draftPatient, setDraftPatient] = useState<AllPatientInfo | null>(null);
@@ -338,6 +340,7 @@ const PatientProfile = () => {
             onCancel={cancelEditing}
             onSave={() => saveSection("notes")}
             onChange={handleFieldChange}
+            onViewNotes={() => navigate("/notes")}
           />
         </div>
       </div>
