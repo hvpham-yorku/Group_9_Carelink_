@@ -90,12 +90,16 @@ const MedicationTracker = () => {
     }
   };
 
+  const clearMedicationState = () => {
+    setMedications([]);
+    setArchivedMedications([]);
+    setSelectedMedicationId(null);
+  };
+  
   // Reload medications whenever the selected patient changes
   useEffect(() => {
     if (!selectedPatientId) {
-      setMedications([]);
-      setArchivedMedications([]);
-      setSelectedMedicationId(null);
+      clearMedicationState();
       return;
     }
 
