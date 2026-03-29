@@ -171,6 +171,30 @@ Actual Time Spent: 4 hours
 
 ### Adeena Ahmed
 
+Login Page:
+
+Implemented 4 new features for the Login page: show password toggle button, forgot password link, caps lock detection and loading bar.
+
+Estimated Time: 7 hours
+
+Actual Time Spent: 4 hours
+
+Account Settings Page:
+
+Created and developed the frontend of the Account Settings Page. It includes fields for the first name, last name, password, username, email and phone number. It also has a header, profile summary section, personal details section, contact & role section and danger zone section with a delete account button.
+
+Estimated Time : 7 hours
+
+Actual Time Spent: 4 hours
+
+Testing (Unit & Integration Testing):
+
+Implemented unit and integration testing for both the Login page and Account Settings page using the data.ts file and stub data.
+
+Estimated Time: 4 hours
+
+Actual Time spent: 14 hours
+
 ### Neharika Sharma
 
 
