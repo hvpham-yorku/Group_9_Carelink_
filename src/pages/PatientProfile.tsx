@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Top banner components
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 
+// Patient profile sections
 import PatientContactSection from "../components/patientProfile/PatientContactSection";
 import PatientMedicalSection from "../components/patientProfile/PatientMedicalSection";
 import PatientInsuranceSection from "../components/patientProfile/PatientInsuranceSection";
@@ -12,12 +14,14 @@ import PatientNotesSection from "../components/patientProfile/PatientNotesSectio
 import PatientConditionsSection from "../components/patientProfile/PatientConditionsSection";
 import EmergencyContactsSection from "../components/patientProfile/EmergencyContactsSection";
 
+// Types + data/context
 import type { AllPatientInfo } from "../types/patient";
 import { usePatient } from "../contexts/patient/usePatient";
 import { repositories } from "../data";
 
 const patientRepo = repositories.patient;
 
+// Tracks which section is currently being edited or saved
 type EditableSection =
   | "contact"
   | "medical"
@@ -25,18 +29,22 @@ type EditableSection =
   | "physician"
   | "conditions"
   | "emergency"
+  | "notes"
   | null;
 
 const PatientProfile = () => {
+  // Selected patient from context
   const { selectedPatientId } = usePatient();
   const navigate = useNavigate();
 
+  // Main page state
   const [patient, setPatient] = useState<AllPatientInfo | null>(null);
   const [draftPatient, setDraftPatient] = useState<AllPatientInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [savingSection, setSavingSection] = useState<EditableSection>(null);
   const [editingSection, setEditingSection] = useState<EditableSection>(null);
 
+  // Fetch patient details whenever the selected patient changes
   useEffect(() => {
     if (!selectedPatientId) {
       setPatient(null);
@@ -62,17 +70,20 @@ const PatientProfile = () => {
     fetchPatient();
   }, [selectedPatientId]);
 
+  // Start editing one section at a time
   const startEditing = (section: EditableSection) => {
     if (!patient) return;
     setDraftPatient({ ...patient });
     setEditingSection(section);
   };
 
+  // Cancel edits and reset draft back to saved patient data
   const cancelEditing = () => {
     setDraftPatient(patient ? { ...patient } : null);
     setEditingSection(null);
   };
 
+  // Save only the section currently being edited
   const saveSection = async (section: EditableSection) => {
     if (!patient || !draftPatient || !section) return;
 
@@ -138,10 +149,15 @@ const PatientProfile = () => {
               draftPatient.emergencyContactRelationship,
           },
         );
+      } else if (section === "notes") {
+        updated = await patientRepo.updatePatientNotes(patient.patientId, {
+          careNotes: draftPatient.careNotes,
+        });
       } else {
         return;
       }
 
+      // Update both saved data and draft after a successful save
       setPatient(updated);
       setDraftPatient(updated);
       setEditingSection(null);
@@ -162,6 +178,7 @@ const PatientProfile = () => {
     }
   };
 
+  // Generic field change handler for text-based fields
   const handleFieldChange = (field: keyof AllPatientInfo, value: string) => {
     if (!draftPatient) return;
 
@@ -171,6 +188,7 @@ const PatientProfile = () => {
     });
   };
 
+  // Convert comma-separated allergies into an array
   const handleAllergyChange = (value: string) => {
     if (!draftPatient) return;
 
@@ -185,6 +203,7 @@ const PatientProfile = () => {
     });
   };
 
+  // Update one condition in the conditions list
   const handleConditionChange = (index: number, value: string) => {
     if (!draftPatient) return;
 
@@ -197,6 +216,7 @@ const PatientProfile = () => {
     });
   };
 
+  // Add a new empty condition field
   const addCondition = () => {
     if (!draftPatient) return;
 
@@ -206,6 +226,7 @@ const PatientProfile = () => {
     });
   };
 
+  // Remove a condition by index
   const removeCondition = (index: number) => {
     if (!draftPatient) return;
 
@@ -218,6 +239,7 @@ const PatientProfile = () => {
     });
   };
 
+  // Loading state while patient data is being fetched
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -227,6 +249,7 @@ const PatientProfile = () => {
     );
   }
 
+  // Empty state if no patient is selected
   if (!patient || !draftPatient) {
     return (
       <div className="container py-4 text-center text-muted">
@@ -235,6 +258,7 @@ const PatientProfile = () => {
     );
   }
 
+  // While editing some sections, show draft values in the top banner
   const bannerPatient =
     editingSection === "medical" ||
     editingSection === "conditions" ||
@@ -244,16 +268,19 @@ const PatientProfile = () => {
 
   return (
     <div className="container py-4">
+      {/* Page header */}
       <CustomTitleBanner
         title="Patient Profile"
         subheader="View and manage patient details"
       />
 
+      {/* Top patient summary banner */}
       <div className="mb-4">
         <PatientInfoBanner patient={bannerPatient} />
       </div>
 
       <div className="row g-4">
+        {/* Left column */}
         <div className="col-lg-4">
           <PatientContactSection
             patient={patient}
@@ -290,6 +317,7 @@ const PatientProfile = () => {
           />
         </div>
 
+        {/* Right column */}
         <div className="col-lg-8">
           <EmergencyContactsSection
             patient={patient}
@@ -326,7 +354,17 @@ const PatientProfile = () => {
             onRemoveCondition={removeCondition}
           />
 
-          <PatientNotesSection onViewNotes={() => navigate("/notes")} />
+          <PatientNotesSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "notes"}
+            isSaving={savingSection === "notes"}
+            onEdit={() => startEditing("notes")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("notes")}
+            onChange={handleFieldChange}
+            onViewNotes={() => navigate("/notes")}
+          />
         </div>
       </div>
     </div>

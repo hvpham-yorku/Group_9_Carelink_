@@ -8,6 +8,7 @@ import {
   Archive,
 } from "lucide-react";
 
+// Medication-specific UI components
 import MedicationScheduleItem from "../components/medication/MedicationScheduleItem";
 import ActiveMedicationCard from "../components/medication/ActiveMedicationCard";
 import MedicationDetailsCard from "../components/medication/MedicationDetailsCard";
@@ -15,24 +16,30 @@ import MedicationFormModal from "../components/medication/MedicationFormModal";
 import ArchivedMedicationsModal from "../components/medication/ArchivedMedicationsModal";
 import AdherenceOverviewChart from "../components/medication/AdherenceOverviewChart";
 
+// Shared UI components
 import CustomSection from "../components/ui/CustomSection";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import StatCard from "../components/ui/StatCard";
 import Button from "../components/ui/Button";
 
+// Data + app context
 import { repositories } from "../data";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 import type { Medication } from "../types/medication";
 
 const MedicationTracker = () => {
+  // Current logged-in user
   const { user } = useAuth();
+
+  // Current selected patient + care team context
   const {
     selectedPatientId,
     careTeamId,
     loading: contextLoading,
   } = usePatient();
 
+  // Main page state
   const [medications, setMedications] = useState<Medication[]>([]);
   const [archivedMedications, setArchivedMedications] = useState<Medication[]>(
     [],
@@ -42,13 +49,16 @@ const MedicationTracker = () => {
     string | null
   >(null);
 
+  // Modal state for add/edit form
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMedication, setEditingMedication] = useState<Medication | null>(
     null,
   );
 
+  // Modal state for archived medications
   const [isArchivedModalOpen, setIsArchivedModalOpen] = useState(false);
 
+  // Fetch both active and archived medications for the selected patient
   const fetchMedications = async (patientId: string) => {
     setLoadingMeds(true);
 
@@ -61,6 +71,7 @@ const MedicationTracker = () => {
       setMedications(active);
       setArchivedMedications(archived);
 
+      // Keep the selected medication valid after refresh
       setSelectedMedicationId((currentSelectedId) => {
         if (!active.length) return null;
 
@@ -79,6 +90,7 @@ const MedicationTracker = () => {
     }
   };
 
+  // Reload medications whenever the selected patient changes
   useEffect(() => {
     if (!selectedPatientId) {
       setMedications([]);
@@ -90,6 +102,7 @@ const MedicationTracker = () => {
     fetchMedications(selectedPatientId);
   }, [selectedPatientId]);
 
+  // Mark medication as taken / untaken, then refresh the list
   const handleToggle = async (medicationId: string, isCompleted: boolean) => {
     if (!user) return;
 
@@ -108,11 +121,13 @@ const MedicationTracker = () => {
     }
   };
 
+  // Open modal in "add" mode
   const handleAddMedication = () => {
     setEditingMedication(null);
     setIsModalOpen(true);
   };
 
+  // Open modal in "edit" mode for the selected medication
   const handleEditMedication = (medicationId: string) => {
     const medicationToEdit =
       medications.find((med) => med.medicationId === medicationId) ?? null;
@@ -121,11 +136,13 @@ const MedicationTracker = () => {
     setIsModalOpen(true);
   };
 
+  // Close add/edit modal and clear editing state
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingMedication(null);
   };
 
+  // Save either a new medication or updates to an existing one
   const handleSaveMedication = async (data: {
     name: string;
     dosage: string;
@@ -175,6 +192,7 @@ const MedicationTracker = () => {
     }
   };
 
+  // Archive the currently selected medication
   const handleArchiveMedication = async () => {
     if (!selectedMedication || !selectedPatientId) return;
 
@@ -195,10 +213,12 @@ const MedicationTracker = () => {
     }
   };
 
+  // Derived lists used by the page
   const activeMedications = useMemo(() => medications, [medications]);
 
   const todaySchedule = useMemo(() => activeMedications, [activeMedications]);
 
+  // Summary stats for cards + section headers
   const takenCount = activeMedications.filter(
     (p) => p.medicationLog?.isCompleted,
   ).length;
@@ -208,6 +228,7 @@ const MedicationTracker = () => {
   const adherencePercentage =
     totalCount > 0 ? Math.round((takenCount / totalCount) * 100) : 0;
 
+  // Currently selected medication for the details panel
   const selectedMedication = useMemo(() => {
     return (
       activeMedications.find(
@@ -216,6 +237,7 @@ const MedicationTracker = () => {
     );
   }, [activeMedications, selectedMedicationId]);
 
+  // Build 7-day adherence chart data
   const adherenceChartData = useMemo(() => {
     const today = new Date();
 
@@ -247,10 +269,12 @@ const MedicationTracker = () => {
     });
   }, [takenCount, totalCount]);
 
+  // Overall loading state combines patient context + medication fetch state
   const isLoading = contextLoading || loadingMeds;
 
   return (
     <div className="container py-3">
+      {/* Page title + top action buttons */}
       <CustomTitleBanner
         title="Medication Tracker"
         subheader="Track today's medication schedule for your patient"
@@ -274,12 +298,14 @@ const MedicationTracker = () => {
         </div>
       </CustomTitleBanner>
 
+      {/* Empty state when no patient is selected */}
       {!selectedPatientId && !contextLoading ? (
         <div className="alert alert-info rounded-4">
           No patient selected. Please select a patient from the sidebar.
         </div>
       ) : (
         <>
+          {/* Summary stat cards */}
           <div className="row g-3 mb-4">
             <div className="col-12 col-md-6 col-xl-3">
               <StatCard
@@ -318,6 +344,7 @@ const MedicationTracker = () => {
             </div>
           </div>
 
+          {/* Weekly adherence chart */}
           <CustomSection
             title="7-Day Adherence Overview"
             subheader="Daily medication completion trends"
@@ -326,6 +353,7 @@ const MedicationTracker = () => {
           </CustomSection>
 
           <div className="row g-3 mt-1">
+            {/* Left column: today's schedule */}
             <div className="col-12 col-xl-7">
               <CustomSection
                 title="Today's Medication Schedule"
@@ -349,6 +377,7 @@ const MedicationTracker = () => {
               </CustomSection>
             </div>
 
+            {/* Right column: active medications + selected medication details */}
             <div className="col-12 col-xl-5">
               <div className="d-flex flex-column gap-3">
                 <CustomSection
@@ -404,6 +433,7 @@ const MedicationTracker = () => {
         </>
       )}
 
+      {/* Add/edit medication modal */}
       <MedicationFormModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -424,6 +454,7 @@ const MedicationTracker = () => {
         }
       />
 
+      {/* Archived medications modal */}
       <ArchivedMedicationsModal
         isOpen={isArchivedModalOpen}
         onClose={() => setIsArchivedModalOpen(false)}

@@ -6,6 +6,7 @@ import type {
   PatientEmergencyContact,
   PatientInsuranceInfo,
   PatientPhysicianInfo,
+  PatientNotesInfo,
 } from "../../../types/patient";
 
 import type { PatientRepo } from "./PatientRepo";
@@ -20,16 +21,12 @@ export class StubPatientRepo implements PatientRepo {
     return patient;
   }
 
-  /**
-   * Update Methods for Patient Fields -----------------------------
-   */
   async updatePatientContactInfo(
     patientId: string,
     contactInfo: Partial<PatientContactInfo>,
   ): Promise<AllPatientInfo> {
     const patient = await this.getPatientDetails(patientId);
-    const updatedPatient = { ...patient, ...contactInfo };
-    return updatedPatient;
+    return { ...patient, ...contactInfo };
   }
 
   async updatePatientMedicalInfo(
@@ -37,8 +34,7 @@ export class StubPatientRepo implements PatientRepo {
     medicalInfo: Partial<PatientMedicalInfo>,
   ): Promise<AllPatientInfo> {
     const patient = await this.getPatientDetails(patientId);
-    const updatedPatient = { ...patient, ...medicalInfo };
-    return updatedPatient;
+    return { ...patient, ...medicalInfo };
   }
 
   async updatePatientConditions(
@@ -46,8 +42,7 @@ export class StubPatientRepo implements PatientRepo {
     conditions: Partial<PatientConditions>,
   ): Promise<AllPatientInfo> {
     const patient = await this.getPatientDetails(patientId);
-    const updatedPatient = { ...patient, ...conditions };
-    return updatedPatient;
+    return { ...patient, ...conditions };
   }
 
   async updatePatientEmergencyContact(
@@ -55,8 +50,7 @@ export class StubPatientRepo implements PatientRepo {
     emergencyContactInfo: Partial<PatientEmergencyContact>,
   ): Promise<AllPatientInfo> {
     const patient = await this.getPatientDetails(patientId);
-    const updatedPatient = { ...patient, ...emergencyContactInfo };
-    return updatedPatient;
+    return { ...patient, ...emergencyContactInfo };
   }
 
   async updatePatientInsuranceInfo(
@@ -64,8 +58,7 @@ export class StubPatientRepo implements PatientRepo {
     insuranceInfo: Partial<PatientInsuranceInfo>,
   ): Promise<AllPatientInfo> {
     const patient = await this.getPatientDetails(patientId);
-    const updatedPatient = { ...patient, ...insuranceInfo };
-    return updatedPatient;
+    return { ...patient, ...insuranceInfo };
   }
 
   async updatePatientPhysicianInfo(
@@ -73,7 +66,14 @@ export class StubPatientRepo implements PatientRepo {
     physicianInfo: Partial<PatientPhysicianInfo>,
   ): Promise<AllPatientInfo> {
     const patient = await this.getPatientDetails(patientId);
-    const updatedPatient = { ...patient, ...physicianInfo };
-    return updatedPatient;
+    return { ...patient, ...physicianInfo };
+  }
+
+  async updatePatientNotes(
+    patientId: string,
+    notesInfo: Partial<PatientNotesInfo>,
+  ): Promise<AllPatientInfo> {
+    const patient = await this.getPatientDetails(patientId);
+    return { ...patient, ...notesInfo };
   }
 }

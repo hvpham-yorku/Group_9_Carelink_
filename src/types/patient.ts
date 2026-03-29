@@ -14,7 +14,6 @@ export interface PatientMedicalInfo {
   height?: string | null;
   weight?: string | null;
   dietaryRequirements?: string | null;
-
   allergies?: string[];
 }
 
@@ -41,10 +40,15 @@ export interface PatientInsuranceInfo {
   groupNumber?: string | null;
 }
 
+export interface PatientNotesInfo {
+  careNotes?: string | null;
+}
+
 // Full patient composed from all sections
 export type AllPatientInfo = PatientContactInfo &
   PatientMedicalInfo &
   PatientConditions &
   PatientEmergencyContact &
   PatientPhysicianInfo &
-  PatientInsuranceInfo;
+  PatientInsuranceInfo &
+  PatientNotesInfo;
