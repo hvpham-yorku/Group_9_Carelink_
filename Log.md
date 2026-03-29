@@ -195,6 +195,19 @@ Estimated Time: 4 hours
 
 Actual Time spent: 14 hours
 
+Assigned User Stories:
+
+- As a user, I want to be able to see my information that is being used on the website
+- As a user I want to be able to see the password I typed or hide it so that it's not visible
+- As a user I want an option to sign in, in case I forget my password
+- As a user I want to see when Caps Lock is on when I am typing the password
+- As a user I want to see a loading bar when the next page is loading after I click the "Login" button
+
+Assigned tasks:
+
+- Worked on the Account Settings page Frontend
+- Worked on adding new features to the Login page
+
 ### Neharika Sharma
 
 
