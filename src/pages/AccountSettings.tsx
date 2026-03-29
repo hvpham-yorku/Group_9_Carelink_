@@ -135,13 +135,12 @@ export default function AccountSettings() {
                                         value={formData.password} 
                                         onChange={handleChange} 
                                     />
-                                    <button 
-                                        className="btn btn-white border border-start-0 text-muted" 
+                                    <button
+                                        data-testid="toggle-password"
+                                        className="btn btn-white border border-start-0 text-muted"
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
+                                        ></button>
                                 </div>
                                 <p className="text-muted small mt-2 mb-0">Password must be at least 8 characters long.</p>
                             </div>
