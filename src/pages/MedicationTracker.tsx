@@ -20,92 +20,60 @@ import CustomTitleBanner from "../components/ui/CustomTitleBanner";
 import StatCard from "../components/ui/StatCard";
 import Button from "../components/ui/Button";
 
-import { medicationService } from "../services/medicationService";
-import { teamService } from "../services/teamService";
+import { repositories } from "../data";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
-import type { MedicationScheduleItemProps } from "../types/Types";
-
-type Prescription = Omit<MedicationScheduleItemProps, "onToggle"> & {
-  purpose?: string;
-  instructions?: string;
-  warnings?: string;
-  prescribedBy?: string;
-  startDate?: string;
-};
+import type { Medication } from "../types/medication";
 
 const MedicationTracker = () => {
   const { user } = useAuth();
-  const { selectedPatientId, loading: contextLoading } = usePatient();
+  const {
+    selectedPatientId,
+    careTeamId,
+    loading: contextLoading,
+  } = usePatient();
 
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [archivedMedications, setArchivedMedications] = useState<Medication[]>(
+    [],
+  );
   const [loadingMeds, setLoadingMeds] = useState(false);
-  const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<
+  const [selectedMedicationId, setSelectedMedicationId] = useState<
     string | null
   >(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMedication, setEditingMedication] =
-    useState<Prescription | null>(null);
+  const [editingMedication, setEditingMedication] = useState<Medication | null>(
+    null,
+  );
 
   const [isArchivedModalOpen, setIsArchivedModalOpen] = useState(false);
 
-  const fetchPrescriptions = async (patientId: string) => {
+  const fetchMedications = async (patientId: string) => {
     setLoadingMeds(true);
 
     try {
-      const data = await medicationService.getPrescriptionsByPatient(patientId);
+      const [active, archived] = await Promise.all([
+        repositories.medication.getMedicationsByPatient(patientId),
+        repositories.medication.getArchivedMedications(patientId),
+      ]);
 
-      const mapped: Prescription[] = (data ?? []).map((row: any) => {
-        const activeLog =
-          (row.medicationLogs as any[])?.find(
-            (l: any) => l.isCompleted === true,
-          ) ?? null;
+      setMedications(active);
+      setArchivedMedications(archived);
 
-        return {
-          prescriptionId: row.prescriptionId,
-          careTeamId: row.careTeamId ?? "",
-          patientId: row.patientId,
-          name: row.name ?? "",
-          dosage: row.dosage ?? "",
-          frequency: row.frequency ?? "",
-          scheduledAt: row.scheduledAt ?? "",
-          isActive: row.isActive ?? true,
-          purpose: row.purpose ?? "",
-          instructions: row.instructions ?? "",
-          warnings: row.warnings ?? "",
-          prescribedBy: row.prescribedBy ?? "",
-          startDate: row.startDate ?? "",
-          medicationLog: activeLog
-            ? {
-                caregiverId: activeLog.caregiverId,
-                takenAt: activeLog.takenAt,
-                isCompleted: true,
-                firstName: activeLog.caregivers?.firstName ?? "",
-                lastName: activeLog.caregivers?.lastName ?? "",
-              }
-            : undefined,
-        };
-      });
+      setSelectedMedicationId((currentSelectedId) => {
+        if (!active.length) return null;
 
-      setPrescriptions(mapped);
-
-      setSelectedPrescriptionId((currentSelectedId) => {
-        if (!mapped.length) return null;
-
-        const activeMapped = mapped.filter((item) => item.isActive);
-        if (!activeMapped.length) return null;
-
-        const selectedStillExists = activeMapped.some(
-          (item) => item.prescriptionId === currentSelectedId,
+        const selectedStillExists = active.some(
+          (item) => item.medicationId === currentSelectedId,
         );
 
         if (selectedStillExists) return currentSelectedId;
 
-        return activeMapped[0].prescriptionId;
+        return active[0].medicationId;
       });
     } catch (err) {
-      console.error("Failed to load prescriptions:", err);
+      console.error("Failed to load medications:", err);
     } finally {
       setLoadingMeds(false);
     }
@@ -113,26 +81,27 @@ const MedicationTracker = () => {
 
   useEffect(() => {
     if (!selectedPatientId) {
-      setPrescriptions([]);
-      setSelectedPrescriptionId(null);
+      setMedications([]);
+      setArchivedMedications([]);
+      setSelectedMedicationId(null);
       return;
     }
 
-    fetchPrescriptions(selectedPatientId);
+    fetchMedications(selectedPatientId);
   }, [selectedPatientId]);
 
-  const handleToggle = async (prescriptionId: string, isCompleted: boolean) => {
+  const handleToggle = async (medicationId: string, isCompleted: boolean) => {
     if (!user) return;
 
     try {
       if (isCompleted) {
-        await medicationService.unmarkAsTaken(prescriptionId);
+        await repositories.medication.unmarkAsTaken(medicationId);
       } else {
-        await medicationService.markAsTaken(prescriptionId, user.id);
+        await repositories.medication.markAsTaken(medicationId, user.id);
       }
 
       if (selectedPatientId) {
-        await fetchPrescriptions(selectedPatientId);
+        await fetchMedications(selectedPatientId);
       }
     } catch (err) {
       console.error("Failed to toggle medication:", err);
@@ -144,10 +113,9 @@ const MedicationTracker = () => {
     setIsModalOpen(true);
   };
 
-  const handleEditMedication = (prescriptionId: string) => {
+  const handleEditMedication = (medicationId: string) => {
     const medicationToEdit =
-      prescriptions.find((med) => med.prescriptionId === prescriptionId) ??
-      null;
+      medications.find((med) => med.medicationId === medicationId) ?? null;
 
     setEditingMedication(medicationToEdit);
     setIsModalOpen(true);
@@ -158,36 +126,49 @@ const MedicationTracker = () => {
     setEditingMedication(null);
   };
 
-  const handleSaveMedication = async (data: any) => {
+  const handleSaveMedication = async (data: {
+    name: string;
+    dosage: string;
+    frequency: string;
+    scheduledAt: string[];
+    purpose?: string;
+    instructions?: string;
+    prescribedBy?: string;
+    warnings?: string;
+  }) => {
     if (!selectedPatientId) return;
 
     try {
       if (editingMedication) {
-        await medicationService.updatePrescription(
-          editingMedication.prescriptionId,
+        await repositories.medication.updateMedication(
+          editingMedication.medicationId,
           {
             name: data.name,
             dosage: data.dosage,
             frequency: data.frequency,
             scheduledAt: data.scheduledAt,
+            purpose: data.purpose,
+            instructions: data.instructions,
+            prescribedBy: data.prescribedBy,
+            warnings: data.warnings,
           },
         );
       } else {
-        const resolvedCareTeamId =
-          prescriptions[0]?.careTeamId ||
-          (await teamService.getCareTeamIdByPatient(selectedPatientId));
-
-        await medicationService.addPrescription({
+        await repositories.medication.addMedication({
           patientId: selectedPatientId,
-          careTeamId: resolvedCareTeamId,
+          careTeamId: medications[0]?.careTeamId ?? careTeamId ?? "",
           name: data.name,
           dosage: data.dosage,
           frequency: data.frequency,
           scheduledAt: data.scheduledAt,
+          purpose: data.purpose,
+          instructions: data.instructions,
+          prescribedBy: data.prescribedBy,
+          warnings: data.warnings,
         });
       }
 
-      await fetchPrescriptions(selectedPatientId);
+      await fetchMedications(selectedPatientId);
       handleCloseModal();
     } catch (err) {
       console.error("Failed to save medication:", err);
@@ -204,27 +185,19 @@ const MedicationTracker = () => {
     if (!confirmed) return;
 
     try {
-      await medicationService.archivePrescription(
-        selectedMedication.prescriptionId,
+      await repositories.medication.archiveMedication(
+        selectedMedication.medicationId,
       );
-      await fetchPrescriptions(selectedPatientId);
-      setSelectedPrescriptionId(null);
+      await fetchMedications(selectedPatientId);
+      setSelectedMedicationId(null);
     } catch (err) {
       console.error("Failed to archive medication:", err);
     }
   };
 
-  const activeMedications = useMemo(() => {
-    return prescriptions.filter((p) => p.isActive);
-  }, [prescriptions]);
+  const activeMedications = useMemo(() => medications, [medications]);
 
-  const archivedMedications = useMemo(() => {
-    return prescriptions.filter((p) => !p.isActive);
-  }, [prescriptions]);
-
-  const todaySchedule = useMemo(() => {
-    return activeMedications;
-  }, [activeMedications]);
+  const todaySchedule = useMemo(() => activeMedications, [activeMedications]);
 
   const takenCount = activeMedications.filter(
     (p) => p.medicationLog?.isCompleted,
@@ -238,10 +211,10 @@ const MedicationTracker = () => {
   const selectedMedication = useMemo(() => {
     return (
       activeMedications.find(
-        (item) => item.prescriptionId === selectedPrescriptionId,
+        (item) => item.medicationId === selectedMedicationId,
       ) ?? null
     );
-  }, [activeMedications, selectedPrescriptionId]);
+  }, [activeMedications, selectedMedicationId]);
 
   const adherenceChartData = useMemo(() => {
     const today = new Date();
@@ -346,11 +319,11 @@ const MedicationTracker = () => {
           </div>
 
           <CustomSection
-  title="7-Day Adherence Overview"
-  subheader="Daily medication completion trends"
->
-  <AdherenceOverviewChart data={adherenceChartData} />
-</CustomSection>
+            title="7-Day Adherence Overview"
+            subheader="Daily medication completion trends"
+          >
+            <AdherenceOverviewChart data={adherenceChartData} />
+          </CustomSection>
 
           <div className="row g-3 mt-1">
             <div className="col-12 col-xl-7">
@@ -367,7 +340,7 @@ const MedicationTracker = () => {
                 ) : (
                   todaySchedule.map((med) => (
                     <MedicationScheduleItem
-                      key={med.prescriptionId}
+                      key={med.medicationId}
                       {...med}
                       onToggle={handleToggle}
                     />
@@ -392,19 +365,17 @@ const MedicationTracker = () => {
                     <div className="d-flex flex-column gap-3">
                       {activeMedications.map((med) => (
                         <ActiveMedicationCard
-                          key={med.prescriptionId}
-                          name={med.name}
-                          dosage={med.dosage}
-                          frequency={med.frequency}
-                          isSelected={
-                            selectedPrescriptionId === med.prescriptionId
-                          }
+                          key={med.medicationId}
+                          name={med.name ?? ""}
+                          dosage={med.dosage ?? ""}
+                          frequency={med.frequency ?? undefined}
+                          isSelected={selectedMedicationId === med.medicationId}
                           isCompleted={!!med.medicationLog?.isCompleted}
                           onClick={() =>
-                            setSelectedPrescriptionId(med.prescriptionId)
+                            setSelectedMedicationId(med.medicationId)
                           }
                           onEdit={() =>
-                            handleEditMedication(med.prescriptionId)
+                            handleEditMedication(med.medicationId ?? "")
                           }
                         />
                       ))}
@@ -448,7 +419,6 @@ const MedicationTracker = () => {
                 instructions: editingMedication.instructions,
                 prescribedBy: editingMedication.prescribedBy,
                 warnings: editingMedication.warnings,
-                startDate: editingMedication.startDate,
               }
             : undefined
         }

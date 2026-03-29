@@ -1,0 +1,45 @@
+/**
+ * Patient Info Type Definition
+ */
+export interface PatientInfo {
+  patientId: string;
+  firstName: string;
+  lastName: string;
+  dob?: string;
+  gender?: string;
+  bloodType?: string;
+}
+
+/**
+ * Caregiver Info Type Definition
+ */
+export interface CaregiverInfo {
+  caregiverId: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  email?: string;
+  jobTitle?: string;
+  teamRole?: string | null; // new field ------------------------------
+  teamDateAssigned?: string; // new field ------------------------------
+}
+
+/**
+ * Caregiver Teams Type Definition
+ */
+export interface CaregiverTeam {
+  careTeamId: string;
+  caregivers: CaregiverInfo[];
+  patients: PatientInfo[];
+  teamName: string; // new field ------------------------------
+  joinCode: string;
+}
+
+/**
+ * Category Type Definition
+ */
+export interface Category {
+  categoryId: string;
+  name: string;
+  color?: string;
+}

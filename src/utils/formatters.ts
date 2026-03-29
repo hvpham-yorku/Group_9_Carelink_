@@ -5,7 +5,13 @@
 export const formatToTime = (dateString: string | null): string => {
   if (!dateString) return "";
 
-  const date = new Date(dateString);
+  // Handle time-only strings like "08:00:00" or "08:00"
+  const timeOnly = /^\d{1,2}:\d{2}(:\d{2})?$/.test(dateString);
+  const date = timeOnly
+    ? new Date(`1970-01-01T${dateString}`)
+    : new Date(dateString);
+
+  if (isNaN(date.getTime())) return dateString;
 
   return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
@@ -36,6 +42,19 @@ export const formatToDateTimeLocal = (dateString: string | null): string => {
   }).format(date);
 
   return `${datePart} ${timePart}`;
+};
+
+/**
+ * Converts any parseable date string to the "yyyy-MM-ddThh:mm" format
+ * required by <input type="datetime-local">.
+ * Example: "2026-03-20 3:21 PM" -> "2026-03-20T15:21"
+ */
+export const toDateTimeInputValue = (dateString: string | null): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "";
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
 /**

@@ -13,6 +13,7 @@ type Props = {
   handleDelete: (id: string) => void;
   formatDateTime: (ts: string) => string;
   formatDayLabel: (key: string) => string;
+  isUrgentMode: boolean;
 };
 
 export default function NoteList({
@@ -22,6 +23,7 @@ export default function NoteList({
   handleDelete,
   formatDateTime,
   formatDayLabel,
+  isUrgentMode,
 }: Props) {
   return (
     <div className="mb-3">
@@ -41,6 +43,7 @@ export default function NoteList({
               onSelect={() => setSelectedId(note.noteId)}
               onDelete={() => handleDelete(note.noteId)}
               formatDateTime={formatDateTime}
+              isUrgentMode={isUrgentMode}
             />
           );
         })}
