@@ -10,7 +10,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { Task } from "../../../src/types/Types";
+import type { Task } from "../../../src/types/task";
 import TaskEdit from "../../../src/components/task/TaskEdit";
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
@@ -23,7 +23,6 @@ const CATEGORIES = [
 const BASE_TASK: Task = {
   taskId: "task-1",
   patientId: "patient-1",
-  careTeamId: "team-1",
   categoryId: "cat-1",
   title: "Take Medication",
   description: "Administer morning pills",
@@ -336,9 +335,7 @@ describe("TaskEdit – cancel button", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("button", { name: /cancel/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
   });
 
   it("hides the Cancel button when onCancel is omitted", () => {
@@ -419,9 +416,7 @@ describe("TaskEdit – completion details panel", () => {
       />,
     );
 
-    expect(
-      screen.getByText(/latest completion details/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/latest completion details/i)).toBeInTheDocument();
   });
 
   it("displays the caregiver's first name in the completion panel", () => {
@@ -434,7 +429,7 @@ describe("TaskEdit – completion details panel", () => {
       />,
     );
 
-    expect(screen.getByText("Alice")).toBeInTheDocument();
+    expect(screen.getByText("Alice Smith")).toBeInTheDocument();
   });
 
   it("shows 'Not specified' when the log has no caregiver name", () => {
