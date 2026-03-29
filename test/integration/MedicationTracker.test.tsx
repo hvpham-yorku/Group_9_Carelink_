@@ -4,48 +4,21 @@
 
 import "@testing-library/jest-dom/vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-// ✅ DEFINE MOCKS INSIDE vi.mock (IMPORTANT)
-
-vi.mock("../../src/data", () => {
-  const mockGetMeds = vi.fn();
-  const mockGetArchived = vi.fn();
-  const mockMark = vi.fn();
-  const mockUnmark = vi.fn();
-  const mockAdd = vi.fn();
-  const mockUpdate = vi.fn();
-  const mockArchive = vi.fn();
-
-  return {
-    repositories: {
-      medication: {
-        getMedicationsByPatient: mockGetMeds,
-        getArchivedMedications: mockGetArchived,
-        markAsTaken: mockMark,
-        unmarkAsTaken: mockUnmark,
-        addMedication: mockAdd,
-        updateMedication: mockUpdate,
-        archiveMedication: mockArchive,
-      },
-    },
-
-    // 👇 expose mocks so tests can use them
-    __mocks__: {
-      mockGetMeds,
-      mockGetArchived,
-      mockMark,
-      mockUnmark,
-      mockAdd,
-      mockUpdate,
-      mockArchive,
-    },
-  };
-});
+const repoMocks = vi.hoisted(() => ({
+  mockGetMeds: vi.fn(),
+  mockGetArchived: vi.fn(),
+  mockMark: vi.fn(),
+  mockUnmark: vi.fn(),
+  mockAdd: vi.fn(),
+  mockUpdate: vi.fn(),
+  mockArchive: vi.fn(),
+}));
 
 vi.mock("../../src/hooks/useAuth", () => ({
   useAuth: () => ({
-    user: { id: "user-1" },
+    user: { id: "caregiver-1" },
   }),
 }));
 
@@ -57,59 +30,97 @@ vi.mock("../../src/contexts/patient/usePatient", () => ({
   }),
 }));
 
-// import AFTER mocks
+vi.mock("../../src/data", () => ({
+  repositories: {
+    medication: {
+      getMedicationsByPatient: repoMocks.mockGetMeds,
+      getArchivedMedications: repoMocks.mockGetArchived,
+      markAsTaken: repoMocks.mockMark,
+      unmarkAsTaken: repoMocks.mockUnmark,
+      addMedication: repoMocks.mockAdd,
+      updateMedication: repoMocks.mockUpdate,
+      archiveMedication: repoMocks.mockArchive,
+    },
+  },
+}));
+
 import MedicationTracker from "../../src/pages/MedicationTracker";
-import { repositories } from "../../src/data";
 
-// grab mocks
-const {
-  mockGetMeds,
-  mockGetArchived,
-  mockMark,
-  mockUnmark,
-  mockAdd,
-  mockUpdate,
-  mockArchive,
-} = (repositories as any).__mocks__;
-
-// ---- MOCK DATA ----
-const mockMedication = {
+const activeMedication = {
   medicationId: "med-1",
   careTeamId: "team-1",
   patientId: "patient-1",
-  name: "Aspirin",
-  dosage: "500mg",
-  frequency: "Daily",
-  purpose: "Pain relief",
-  instructions: "Take with food",
+  name: "Metformin",
+  dosage: "500 mg",
+  frequency: "Twice a day",
+  purpose: "Manage blood sugar levels",
+  instructions: "Take with meals",
   prescribedBy: "Dr. Smith",
-  warnings: "Do not exceed dosage",
-  scheduledAt: ["2099-01-01T08:00:00"],
+  warnings: "May cause dizziness",
+  isActive: true,
+  scheduledAt: ["2099-01-01T08:00:00", "2099-01-01T20:00:00"],
+};
+
+const completedMedication = {
+  medicationId: "med-2",
+  careTeamId: "team-1",
+  patientId: "patient-1",
+  name: "Aspirin",
+  dosage: "100 mg",
+  frequency: "Once a day",
+  purpose: "Prevent blood clots",
+  instructions: "Take with water",
+  prescribedBy: "Dr. Brown",
+  warnings: "May cause stomach upset",
+  isActive: true,
+  scheduledAt: ["2099-01-01T09:00:00"],
   medicationLog: {
-    caregiverId: "c1",
-    firstName: "John",
-    lastName: "Doe",
-    takenAt: "2026-01-01T08:00:00",
-    isCompleted: false,
+    caregiverId: "caregiver-1",
+    firstName: "Alice",
+    lastName: "Johnson",
+    takenAt: "2026-03-13T09:00:00",
+    isCompleted: true,
   },
+};
+
+const archivedMedication = {
+  medicationId: "med-3",
+  careTeamId: "team-1",
+  patientId: "patient-1",
+  name: "Lisinopril",
+  dosage: "10 mg",
+  frequency: "Once a day",
+  purpose: "Manage blood pressure",
+  instructions: "Take in the morning",
+  prescribedBy: "Dr. Johnson",
+  warnings: "May cause dizziness",
+  isActive: false,
+  scheduledAt: ["2099-01-01T07:00:00"],
 };
 
 describe("MedicationTracker (Integration)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetMeds.mockResolvedValue([mockMedication]);
-    mockGetArchived.mockResolvedValue([]);
-    mockMark.mockResolvedValue(undefined);
-    mockUnmark.mockResolvedValue(undefined);
-    mockAdd.mockResolvedValue(undefined);
-    mockUpdate.mockResolvedValue(undefined);
-    mockArchive.mockResolvedValue(undefined);
+    repoMocks.mockGetMeds.mockResolvedValue([
+      activeMedication,
+      completedMedication,
+    ]);
+    repoMocks.mockGetArchived.mockResolvedValue([archivedMedication]);
+    repoMocks.mockMark.mockResolvedValue(undefined);
+    repoMocks.mockUnmark.mockResolvedValue(undefined);
+    repoMocks.mockAdd.mockResolvedValue(undefined);
+    repoMocks.mockUpdate.mockResolvedValue(undefined);
+    repoMocks.mockArchive.mockResolvedValue(undefined);
 
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
-  it("renders and loads medications", async () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("renders page and loads medications", async () => {
     render(<MedicationTracker />);
 
     expect(
@@ -117,49 +128,131 @@ describe("MedicationTracker (Integration)", () => {
     ).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockGetMeds).toHaveBeenCalled();
+      expect(repoMocks.mockGetMeds).toHaveBeenCalledWith("patient-1");
+      expect(repoMocks.mockGetArchived).toHaveBeenCalledWith("patient-1");
     });
 
-    expect(await screen.findAllByText("Aspirin")).not.toHaveLength(0);
+    expect(await screen.findAllByText("Metformin")).not.toHaveLength(0);
+    expect(screen.getAllByText("Aspirin")).not.toHaveLength(0);
   });
 
-  it("toggles medication", async () => {
+  it("shows stat cards correctly", async () => {
     render(<MedicationTracker />);
 
-    const checkbox = await screen.findByLabelText(/mark aspirin/i);
+    expect(await screen.findByText(/currently prescribed/i)).toBeInTheDocument();
+    expect(screen.getByText(/marked as completed/i)).toBeInTheDocument();
+    expect(screen.getByText(/still left for today/i)).toBeInTheDocument();
+  });
+
+  it("toggles an incomplete medication as taken", async () => {
+    render(<MedicationTracker />);
+
+    const checkbox = await screen.findByLabelText(/mark metformin as taken/i);
     fireEvent.click(checkbox);
 
     await waitFor(() => {
-      expect(mockMark).toHaveBeenCalled();
+      expect(repoMocks.mockMark).toHaveBeenCalledWith("med-1", "caregiver-1");
     });
   });
 
-  it("opens add modal", async () => {
+  it("opens add medication modal", async () => {
     render(<MedicationTracker />);
 
-    fireEvent.click(screen.getByText(/add medication/i));
+    fireEvent.click(screen.getByRole("button", { name: /add medication/i }));
 
     expect(await screen.findByText(/save medication/i)).toBeInTheDocument();
   });
 
-  it("opens archived modal", async () => {
+  it("opens archived medications modal", async () => {
     render(<MedicationTracker />);
 
-    fireEvent.click(screen.getByText(/view archived/i));
+    fireEvent.click(screen.getByRole("button", { name: /view archived/i }));
 
     expect(
-      await screen.findByText(/archived medications/i),
+      await screen.findByRole("heading", { name: /archived medications/i }),
     ).toBeInTheDocument();
+
+    expect(screen.getByText("Lisinopril")).toBeInTheDocument();
   });
 
-  it("archives medication", async () => {
+  it("shows medication details for the selected medication", async () => {
     render(<MedicationTracker />);
 
-    const archiveButton = await screen.findByText(/archive/i);
+    expect(await screen.findByText(/manage blood sugar levels/i)).toBeInTheDocument();
+    expect(screen.getByText(/take with meals/i)).toBeInTheDocument();
+    expect(screen.getByText(/dr\. smith/i)).toBeInTheDocument();
+  });
+
+  it("opens edit modal from the active medication card", async () => {
+    render(<MedicationTracker />);
+
+    const medCard = await screen.findByRole("button", {
+      name: /select metformin/i,
+    });
+
+    const editButton = medCard.querySelector("button");
+    expect(editButton).toBeInTheDocument();
+
+    fireEvent.click(editButton!);
+
+    expect(await screen.findByText(/edit medication/i)).toBeInTheDocument();
+  });
+
+  it("saves a new medication", async () => {
+    render(<MedicationTracker />);
+
+    fireEvent.click(screen.getByRole("button", { name: /add medication/i }));
+
+    expect(await screen.findByText(/save medication/i)).toBeInTheDocument();
+
+    const textboxes = screen.getAllByRole("textbox");
+    fireEvent.change(textboxes[0], { target: { value: "Vitamin D" } });
+    fireEvent.change(textboxes[1], { target: { value: "1000 IU" } });
+    fireEvent.change(textboxes[2], { target: { value: "Once daily" } });
+
+    fireEvent.click(screen.getByRole("button", { name: /save medication/i }));
+
+    await waitFor(() => {
+      expect(repoMocks.mockAdd).toHaveBeenCalled();
+    });
+  });
+
+  it("saves an edited medication", async () => {
+    render(<MedicationTracker />);
+
+    const medCard = await screen.findByRole("button", {
+      name: /select metformin/i,
+    });
+
+    const editButton = medCard.querySelector("button");
+    expect(editButton).toBeInTheDocument();
+
+    fireEvent.click(editButton!);
+
+    expect(await screen.findByText(/edit medication/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /save medication/i }));
+
+    await waitFor(() => {
+      expect(repoMocks.mockUpdate).toHaveBeenCalled();
+    });
+  });
+
+  it("archives the selected medication", async () => {
+    render(<MedicationTracker />);
+
+    const medCard = await screen.findByRole("button", {
+      name: /select metformin/i,
+    });
+    fireEvent.click(medCard);
+
+    const archiveButton = await screen.findByRole("button", {
+      name: /^archive$/i,
+    });
     fireEvent.click(archiveButton);
 
     await waitFor(() => {
-      expect(mockArchive).toHaveBeenCalled();
+      expect(repoMocks.mockArchive).toHaveBeenCalledWith("med-1");
     });
   });
 });
