@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, CheckCircle } from "lucide-react";
 
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
-import CustomSection from "../components/ui/CustomSection";
-import StatCard from "../components/ui/StatCard";
 
 import PatientContactSection from "../components/patientProfile/PatientContactSection";
 import PatientMedicalSection from "../components/patientProfile/PatientMedicalSection";
@@ -221,53 +218,6 @@ const PatientProfile = () => {
     });
   };
 
-  const renderCareHistorySummary = () => (
-    <CustomSection
-      title="Care History Summary"
-      rightAction={
-        <button
-          type="button"
-          className="btn btn-link p-0 text-decoration-none"
-          style={{ fontSize: "0.88rem", color: "#2563eb" }}
-        >
-          View Full History →
-        </button>
-      }
-    >
-      <div className="row g-3">
-        <div className="col-md-4">
-          <StatCard
-            title="Care Days"
-            value="—"
-            description="Total care days"
-            icon={<Calendar size={16} color="#2563eb" />}
-            backgroundColor="#e0ecff"
-          />
-        </div>
-
-        <div className="col-md-4">
-          <StatCard
-            title="Tasks Completed"
-            value="—"
-            description="Completed care tasks"
-            icon={<CheckCircle size={16} color="#16a34a" />}
-            backgroundColor="#dcfce7"
-          />
-        </div>
-
-        <div className="col-md-4">
-          <StatCard
-            title="Appointments"
-            value="—"
-            description="Scheduled appointments"
-            icon={<Calendar size={16} color="#9333ea" />}
-            backgroundColor="#f3e8ff"
-          />
-        </div>
-      </div>
-    </CustomSection>
-  );
-
   if (loading) {
     return (
       <div className="container py-4 text-center">
@@ -377,8 +327,6 @@ const PatientProfile = () => {
           />
 
           <PatientNotesSection onViewNotes={() => navigate("/notes")} />
-
-          {renderCareHistorySummary()}
         </div>
       </div>
     </div>
