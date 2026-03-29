@@ -130,6 +130,7 @@ CREATE TABLE public.patients (
   phys_spec text,
   phys_phone text,
   phys_address text,
+  care_notes text,
   CONSTRAINT patients_pkey PRIMARY KEY (patient_id)
 );
 CREATE TABLE public.task_logs (

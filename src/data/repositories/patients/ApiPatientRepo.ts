@@ -7,6 +7,7 @@ import type {
   PatientEmergencyContact,
   PatientInsuranceInfo,
   PatientPhysicianInfo,
+  PatientNotesInfo,
 } from "../../../types/patient";
 
 import type { PatientRepo } from "./PatientRepo";
@@ -17,11 +18,11 @@ export class ApiPatientRepo implements PatientRepo {
       .from("patients")
       .select(
         `
-                *,
-                emergency_contacts (name, phone_number, relationship),
-                allergies (allergy_name),
-                patient_conditions (condition_name)
-            `,
+          *,
+          emergency_contacts (name, phone_number, relationship),
+          allergies (allergy_name),
+          patient_conditions (condition_name)
+        `,
       )
       .eq("patient_id", patientId)
       .single();
@@ -60,14 +61,12 @@ export class ApiPatientRepo implements PatientRepo {
       insuranceProvider: data.insurance_provider,
       insurancePolicyNumber: data.policy_number,
       groupNumber: data.group_number,
+      careNotes: data.care_notes,
     };
 
     return formattedData;
   }
 
-  /**
-   * Update Methods for Patient Fields ---------
-   */
   async updatePatientContactInfo(
     patientId: string,
     contactInfo: Partial<PatientContactInfo>,
@@ -118,7 +117,6 @@ export class ApiPatientRepo implements PatientRepo {
     return this.getPatientDetails(patientId);
   }
 
-  // check if condition exists - if yes, update, if no, insert. all conditions are set as active
   async updatePatientConditions(
     patientId: string,
     conditions: Partial<PatientConditions>,
@@ -134,6 +132,7 @@ export class ApiPatientRepo implements PatientRepo {
       const existing = existingConditions.data?.find(
         (c) => c.condition_name === conditionName,
       );
+
       return supabase.from("patient_conditions").upsert({
         condition_id: existing?.condition_id,
         patient_id: patientId,
@@ -147,7 +146,6 @@ export class ApiPatientRepo implements PatientRepo {
     return this.getPatientDetails(patientId);
   }
 
-  // check if emergency contact exists - if yes, update, if no, insert
   async updatePatientEmergencyContact(
     patientId: string,
     emergencyContactInfo: Partial<PatientEmergencyContact>,
@@ -213,6 +211,22 @@ export class ApiPatientRepo implements PatientRepo {
         phys_spec: physicianInfo.physicianSpecialty,
         phys_phone: physicianInfo.physicianPhone,
         phys_address: physicianInfo.physicianAddress,
+      })
+      .eq("patient_id", patientId);
+
+    if (error) throw error;
+
+    return this.getPatientDetails(patientId);
+  }
+
+  async updatePatientNotes(
+    patientId: string,
+    notesInfo: Partial<PatientNotesInfo>,
+  ): Promise<AllPatientInfo> {
+    const { error } = await supabase
+      .from("patients")
+      .update({
+        care_notes: notesInfo.careNotes,
       })
       .eq("patient_id", patientId);
 

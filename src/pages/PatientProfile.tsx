@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import PatientInfoBanner from "../components/ui/PatientInfoBanner";
 import CustomTitleBanner from "../components/ui/CustomTitleBanner";
@@ -25,11 +24,11 @@ type EditableSection =
   | "physician"
   | "conditions"
   | "emergency"
+  | "notes"
   | null;
 
 const PatientProfile = () => {
   const { selectedPatientId } = usePatient();
-  const navigate = useNavigate();
 
   const [patient, setPatient] = useState<AllPatientInfo | null>(null);
   const [draftPatient, setDraftPatient] = useState<AllPatientInfo | null>(null);
@@ -138,6 +137,10 @@ const PatientProfile = () => {
               draftPatient.emergencyContactRelationship,
           },
         );
+      } else if (section === "notes") {
+        updated = await patientRepo.updatePatientNotes(patient.patientId, {
+          careNotes: draftPatient.careNotes,
+        });
       } else {
         return;
       }
@@ -326,7 +329,16 @@ const PatientProfile = () => {
             onRemoveCondition={removeCondition}
           />
 
-          <PatientNotesSection onViewNotes={() => navigate("/notes")} />
+          <PatientNotesSection
+            patient={patient}
+            draft={draftPatient}
+            isEditing={editingSection === "notes"}
+            isSaving={savingSection === "notes"}
+            onEdit={() => startEditing("notes")}
+            onCancel={cancelEditing}
+            onSave={() => saveSection("notes")}
+            onChange={handleFieldChange}
+          />
         </div>
       </div>
     </div>

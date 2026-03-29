@@ -440,6 +440,7 @@ export type Database = {
         Row: {
           address: string | null
           blood_type: string | null
+          care_notes: string | null
           dietary_requirements: string | null
           dob: string
           email: string | null
@@ -462,6 +463,7 @@ export type Database = {
         Insert: {
           address?: string | null
           blood_type?: string | null
+          care_notes?: string | null
           dietary_requirements?: string | null
           dob: string
           email?: string | null
@@ -484,6 +486,7 @@ export type Database = {
         Update: {
           address?: string | null
           blood_type?: string | null
+          care_notes?: string | null
           dietary_requirements?: string | null
           dob?: string
           email?: string | null
