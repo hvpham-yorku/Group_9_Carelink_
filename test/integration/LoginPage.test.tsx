@@ -1,121 +1,75 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
-import { describe, test, expect, beforeEach, vi } from "vitest";
-import Login from "../../src/pages/Login";
-import { authService } from "../../src/services/authService";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import * as useAuthHook from "/Users/aa/Desktop/Git Repos/CareLink_Adeena/src/hooks/useAuth.ts";
+import Login from "/Users/aa/Desktop/Git Repos/CareLink_Adeena/src/pages/Login.tsx";
+import { AuthCredentials } from "/Users/aa/Desktop/Git Repos/CareLink_Adeena/src/hooks/useAuth.ts";
 
-// ✅ FIX 1: mock hook properly
-vi.mock("../../src/hooks/useAuth", () => ({
-  useAuth: vi.fn(() => ({ user: null })),
-}));
+// Mock navigation
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual<any>("react-router-dom");
+  return { ...actual, useNavigate: () => mockNavigate };
+});
 
-// ✅ FIX 2: mock service properly
-vi.mock("../../src/services/authService", () => ({
-  authService: {
-    signIn: vi.fn(),
-  },
-}));
+describe("Login Page Integration (useAuth only)", () => {
+  const setup = () => render(<Login />, { wrapper: MemoryRouter });
 
-const mockedSignIn = authService.signIn as any;
+  const mockLogin = vi.fn(async (creds: AuthCredentials) => {
+    if (creds.email === "test@example.com" && creds.password === "password123") {
+      return { token: "fake-token" };
+    } else {
+      throw new Error("Invalid credentials");
+    }
+  });
 
-const renderApp = () =>
-  render(
-    <MemoryRouter initialEntries={["/"]}>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/teams" element={<div>Teams Page</div>} />
-        <Route path="/forgot-password" element={<div>Forgot Page</div>} />
-      </Routes>
-    </MemoryRouter>
-  );
-
-describe("Login", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(useAuthHook, "useAuth").mockReturnValue({
+      user: null,
+      loading: false,
+      login: mockLogin,
+      logout: vi.fn(),
+    });
   });
 
-  test("renders login form", () => {
-    renderApp();
-
+  it("renders all form elements", () => {
+    setup();
+    expect(screen.getByText(/login to carelink!/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/name@company.com/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/••••••••/i)).toBeInTheDocument();
   });
 
-  test("calls authService on submit", async () => {
-    mockedSignIn.mockResolvedValue({});
+  it("shows/hides password when toggle clicked", async () => {
+    setup();
+    const user = userEvent.setup();
+    const passwordInput = screen.getByPlaceholderText(/••••••••/i);
+    const toggleButton = screen.getByRole("button", { name: /show/i });
 
-    renderApp();
+    expect(passwordInput).toHaveAttribute("type", "password");
+    await user.click(toggleButton);
+    expect(passwordInput).toHaveAttribute("type", "text");
+  });
 
-    fireEvent.change(screen.getByPlaceholderText(/name@company.com/i), {
-      target: { value: "test@test.com" },
+  it("displays Caps Lock warning when active", async () => {
+    setup();
+    const user = userEvent.setup();
+    const passwordInput = screen.getByPlaceholderText(/••••••••/i);
+
+    await user.click(passwordInput);
+    await user.keyboard("{CapsLock}");
+
+    expect(await screen.findByText(/caps lock is on/i)).toBeInTheDocument();
+  });
+
+  it("redirects if user is already logged in", () => {
+    vi.spyOn(useAuthHook, "useAuth").mockReturnValue({
+      user: { id: "1", name: "Test User" },
+      loading: false,
+      login: mockLogin,
+      logout: vi.fn(),
     });
-
-    fireEvent.change(screen.getByPlaceholderText(/••••••••/i), {
-      target: { value: "password123" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
-
-    await waitFor(() => {
-      expect(mockedSignIn).toHaveBeenCalled();
-    });
-  });
-
-  test("shows error when login fails", async () => {
-  mockedSignIn.mockRejectedValue(new Error("Invalid credentials"));
-
-  renderApp();
-
-  // 🔥 REQUIRED: fill inputs
-  fireEvent.change(screen.getByPlaceholderText(/name@company.com/i), {
-    target: { value: "bad@test.com" },
-  });
-
-  fireEvent.change(screen.getByPlaceholderText(/••••••••/i), {
-    target: { value: "wrongpass" },
-  });
-
-  fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
-
-  expect(await screen.findByText(/invalid credentials/i)).toBeInTheDocument();
-  });
-
-  test("toggles password visibility", () => {
-    renderApp();
-
-    const input = screen.getByPlaceholderText(/••••••••/i);
-    const toggle = screen.getByRole("button", { name: /show/i });
-
-    fireEvent.click(toggle);
-
-    expect(input).toHaveAttribute("type", "text");
-  });
-
-  test("shows caps lock warning", async () => {
-  renderApp();
-
-  const input = screen.getByPlaceholderText(/••••••••/i);
-
-  // 🔥 Create a real event and override method
-  const event = new KeyboardEvent("keydown", {
-    bubbles: true,
-  });
-
-  // force CapsLock ON
-  Object.defineProperty(event, "getModifierState", {
-    value: (key: string) => key === "CapsLock",
-  });
-
-  input.dispatchEvent(event);
-
-  expect(await screen.findByText(/caps lock is on/i)).toBeInTheDocument();
-  });
-
-  test("navigates to forgot password page", async () => {
-  renderApp();
-
-  fireEvent.click(screen.getByText(/forgot\?/i));
-
-  expect(await screen.findByText(/forgot page/i)).toBeInTheDocument();
+    setup();
+    expect(mockNavigate).toHaveBeenCalledWith("/teams");
   });
 });

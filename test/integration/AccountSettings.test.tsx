@@ -1,75 +1,98 @@
-import "@testing-library/jest-dom";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
+import { describe, it, vi, beforeEach, expect } from "vitest";
 import AccountSettings from "../../src/pages/AccountSettings";
+import { useAuth } from "../../src/hooks/useAuth";
+import { repositories } from "../../src/data";
 
-const renderComponent = () =>
-  render(
-    <BrowserRouter>
-      <AccountSettings />
-    </BrowserRouter>
-  );
+// Mock useAuth
+vi.mock("../../src/hooks/useAuth", () => ({
+  useAuth: vi.fn(),
+}));
 
-describe("AccountSettings UI Integration", () => {
+// Mock profile repository
+const mockProfile = {
+  firstName: "Jane",
+  lastName: "Doe",
+  email: "jane.doe@example.com",
+  phoneNumber: "555-1234",
+  jobTitle: "Nurse",
+};
+
+repositories.profile.getProfile = vi.fn().mockResolvedValue(mockProfile);
+repositories.profile.updateFirstName = vi.fn().mockResolvedValue(undefined);
+repositories.profile.updateLastName = vi.fn().mockResolvedValue(undefined);
+
+// Mock navigation
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual<any>("react-router-dom");
+  return { ...actual, useNavigate: () => mockNavigate };
+});
+
+describe("AccountSettings", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    window.alert = vi.fn();
+    (useAuth as any).mockReturnValue({
+      user: { id: "user123" },
+    });
   });
 
-  it("synchronizes input changes across the UI state", async () => {
-    const user = userEvent.setup();
-    renderComponent();
+  it("renders form with fetched profile data", async () => {
+    render(
+      <BrowserRouter>
+        <AccountSettings />
+      </BrowserRouter>
+    );
 
-    const firstNameInput = screen.getByDisplayValue("John");
-    await user.clear(firstNameInput);
-    await user.type(firstNameInput, "Jane");
-
-    expect(firstNameInput).toHaveValue("Jane");
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("Jane")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("Doe")).toBeInTheDocument();
+    });
   });
 
-  /** FIX 1: Use Placeholder or Name instead of Label if IDs are missing **/
-  it("interacts with the password visibility toggle and input type", async () => {
-    const user = userEvent.setup();
-    const { container } = renderComponent();
-    const passwordInput = screen.getByDisplayValue("password123") as HTMLInputElement; 
-    const toggleBtn = container.querySelector('button[onClick*="setShowPassword"]') || 
-                      screen.getAllByRole("button").find(btn => btn.querySelector('.lucide-eye, .lucide-eye-off'));
-   if (!toggleBtn) throw new Error("Could not find the password toggle button");
+  it("updates input values and saves changes", async () => {
+    render(
+      <BrowserRouter>
+        <AccountSettings />
+      </BrowserRouter>
+    );
 
-    expect(passwordInput.type).toBe("password");
+    // 1. Wait for data to load
+    await waitFor(() => screen.getByDisplayValue("Jane"));
 
-    await user.click(toggleBtn);
-    expect(passwordInput.type).toBe("text");
+    /** * FIX: The error showed that <label> is not linked to <input>.
+     * Instead of getByLabelText, we target by the 'name' attribute 
+     * or use getByText + navigating to the input.
+     */
+    const firstNameInput = screen.getByDisplayValue("Jane");
+    const lastNameInput = screen.getByDisplayValue("Doe");
 
-    await user.click(toggleBtn);
-    expect(passwordInput.type).toBe("password");
-  });
-  it("displays the immutable username correctly in the profile card header", () => {
-    renderComponent();
-    const profileHandle = screen.getByText(/johndoe_care/i);
-    expect(profileHandle).toBeInTheDocument();
-  });
+    fireEvent.change(firstNameInput, { target: { value: "Janet" } });
+    fireEvent.change(lastNameInput, { target: { value: "Smith" } });
 
-  it("shows the 'Changes Saved' alert when the header action is triggered", async () => {
-    const user = userEvent.setup();
-    renderComponent();
+    fireEvent.click(screen.getByText(/Save Changes/i));
 
-    const saveBtn = screen.getByRole("button", { name: /Save Changes/i });
-    await user.click(saveBtn);
-    expect(window.alert).toHaveBeenCalledWith("Changes Saved!");
+    await waitFor(() => {
+      expect(repositories.profile.updateFirstName).toHaveBeenCalledWith("user123", "Janet");
+      expect(repositories.profile.updateLastName).toHaveBeenCalledWith("user123", "Smith");
+    });
   });
 
-  /** FIX 2: Check classes on the element itself, not the parent **/
-  it("ensures certain fields remain consistent with initial UI state", () => {
-    renderComponent();
-    
-    const badge = screen.getByText(/Verified Caregiver ID/i);
-    expect(badge).toBeInTheDocument();
-    
-    // In your code: <div class="d-flex ... text-success small fw-medium">
-    expect(badge).toHaveClass("text-success");
-    expect(badge).toHaveClass("small");
+  it("navigates back when arrow button clicked", async () => {
+    render(
+      <BrowserRouter>
+        <AccountSettings />
+      </BrowserRouter>
+    );
+
+    // 2. CRITICAL: Wait for loading spinner to disappear before clicking
+    await waitFor(() => expect(screen.queryByRole("status")).not.toBeInTheDocument());
+
+    // The back button is the only button with an SVG inside it in the header
+    const backButton = screen.getByRole("button", { name: "" }); 
+    fireEvent.click(backButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
   });
 });
