@@ -1,5 +1,10 @@
 import type { Medication } from "../../types/medication";
 import { formatToTime, formatToDateTimeLocal } from "../../utils/formatters";
+import {
+  getMedicationStatus,
+  getMedicationStatusLabel,
+  getMedicationStatusStyles,
+} from "./medicationStatus";
 
 interface MedicationScheduleItemProps extends Medication {
   onToggle: (medicationId: string, isCompleted: boolean) => void;
@@ -28,32 +33,10 @@ const MedicationScheduleItem = ({
   const hasValidScheduledDate =
     scheduledDate instanceof Date && !Number.isNaN(scheduledDate.getTime());
 
-  const now = new Date();
-  const isOverdue =
-    !isCompleted && hasValidScheduledDate ? scheduledDate < now : false;
-
-  const statusLabel = isCompleted ? "Taken" : isOverdue ? "Overdue" : "Pending";
-
-  const statusStyles = isCompleted
-    ? {
-        border: "1px solid #98d4a9",
-        backgroundColor: "#f3fbf5",
-        badgeBackground: "#d1e7dd",
-        badgeColor: "#146c43",
-      }
-    : isOverdue
-      ? {
-          border: "1px solid #f5c2c7",
-          backgroundColor: "#fff5f5",
-          badgeBackground: "#f8d7da",
-          badgeColor: "#b02a37",
-        }
-      : {
-          border: "1px solid #e9ecef",
-          backgroundColor: "#ffffff",
-          badgeBackground: "#f1f3f5",
-          badgeColor: "#495057",
-        };
+  const status = getMedicationStatus(isCompleted, scheduledDate);
+  const statusLabel = getMedicationStatusLabel(status);
+  const statusStyles = getMedicationStatusStyles(status);
+  const isOverdue = status === "overdue";
 
   return (
     <div
