@@ -1,10 +1,37 @@
+// test/integration/AccountSettings.test.tsx
 import "@testing-library/jest-dom";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BrowserRouter } from "react-router-dom";
 import AccountSettings from "../../src/pages/AccountSettings";
+import { CaregiverInfo } from "../../src/types/Types";
 
+// --- Mock Auth Module ---
+const mockUser: CaregiverInfo & { password: string } = {
+  caregiverId: "cg-123",
+  firstName: "John",
+  lastName: "Doe",
+  phone: "123-456-7890",
+  email: "johndoe@example.com",
+  jobTitle: "Caregiver",
+  password: "password123",
+};
+
+const mockLogin = vi.fn();
+const mockLogout = vi.fn();
+const mockUpdateUser = vi.fn();
+
+vi.mock("../../src/hooks/auth", () => ({
+  useAuth: () => ({
+    user: mockUser,
+    login: mockLogin,
+    logout: mockLogout,
+    updateUser: mockUpdateUser,
+  }),
+}));
+
+// --- Render Helper ---
 const renderComponent = () =>
   render(
     <BrowserRouter>
@@ -29,23 +56,28 @@ describe("AccountSettings UI Integration", () => {
     expect(firstNameInput).toHaveValue("Jane");
   });
 
-  /** FIX 1: Use Placeholder or Name instead of Label if IDs are missing **/
   it("interacts with the password visibility toggle and input type", async () => {
-    const user = userEvent.setup();
-    const { container } = renderComponent();
-    const passwordInput = screen.getByDisplayValue("password123") as HTMLInputElement; 
-    const toggleBtn = container.querySelector('button[onClick*="setShowPassword"]') || 
-                      screen.getAllByRole("button").find(btn => btn.querySelector('.lucide-eye, .lucide-eye-off'));
-   if (!toggleBtn) throw new Error("Could not find the password toggle button");
+  const user = userEvent.setup();
+  renderComponent();
 
-    expect(passwordInput.type).toBe("password");
+  // Get password input by its current value
+  const passwordInput = screen.getByDisplayValue("password123") as HTMLInputElement;
 
-    await user.click(toggleBtn);
-    expect(passwordInput.type).toBe("text");
+  // Get toggle button by test id
+  const toggleBtn = screen.getByTestId("toggle-password");
 
-    await user.click(toggleBtn);
-    expect(passwordInput.type).toBe("password");
-  });
+  // Initially, the input type should be 'password'
+  expect(passwordInput.type).toBe("password");
+
+  // Click to show password
+  await user.click(toggleBtn);
+  expect(passwordInput.type).toBe("text");
+
+  // Click again to hide password
+  await user.click(toggleBtn);
+  expect(passwordInput.type).toBe("password");
+});
+
   it("displays the immutable username correctly in the profile card header", () => {
     renderComponent();
     const profileHandle = screen.getByText(/johndoe_care/i);
@@ -58,17 +90,17 @@ describe("AccountSettings UI Integration", () => {
 
     const saveBtn = screen.getByRole("button", { name: /Save Changes/i });
     await user.click(saveBtn);
+
     expect(window.alert).toHaveBeenCalledWith("Changes Saved!");
   });
 
-  /** FIX 2: Check classes on the element itself, not the parent **/
   it("ensures certain fields remain consistent with initial UI state", () => {
     renderComponent();
-    
+
     const badge = screen.getByText(/Verified Caregiver ID/i);
     expect(badge).toBeInTheDocument();
-    
-    // In your code: <div class="d-flex ... text-success small fw-medium">
+
+    // Check for classes
     expect(badge).toHaveClass("text-success");
     expect(badge).toHaveClass("small");
   });
