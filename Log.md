@@ -167,6 +167,32 @@ Actual Time Spent: 4 hours
 
 ### Tara
 
+Notes Page:
+
+Implemented Stats Card (Today's Notes, Urgent Notes), Search bar, Filter by time,Urgent Checkbox, Urgent pop ups in orange and some UI design Changes (Colour theme,Lucid Stickers,New Notes pop up page, etc).
+
+Estimated Time: 12 Hours
+Actual Time: 10 Hours
+
+Refactoring:
+
+New Stats Card component, Updating the previous Components.
+
+Estimated Time: 6 Hours
+Actual Time: 6 Hours 
+
+Implemented Unit & Integration Testing:
+
+Estimated Time: 4 Hours
+Actual Time: 6 Hours
+
+- As a user, I want to be able to create a new note.
+- As a user, I want to view previous notes.
+- As a user, I want to edit existing notes.
+- As a user, I want to delete notes if needed.
+- As a user, I want to see notes in chronological order in CareTimeLine.
+
+
 ### Jose Urbina
 
 ### Adeena Ahmed
