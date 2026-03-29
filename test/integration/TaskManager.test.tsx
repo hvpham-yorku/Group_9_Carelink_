@@ -2,8 +2,10 @@
  * @vitest-environment jsdom
  *
  * Integration tests for the TaskManager page.
- * Covers task rendering, creation, toggling completion, editing, and deletion.
- * Mocks taskService, useAuth, and usePatient so no real network calls are made.
+ * Covers task rendering, creation, toggling completion, editing, deletion,
+ * and the stat-cards introduced in ITR 3.
+ * Mocks repositories.task, useAuth, and usePatient so no real network calls
+ * are made.
  */
 
 import "@testing-library/jest-dom/vitest";
@@ -16,9 +18,9 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Task } from "../../src/types/Types";
+import type { Task } from "../../src/types/task";
 import TaskManager from "../../src/pages/TaskManager";
-import { taskService } from "../../src/services/taskService";
+import { repositories } from "../../src/data/index";
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
 
@@ -27,10 +29,10 @@ const MOCK_CATEGORIES = [
   { categoryId: "cat-2", name: "Medication" },
 ];
 
+// scheduledAt is in the past so this task counts as "overdue"
 const MOCK_TASK: Task = {
   taskId: "task-1",
   patientId: "patient-1",
-  careTeamId: "team-1",
   categoryId: "cat-1",
   title: "Sample Task",
   description: "Sample Description",
@@ -39,6 +41,8 @@ const MOCK_TASK: Task = {
   taskLogs: [],
 };
 
+// completedAt is set to today so isCompletedToday() returns true
+const TODAY_ISO = new Date().toISOString();
 const COMPLETED_TASK: Task = {
   ...MOCK_TASK,
   taskId: "task-2",
@@ -47,7 +51,7 @@ const COMPLETED_TASK: Task = {
     {
       taskId: "task-2",
       caregiverId: "caregiver-1",
-      completedAt: "2026-03-06T11:00:00Z",
+      completedAt: TODAY_ISO,
       isCompleted: true,
       caregivers: { firstName: "Alice", lastName: "Smith" },
     },
@@ -68,15 +72,17 @@ vi.mock("../../src/contexts/patient/usePatient", () => ({
   }),
 }));
 
-vi.mock("../../src/services/taskService", () => ({
-  taskService: {
-    getTasksByPatient: vi.fn(),
-    getCategories: vi.fn(),
-    addTask: vi.fn(),
-    markTaskAsDone: vi.fn(),
-    unmarkTaskAsDone: vi.fn(),
-    updateTask: vi.fn(),
-    deleteTask: vi.fn(),
+vi.mock("../../src/data/index", () => ({
+  repositories: {
+    task: {
+      getTasksByPatient: vi.fn(),
+      getCategories: vi.fn(),
+      addTask: vi.fn(),
+      markTaskAsDone: vi.fn(),
+      unmarkTaskAsDone: vi.fn(),
+      updateTask: vi.fn(),
+      deleteTask: vi.fn(),
+    },
   },
 }));
 
@@ -84,19 +90,29 @@ vi.mock("../../src/services/taskService", () => ({
 
 describe("TaskManager page", () => {
   beforeEach(() => {
-    vi.mocked(taskService.getTasksByPatient).mockResolvedValue([MOCK_TASK]);
-    vi.mocked(taskService.getCategories).mockResolvedValue(MOCK_CATEGORIES);
-    vi.mocked(taskService.addTask).mockResolvedValue(undefined as any);
-    vi.mocked(taskService.markTaskAsDone).mockResolvedValue(undefined as any);
-    vi.mocked(taskService.unmarkTaskAsDone).mockResolvedValue(undefined as any);
-    vi.mocked(taskService.updateTask).mockResolvedValue(undefined as any);
-    vi.mocked(taskService.deleteTask).mockResolvedValue(undefined as any);
+    vi.mocked(repositories.task.getTasksByPatient).mockResolvedValue([
+      MOCK_TASK,
+    ]);
+    vi.mocked(repositories.task.getCategories).mockResolvedValue(
+      MOCK_CATEGORIES,
+    );
+    vi.mocked(repositories.task.addTask).mockResolvedValue(undefined as any);
+    vi.mocked(repositories.task.markTaskAsDone).mockResolvedValue(
+      undefined as any,
+    );
+    vi.mocked(repositories.task.unmarkTaskAsDone).mockResolvedValue(
+      undefined as any,
+    );
+    vi.mocked(repositories.task.updateTask).mockResolvedValue(undefined as any);
+    vi.mocked(repositories.task.deleteTask).mockResolvedValue(undefined as any);
   });
 
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
   });
+
+  // ── Rendering ──────────────────────────────────────────────────────────────
 
   it("renders the Task Manager heading", async () => {
     render(<TaskManager />);
@@ -106,14 +122,14 @@ describe("TaskManager page", () => {
   });
 
   it("shows a loading spinner while tasks are being fetched", () => {
-    vi.mocked(taskService.getTasksByPatient).mockReturnValue(
+    vi.mocked(repositories.task.getTasksByPatient).mockReturnValue(
       new Promise(() => {}),
     );
     render(<TaskManager />);
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
-  it("renders tasks returned by the service after loading", async () => {
+  it("renders tasks returned by the repository after loading", async () => {
     render(<TaskManager />);
     await waitFor(() =>
       expect(screen.getByText("Sample Task")).toBeInTheDocument(),
@@ -122,7 +138,7 @@ describe("TaskManager page", () => {
   });
 
   it("shows an empty-state message when no tasks exist", async () => {
-    vi.mocked(taskService.getTasksByPatient).mockResolvedValue([]);
+    vi.mocked(repositories.task.getTasksByPatient).mockResolvedValue([]);
     render(<TaskManager />);
     await waitFor(() =>
       expect(
@@ -130,6 +146,61 @@ describe("TaskManager page", () => {
       ).toBeInTheDocument(),
     );
   });
+
+  // ── Stat cards ─────────────────────────────────────────────────────────────
+
+  it("renders the Total Tasks stat card", async () => {
+    render(<TaskManager />);
+    await waitFor(() => screen.getByText("Sample Task"));
+    expect(screen.getByText("Total Tasks")).toBeInTheDocument();
+  });
+
+  it("renders the Completed Tasks stat card", async () => {
+    render(<TaskManager />);
+    await waitFor(() => screen.getByText("Sample Task"));
+    expect(screen.getByText("Completed Tasks")).toBeInTheDocument();
+  });
+
+  it("renders the Pending Tasks stat card", async () => {
+    render(<TaskManager />);
+    await waitFor(() => screen.getByText("Sample Task"));
+    expect(screen.getByText("Pending Tasks")).toBeInTheDocument();
+  });
+
+  it("renders the Overdue Tasks stat card", async () => {
+    render(<TaskManager />);
+    await waitFor(() => screen.getByText("Sample Task"));
+    expect(screen.getByText("Overdue Tasks")).toBeInTheDocument();
+  });
+
+  it("stat cards reflect correct counts for one incomplete overdue task", async () => {
+    render(<TaskManager />);
+    await waitFor(() => screen.getByText("Sample Task"));
+
+    // Total = 1, Completed = 0, Pending = 1, Overdue = 1
+    // Each stat card renders its value in an <h2>; the count "1" appears
+    // three times (Total, Pending, Overdue) and "0" once (Completed).
+    const headings = screen.getAllByRole("heading", { level: 2 });
+    const values = headings.map((h) => h.textContent);
+    expect(values).toContain("1"); // total
+    expect(values).toContain("0"); // completed
+  });
+
+  it("completed task increments the Completed stat card", async () => {
+    vi.mocked(repositories.task.getTasksByPatient).mockResolvedValue([
+      COMPLETED_TASK,
+    ]);
+    render(<TaskManager />);
+    await waitFor(() => screen.getByText("Completed Task"));
+
+    // With one completed task: Completed = 1, Pending = 0
+    const headings = screen.getAllByRole("heading", { level: 2 });
+    const values = headings.map((h) => h.textContent);
+    expect(values).toContain("1"); // completed count
+    expect(values).toContain("0"); // pending count
+  });
+
+  // ── Add task ───────────────────────────────────────────────────────────────
 
   it("opens the add-task form when '+ Add New Task' is clicked", async () => {
     render(<TaskManager />);
@@ -141,12 +212,12 @@ describe("TaskManager page", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls taskService.addTask and refreshes the list on form submission", async () => {
+  it("calls repositories.task.addTask and refreshes the list on form submission", async () => {
     const updated = [
       MOCK_TASK,
       { ...MOCK_TASK, taskId: "task-new", title: "New Task" },
     ];
-    vi.mocked(taskService.getTasksByPatient)
+    vi.mocked(repositories.task.getTasksByPatient)
       .mockResolvedValueOnce([MOCK_TASK])
       .mockResolvedValueOnce(updated);
 
@@ -168,19 +239,25 @@ describe("TaskManager page", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /add task/i }));
 
-    await waitFor(() => expect(taskService.addTask).toHaveBeenCalledOnce());
+    await waitFor(() =>
+      expect(repositories.task.addTask).toHaveBeenCalledOnce(),
+    );
     await waitFor(() =>
       expect(screen.getByText("New Task")).toBeInTheDocument(),
     );
   });
 
+  // ── Toggle completion ──────────────────────────────────────────────────────
+
   it("calls markTaskAsDone when toggling an incomplete task", async () => {
     render(<TaskManager />);
     await waitFor(() => screen.getByText("Sample Task"));
 
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: /mark sample task as done/i }),
+    );
     await waitFor(() =>
-      expect(taskService.markTaskAsDone).toHaveBeenCalledWith(
+      expect(repositories.task.markTaskAsDone).toHaveBeenCalledWith(
         "task-1",
         "user-1",
       ),
@@ -188,17 +265,21 @@ describe("TaskManager page", () => {
   });
 
   it("calls unmarkTaskAsDone when toggling a completed task", async () => {
-    vi.mocked(taskService.getTasksByPatient).mockResolvedValue([
+    vi.mocked(repositories.task.getTasksByPatient).mockResolvedValue([
       COMPLETED_TASK,
     ]);
     render(<TaskManager />);
     await waitFor(() => screen.getByText("Completed Task"));
 
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: /mark completed task as done/i }),
+    );
     await waitFor(() =>
-      expect(taskService.unmarkTaskAsDone).toHaveBeenCalledWith("task-2"),
+      expect(repositories.task.unmarkTaskAsDone).toHaveBeenCalledWith("task-2"),
     );
   });
+
+  // ── Edit / delete ──────────────────────────────────────────────────────────
 
   it("opens the edit form when a task card is clicked", async () => {
     render(<TaskManager />);
@@ -214,7 +295,7 @@ describe("TaskManager page", () => {
     );
   });
 
-  it("calls taskService.updateTask with the modified fields on save", async () => {
+  it("calls repositories.task.updateTask with the modified fields on save", async () => {
     render(<TaskManager />);
     await waitFor(() => screen.getByText("Sample Task"));
 
@@ -229,14 +310,14 @@ describe("TaskManager page", () => {
     fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
 
     await waitFor(() =>
-      expect(taskService.updateTask).toHaveBeenCalledWith(
+      expect(repositories.task.updateTask).toHaveBeenCalledWith(
         "task-1",
         expect.objectContaining({ title: "Updated Task" }),
       ),
     );
   });
 
-  it("calls taskService.deleteTask when delete is clicked in the edit form", async () => {
+  it("calls repositories.task.deleteTask when delete is clicked in the edit form", async () => {
     render(<TaskManager />);
     await waitFor(() => screen.getByText("Sample Task"));
 
@@ -248,7 +329,7 @@ describe("TaskManager page", () => {
     fireEvent.click(screen.getByRole("button", { name: /delete task/i }));
 
     await waitFor(() =>
-      expect(taskService.deleteTask).toHaveBeenCalledWith("task-1"),
+      expect(repositories.task.deleteTask).toHaveBeenCalledWith("task-1"),
     );
   });
 });

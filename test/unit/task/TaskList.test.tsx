@@ -9,7 +9,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { Task } from "../../../src/types/Types";
+import type { Task } from "../../../src/types/task";
 import TaskList from "../../../src/components/task/TaskList";
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
@@ -17,7 +17,6 @@ import TaskList from "../../../src/components/task/TaskList";
 const makeTask = (id: string, title: string, completed = false): Task => ({
   taskId: id,
   patientId: "patient-1",
-  careTeamId: "team-1",
   categoryId: "cat-1",
   title,
   description: `Description for ${title}`,
@@ -28,7 +27,7 @@ const makeTask = (id: string, title: string, completed = false): Task => ({
         {
           taskId: id,
           caregiverId: "cg-1",
-          completedAt: "2026-03-13T10:00:00",
+          completedAt: new Date().toISOString(),
           isCompleted: true,
           caregivers: { firstName: "Alice", lastName: "Smith" },
         },
