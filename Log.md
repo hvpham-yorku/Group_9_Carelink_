@@ -117,8 +117,17 @@ Next Meeting: TBD
 
 
 ## Rationale Behind Major Changes
+### Backend Rework
 
-### Feature Prioritization Adjustment
+At the end of ITR 2, it was realized that in order to switch to the stub database, more than 1 line of code needed to be changed and that the current structure of the backend would not support new features planned in ITR 3. The decision was made to refactor and rework the entire backend of the website.
+
+A new folder structure, data repositories and classes with interfaces were added to allow an easy switch between the real database and the stub database. Furthermore this new version would support any changes or new features that were planned to be added to the website, with easy implementation.
+
+### Cut Features
+
+Dashboard live schedule was cut from ITR 3 due to there being not enough time to add it
+
+Multiple Tags - Originally Tasks and Notes were planned to support adding multiple tags to 1 task/note. However due to time constraints this feature was cut from ITR 3.
 
 ## Development Tasks
 
@@ -194,6 +203,47 @@ Actual Time: 6 Hours
 
 
 ### Jose Urbina
+
+Tasks Page:
+
+Implemented Stats Cards displaying: total amount of tasks, completed tasks, overdue tasks, and pending tasks. The UI design was also improved.
+
+Estimated Time: 5 hours
+
+Actual Time: 3 hours
+
+Teams Page:
+
+Implemented: 
+- The ability to switch between teams the user is apart of. 
+- Stat Cards displaying: Team members, number of patients, user role, Team join code.
+- Edit Team Details options which allows the user to edit their team details (team name, user roles, remove members, add new tags)
+
+The overall page UI design was completely reworked to match the websites design. 
+
+Estimated Time: 10 hours
+
+Actual Time: 12 hours
+
+BackEnd Rework:
+
+Refactor on the services folder. There is a folder called Services which held the files for database querying. Switching to the stub database required more than changing 1 line of code. 
+
+A new folder structure was made to better organize the database querying. Inside Data > repositories are folders for each page containing the new refactored api querying. Each folder has an interface which is implemented into the classes for both the Stub and Api version of data querying. 
+
+Example: 
+```
+TaskRepo.ts - exported class interface
+ApiTaskRepo.ts - class that gets data from the online database
+StubTaskRepo.ts - class that gets data from the stub database
+```
+
+This layout was repeated in each folder
+A switch (index.ts) was also added to easily switch between stub database and online database. Now the persistence layer is not embedded to the presentation and business logic layer.
+
+Estimated Time: 24 hours
+
+Actual Time: ~50 hours
 
 ### Adeena Ahmed
 
