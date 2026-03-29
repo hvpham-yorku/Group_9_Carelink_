@@ -63,7 +63,7 @@ export default function NewNoteContainer({
               </h5>
               <div className="text-muted small">
                 {selectedNote
-                  ? `Created: ${formatDateTime(selectedNote.createdAt)}`
+                  ? `Created: ${selectedNote.createdAt ? formatDateTime(selectedNote.createdAt) : "Unknown"}`
                   : "Not saved yet"}
               </div>
             </div>
