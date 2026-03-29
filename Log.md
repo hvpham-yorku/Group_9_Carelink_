@@ -235,5 +235,31 @@ Assigned tasks:
 - Worked on adding new features to the Login page
 
 ### Neharika Sharma
+Dashboard & Appointment Integration:
 
+Worked on refining and improving the Dashboard to better support real caregiver workflows. Updated the Dashboard structure to include key information such as tasks, medications, appointments, and recent notes in a more organized and accessible format. Improved navigation flow to ensure caregivers can quickly access important patient information without switching between multiple pages.
+
+Focused on integrating appointment-related data into the Dashboard so that upcoming visits are visible alongside other daily care activities. Ensured that the Dashboard acts as a central hub connecting all major features of the system, including tasks, medications, notes, and appointments.
+
+Refactored parts of the Dashboard and Appointment pages to align with shared UI components and improve consistency across the application. Worked on simplifying layouts, removing unnecessary elements, and ensuring a clean and uniform design based on the agreed UI standard.
+
+Estimated Time: 8 hours  
+Actual Time Spent: 9 hours  
+
+Testing (Unit & Integration Testing):
+
+Performed testing on Dashboard functionality to ensure correct display of dynamic data such as tasks, medications, notes, and appointments. Verified that navigation between Dashboard and other pages functions correctly and that updated UI components render consistently.
+
+Estimated Time: 4 hours  
+Actual Time Spent: 3 hours  
+
+Assigned User Stories:
+
+- As a caregiver, I want to view a dashboard that summarizes tasks, medications, appointments, and recent notes so that I can quickly understand the patient’s care status for the day.
+- As a caregiver, I want to see today’s tasks and their completion status on the dashboard so that I can prioritize my work efficiently.
+- As a caregiver, I want upcoming appointments to appear on both the Appointment page and the Dashboard so that I can keep track of schedules in one place.
+- As a caregiver, I want recent notes to be visible on the Dashboard so that I can stay updated on patient changes without opening the notes page.
+- As a caregiver, I want the Dashboard and Appointment pages to use consistent UI components so that the system is easier to navigate and visually consistent.
+- As a caregiver, I want clear navigation from the Dashboard to all major pages so that I can move through the system efficiently.
+- As a caregiver, I want important information to be displayed in a structured and readable format so that I can quickly understand patient needs during busy shifts.
 
