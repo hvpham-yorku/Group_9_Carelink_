@@ -28,6 +28,11 @@ import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 import type { Medication } from "../types/medication";
 
+type ScheduledMedicationItem = Medication & {
+  scheduledTime: string;
+  scheduleId: string;
+};
+
 const MedicationTracker = () => {
   // Current logged-in user
   const { user } = useAuth();
@@ -103,14 +108,22 @@ const MedicationTracker = () => {
   }, [selectedPatientId]);
 
   // Mark medication as taken / untaken, then refresh the list
-  const handleToggle = async (medicationId: string, isCompleted: boolean) => {
+  const handleToggle = async (
+    medicationId: string,
+    scheduledTime: string,
+    isCompleted: boolean,
+  ) => {
     if (!user) return;
 
     try {
       if (isCompleted) {
-        await repositories.medication.unmarkAsTaken(medicationId);
+        await repositories.medication.unmarkAsTaken(medicationId, scheduledTime);
       } else {
-        await repositories.medication.markAsTaken(medicationId, user.id);
+        await repositories.medication.markAsTaken(
+          medicationId,
+          scheduledTime,
+          user.id,
+        );
       }
 
       if (selectedPatientId) {
@@ -216,14 +229,28 @@ const MedicationTracker = () => {
   // Derived lists used by the page
   const activeMedications = useMemo(() => medications, [medications]);
 
-  const todaySchedule = useMemo(() => activeMedications, [activeMedications]);
+  const todaySchedule = useMemo<ScheduledMedicationItem[]>(() => {
+    return activeMedications.flatMap((med) =>
+      (med.scheduledAt ?? []).map((time, index) => {
+        const matchingLog =
+          med.medicationLogs?.find((log) => log.scheduledTime === time) ?? null;
+
+        return {
+          ...med,
+          scheduledTime: time,
+          medicationLog: matchingLog ?? undefined,
+          scheduleId: `${med.medicationId}-${index}`,
+        };
+      }),
+    );
+  }, [activeMedications]);
 
   // Summary stats for cards + section headers
-  const takenCount = activeMedications.filter(
+  const takenCount = todaySchedule.filter(
     (p) => p.medicationLog?.isCompleted,
   ).length;
 
-  const totalCount = activeMedications.length;
+  const totalCount = todaySchedule.length;
   const remainingCount = totalCount - takenCount;
   const adherencePercentage =
     totalCount > 0 ? Math.round((takenCount / totalCount) * 100) : 0;
@@ -311,16 +338,16 @@ const MedicationTracker = () => {
               <StatCard
                 title="Today's Adherence"
                 value={`${adherencePercentage}%`}
-                description={`${takenCount} of ${totalCount} medications taken`}
+                description={`${takenCount} of ${totalCount} doses taken`}
                 icon={<CheckCircle2 size={20} color="#198754" />}
               />
             </div>
 
             <div className="col-12 col-md-6 col-xl-3">
               <StatCard
-                title="Active Medications"
+                title="Today's Scheduled Doses"
                 value={totalCount}
-                description="Currently prescribed"
+                description="Total doses scheduled today"
                 icon={<Pill size={20} color="#6f42c1" />}
               />
             </div>
@@ -366,13 +393,16 @@ const MedicationTracker = () => {
                     No active prescriptions found for this patient.
                   </div>
                 ) : (
-                  todaySchedule.map((med) => (
-                    <MedicationScheduleItem
-                      key={med.medicationId}
-                      {...med}
-                      onToggle={handleToggle}
-                    />
-                  ))
+                  <>
+                    {todaySchedule.map((item) => (
+                      <MedicationScheduleItem
+                        key={item.scheduleId}
+                        {...item}
+                        scheduledTime={item.scheduledTime}
+                        onToggle={handleToggle}
+                      />
+                    ))}
+                  </>
                 )}
               </CustomSection>
             </div>
@@ -382,7 +412,7 @@ const MedicationTracker = () => {
               <div className="d-flex flex-column gap-3">
                 <CustomSection
                   title="Active Medications"
-                  subheader={`${totalCount} prescribed`}
+                  subheader={`${activeMedications.length} prescribed`}
                 >
                   {isLoading ? (
                     <div className="text-muted">Loading medications…</div>
@@ -392,22 +422,32 @@ const MedicationTracker = () => {
                     </div>
                   ) : (
                     <div className="d-flex flex-column gap-3">
-                      {activeMedications.map((med) => (
-                        <ActiveMedicationCard
-                          key={med.medicationId}
-                          name={med.name ?? ""}
-                          dosage={med.dosage ?? ""}
-                          frequency={med.frequency ?? undefined}
-                          isSelected={selectedMedicationId === med.medicationId}
-                          isCompleted={!!med.medicationLog?.isCompleted}
-                          onClick={() =>
-                            setSelectedMedicationId(med.medicationId)
-                          }
-                          onEdit={() =>
-                            handleEditMedication(med.medicationId ?? "")
-                          }
-                        />
-                      ))}
+                      {activeMedications.map((med) => {
+                        const scheduledDoseCount = med.scheduledAt?.length ?? 0;
+                        const completedDoseCount =
+                          med.medicationLogs?.filter((log) => log.isCompleted)
+                            .length ?? 0;
+
+                        return (
+                          <ActiveMedicationCard
+                            key={med.medicationId}
+                            name={med.name ?? ""}
+                            dosage={med.dosage ?? ""}
+                            frequency={med.frequency ?? undefined}
+                            isSelected={selectedMedicationId === med.medicationId}
+                            isCompleted={
+                              scheduledDoseCount > 0 &&
+                              completedDoseCount === scheduledDoseCount
+                            }
+                            onClick={() =>
+                              setSelectedMedicationId(med.medicationId)
+                            }
+                            onEdit={() =>
+                              handleEditMedication(med.medicationId ?? "")
+                            }
+                          />
+                        );
+                      })}
                     </div>
                   )}
                 </CustomSection>

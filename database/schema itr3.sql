@@ -55,12 +55,17 @@ CREATE TABLE public.medication_logs (
   medication_log_id uuid NOT NULL DEFAULT gen_random_uuid(),
   medication_id uuid NOT NULL,
   caregiver_id uuid NOT NULL,
+  scheduled_time time NOT NULL,
   taken_at timestamp with time zone,
   is_completed boolean,
   CONSTRAINT medication_logs_pkey PRIMARY KEY (medication_log_id),
   CONSTRAINT medication_logs_medication_id_fkey FOREIGN KEY (medication_id) REFERENCES public.medications(medication_id),
   CONSTRAINT medication_logs_caregiver_id_fkey FOREIGN KEY (caregiver_id) REFERENCES public.caregivers(caregiver_id)
 );
+
+CREATE UNIQUE INDEX medication_logs_medication_id_scheduled_time_idx
+ON public.medication_logs (medication_id, scheduled_time);
+
 CREATE TABLE public.medication_schedule (
   schedule_id uuid NOT NULL DEFAULT gen_random_uuid(),
   medication_id uuid NOT NULL,

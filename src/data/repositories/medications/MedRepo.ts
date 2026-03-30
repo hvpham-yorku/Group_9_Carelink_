@@ -17,8 +17,12 @@ export interface NewMedication {
 export interface MedRepo {
   getMedicationsByPatient(patientId: string): Promise<Medication[]>;
   getArchivedMedications(patientId: string): Promise<Medication[]>;
-  markAsTaken(medicationId: string, caregiverId: string): Promise<void>;
-  unmarkAsTaken(medicationId: string): Promise<void>;
+  markAsTaken(
+    medicationId: string,
+    scheduledTime: string,
+    caregiverId: string,
+  ): Promise<void>;
+  unmarkAsTaken(medicationId: string, scheduledTime: string): Promise<void>;
 
   addMedication(newMedication: NewMedication): Promise<Medication>;
   updateMedication(

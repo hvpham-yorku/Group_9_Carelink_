@@ -1,5 +1,5 @@
 import type { MedRepo, NewMedication } from "./MedRepo";
-import type { Medication } from "../../../types/medication";
+import type { Medication, MedicationLog } from "../../../types/medication";
 
 import { medications, teamCaregivers } from "../../data";
 
@@ -16,7 +16,11 @@ export class StubMedRepo implements MedRepo {
     );
   }
 
-  async markAsTaken(medicationId: string, caregiverId: string): Promise<void> {
+  async markAsTaken(
+    medicationId: string,
+    scheduledTime: string,
+    caregiverId: string,
+  ): Promise<void> {
     const medIndex = medications.findIndex(
       (m) => m.medicationId === medicationId,
     );
@@ -24,21 +28,42 @@ export class StubMedRepo implements MedRepo {
 
     const caregiver = teamCaregivers.find((c) => c.caregiverId === caregiverId);
 
-    medications[medIndex].medicationLog = {
+    const newLog: MedicationLog = {
       caregiverId,
       firstName: caregiver?.firstName ?? "",
       lastName: caregiver?.lastName ?? "",
       takenAt: new Date().toISOString(),
       isCompleted: true,
+      scheduledTime,
     };
+
+    const existingLogs = medications[medIndex].medicationLogs ?? [];
+    const existingIndex = existingLogs.findIndex(
+      (log) => log.scheduledTime === scheduledTime,
+    );
+
+    if (existingIndex >= 0) {
+      existingLogs[existingIndex] = newLog;
+    } else {
+      existingLogs.push(newLog);
+    }
+
+    medications[medIndex].medicationLogs = existingLogs;
   }
 
-  async unmarkAsTaken(medicationId: string): Promise<void> {
+  async unmarkAsTaken(
+    medicationId: string,
+    scheduledTime: string,
+  ): Promise<void> {
     const medIndex = medications.findIndex(
       (m) => m.medicationId === medicationId,
     );
     if (medIndex === -1) throw new Error("Medication not found");
-    medications[medIndex].medicationLog = undefined;
+
+    medications[medIndex].medicationLogs =
+      medications[medIndex].medicationLogs?.filter(
+        (log) => log.scheduledTime !== scheduledTime,
+      ) ?? [];
   }
 
   async addMedication(newMedication: NewMedication): Promise<Medication> {
@@ -53,10 +78,12 @@ export class StubMedRepo implements MedRepo {
       instructions: newMedication.instructions,
       prescribedBy: newMedication.prescribedBy,
       warnings: newMedication.warnings,
+      scheduledAt: newMedication.scheduledAt ?? [],
       isActive: true,
+      medicationLogs: [],
     };
-    medications.push(medication);
 
+    medications.push(medication);
     return medication;
   }
 
@@ -68,9 +95,13 @@ export class StubMedRepo implements MedRepo {
       (m) => m.medicationId === medicationId,
     );
     if (medIndex === -1) throw new Error("Medication not found");
-    const updatedMedication = { ...medications[medIndex], ...updates };
-    medications[medIndex] = updatedMedication;
 
+    const updatedMedication = {
+      ...medications[medIndex],
+      ...updates,
+    };
+
+    medications[medIndex] = updatedMedication;
     return updatedMedication;
   }
 
