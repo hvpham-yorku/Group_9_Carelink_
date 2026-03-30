@@ -4,6 +4,7 @@ import { authService } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
 import LoginText from "../components/login/LoginText";
 
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -90,7 +91,7 @@ const Login = () => {
                       <button
                         type="button"
                         className="btn btn-outline-light border-light-subtle text-secondary"
-                        onClick={() => setShowPassword(!showPassword)}
+                        onClick={() => setShowPassword((prev) => !prev)}
                       >
                         {showPassword ? "Hide" : "Show"}
                       </button>
