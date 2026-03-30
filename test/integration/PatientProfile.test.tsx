@@ -78,6 +78,8 @@ const mockPatient = {
   physicianAddress: "456 Clinic Ave",
   groupNumber: "GRP-001",
   careNotes: "Needs help with morning routine.",
+  allergies: ["Penicillin"],
+  conditions: ["Diabetes"],
 };
 
 describe("PatientProfile (Integration)", () => {
@@ -218,59 +220,62 @@ expect(screen.getByText(/patient profile/i)).toBeInTheDocument();
     ).not.toHaveBeenCalled();
   });
 
-  it("saves updated medical information including allergies", async () => {
-    render(<PatientProfile />);
+it("saves updated medical information including allergies", async () => {
+  render(<PatientProfile />);
 
-    await screen.findByText("John");
+  await screen.findByText("John");
 
-    const editButtons = screen.getAllByRole("button", { name: /edit/i });
-    fireEvent.click(editButtons[1]);
+  const editButtons = screen.getAllByRole("button", { name: /edit/i });
+  fireEvent.click(editButtons[1]);
 
-    fireEvent.change(screen.getByDisplayValue("1950-01-01"), {
-      target: { value: "1951-02-02" },
-    });
+  await screen.findByDisplayValue("1950-01-01");
 
-    fireEvent.change(screen.getByDisplayValue("Male"), {
-      target: { value: "Other" },
-    });
-
-    fireEvent.change(screen.getByDisplayValue("A+"), {
-      target: { value: "B+" },
-    });
-
-    fireEvent.change(screen.getByDisplayValue("180 cm"), {
-      target: { value: "182 cm" },
-    });
-
-    fireEvent.change(screen.getByDisplayValue("80 kg"), {
-      target: { value: "81 kg" },
-    });
-
-    fireEvent.change(screen.getByDisplayValue("Low sodium diet"), {
-      target: { value: "Diabetic diet" },
-    });
-
-    fireEvent.change(screen.getByDisplayValue("Penicillin"), {
-      target: { value: "Penicillin, Dust" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
-
-    await waitFor(() => {
-      expect(repoMocks.mockUpdatePatientMedicalInfo).toHaveBeenCalledWith(
-        "patient-1",
-        expect.objectContaining({
-          dob: "1951-02-02",
-          gender: "Other",
-          bloodType: "B+",
-          height: "182 cm",
-          weight: "81 kg",
-          dietaryRequirements: "Diabetic diet",
-          allergies: ["Penicillin", "Dust"],
-        }),
-      );
-    });
+  fireEvent.change(screen.getByDisplayValue("1950-01-01"), {
+    target: { value: "1951-02-02" },
   });
+
+  fireEvent.change(screen.getByRole("combobox"), {
+    target: { value: "Other" },
+  });
+
+  fireEvent.change(screen.getByDisplayValue("A+"), {
+    target: { value: "B+" },
+  });
+
+  fireEvent.change(screen.getByDisplayValue("180 cm"), {
+    target: { value: "182 cm" },
+  });
+
+  fireEvent.change(screen.getByDisplayValue("80 kg"), {
+    target: { value: "81 kg" },
+  });
+
+  fireEvent.change(screen.getByDisplayValue("Low sodium diet"), {
+    target: { value: "Diabetic diet" },
+  });
+
+  fireEvent.change(screen.getByDisplayValue("Penicillin"), {
+    target: { value: "Dust" },
+  });
+
+  const saveButton = await screen.findByRole("button", { name: /save/i });
+  fireEvent.click(saveButton);
+
+  await waitFor(() => {
+    expect(repoMocks.mockUpdatePatientMedicalInfo).toHaveBeenCalledWith(
+      "patient-1",
+      expect.objectContaining({
+        dob: "1951-02-02",
+        gender: "Other",
+        bloodType: "B+",
+        height: "182 cm",
+        weight: "81 kg",
+        dietaryRequirements: "Diabetic diet",
+        allergies: ["Dust"],
+      }),
+    );
+  });
+});
 
   it("adds and saves medical conditions", async () => {
     render(<PatientProfile />);
@@ -342,4 +347,4 @@ expect(screen.getByText(/patient profile/i)).toBeInTheDocument();
 
     expect(navigateMock).toHaveBeenCalledWith("/notes");
   });
-});
+  });

@@ -136,13 +136,17 @@ describe("MedicationTracker (Integration)", () => {
     expect(screen.getAllByText("Aspirin")).not.toHaveLength(0);
   });
 
-  it("shows stat cards correctly", async () => {
-    render(<MedicationTracker />);
+it("shows stat cards correctly", async () => {
+  render(<MedicationTracker />);
 
-    expect(await screen.findByText(/currently prescribed/i)).toBeInTheDocument();
-    expect(screen.getByText(/marked as completed/i)).toBeInTheDocument();
-    expect(screen.getByText(/still left for today/i)).toBeInTheDocument();
-  });
+  expect(await screen.findByText(/today's scheduled doses/i)).toBeInTheDocument();
+  expect(screen.getByText(/taken today/i)).toBeInTheDocument();
+  expect(screen.getByText(/^remaining$/i)).toBeInTheDocument();
+
+  expect(screen.getByText(/total doses scheduled today/i)).toBeInTheDocument();
+  expect(screen.getByText(/marked as completed/i)).toBeInTheDocument();
+  expect(screen.getByText(/still left for today/i)).toBeInTheDocument();
+});
 
   it("toggles an incomplete medication as taken", async () => {
   render(<MedicationTracker />);

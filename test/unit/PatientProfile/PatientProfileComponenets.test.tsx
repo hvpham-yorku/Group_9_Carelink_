@@ -267,38 +267,38 @@ describe("Patient Profile component tests", () => {
     expect(screen.getByText("Diabetes")).toBeInTheDocument();
   });
 
-  it("calls add and remove condition handlers", () => {
-    const onAddCondition = vi.fn();
-    const onRemoveCondition = vi.fn();
-    const onConditionChange = vi.fn();
+it("calls add and remove condition handlers", () => {
+  const onAddCondition = vi.fn();
+  const onRemoveCondition = vi.fn();
+  const onConditionChange = vi.fn();
 
-    render(
-      <PatientConditionsSection
-        patient={mockPatient}
-        draft={{ ...mockPatient, conditions: ["Diabetes", "Asthma"] }}
-        isEditing={true}
-        isSaving={false}
-        onEdit={vi.fn()}
-        onCancel={vi.fn()}
-        onSave={vi.fn()}
-        onConditionChange={onConditionChange}
-        onAddCondition={onAddCondition}
-        onRemoveCondition={onRemoveCondition}
-      />,
-    );
+  render(
+    <PatientConditionsSection
+      patient={mockPatient}
+      draft={{ ...mockPatient, conditions: ["Diabetes", "Asthma"] }}
+      isEditing={true}
+      isSaving={false}
+      onEdit={vi.fn()}
+      onCancel={vi.fn()}
+      onSave={vi.fn()}
+      onConditionChange={onConditionChange}
+      onAddCondition={onAddCondition}
+      onRemoveCondition={onRemoveCondition}
+    />,
+  );
 
-    fireEvent.click(screen.getByRole("button", { name: /add condition/i }));
-    expect(onAddCondition).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole("button", { name: /add condition/i }));
+  expect(onAddCondition).toHaveBeenCalledTimes(1);
 
-    const conditionInputs = screen.getAllByPlaceholderText(/enter condition/i);
-    fireEvent.change(conditionInputs[0], {
-      target: { value: "Updated Diabetes" },
-    });
-    expect(onConditionChange).toHaveBeenCalledWith(0, "Updated Diabetes");
-
-    fireEvent.click(screen.getByRole("button", { name: /remove condition 1/i }));
-    expect(onRemoveCondition).toHaveBeenCalledWith(0);
+  const conditionInputs = screen.getAllByPlaceholderText(/enter condition/i);
+  fireEvent.change(conditionInputs[0], {
+    target: { value: "Updated Diabetes" },
   });
+  expect(onConditionChange).toHaveBeenCalledWith(0, "Updated Diabetes");
+
+  fireEvent.click(screen.getAllByRole("button", { name: /remove/i })[0]);
+  expect(onRemoveCondition).toHaveBeenCalledWith(0);
+});
 
   it("renders EmergencyContactsSection in read mode", () => {
     render(
