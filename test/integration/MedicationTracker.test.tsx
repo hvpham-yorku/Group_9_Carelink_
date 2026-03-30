@@ -136,24 +136,35 @@ describe("MedicationTracker (Integration)", () => {
     expect(screen.getAllByText("Aspirin")).not.toHaveLength(0);
   });
 
-  it("shows stat cards correctly", async () => {
-    render(<MedicationTracker />);
+it("shows stat cards correctly", async () => {
+  render(<MedicationTracker />);
 
-    expect(await screen.findByText(/currently prescribed/i)).toBeInTheDocument();
-    expect(screen.getByText(/marked as completed/i)).toBeInTheDocument();
-    expect(screen.getByText(/still left for today/i)).toBeInTheDocument();
-  });
+  expect(await screen.findByText(/today's scheduled doses/i)).toBeInTheDocument();
+  expect(screen.getByText(/taken today/i)).toBeInTheDocument();
+  expect(screen.getByText(/^remaining$/i)).toBeInTheDocument();
+
+  expect(screen.getByText(/total doses scheduled today/i)).toBeInTheDocument();
+  expect(screen.getByText(/marked as completed/i)).toBeInTheDocument();
+  expect(screen.getByText(/still left for today/i)).toBeInTheDocument();
+});
 
   it("toggles an incomplete medication as taken", async () => {
-    render(<MedicationTracker />);
+  render(<MedicationTracker />);
 
-    const checkbox = await screen.findByLabelText(/mark metformin as taken/i);
-    fireEvent.click(checkbox);
+  const checkboxes = await screen.findAllByLabelText(/mark metformin as taken/i);
+  expect(checkboxes).toHaveLength(2);
 
-    await waitFor(() => {
-      expect(repoMocks.mockMark).toHaveBeenCalledWith("med-1", "caregiver-1");
-    });
+  fireEvent.click(checkboxes[0]);
+
+  await waitFor(() => {
+    expect(repoMocks.mockMark).toHaveBeenCalledTimes(1);
+    expect(repoMocks.mockMark).toHaveBeenCalledWith(
+      "med-1",
+      "2099-01-01T08:00:00",
+      "caregiver-1",
+    );
   });
+});
 
   it("opens add medication modal", async () => {
     render(<MedicationTracker />);
