@@ -1,3 +1,14 @@
+export interface MedicationLog {
+  medicationLogId?: string;
+  medicationId?: string;
+  caregiverId: string;
+  firstName: string;
+  lastName: string;
+  takenAt: string;
+  isCompleted: boolean;
+  scheduledTime: string;
+}
+
 export interface Medication {
   medicationId: string;
   careTeamId?: string;
@@ -14,12 +25,9 @@ export interface Medication {
   // supabase joins
   scheduledAt?: string[];
 
-  // supabase join for medications and medicationLogs
-  medicationLog?: {
-    caregiverId: string;
-    firstName: string;
-    lastName: string;
-    takenAt: string;
-    isCompleted: boolean;
-  };
+  // single log used by schedule row UI
+  medicationLog?: MedicationLog;
+
+  // all logs for this medication
+  medicationLogs?: MedicationLog[];
 }

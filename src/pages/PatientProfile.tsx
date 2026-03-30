@@ -57,7 +57,11 @@ const PatientProfile = () => {
       try {
         const data = await patientRepo.getPatientDetails(selectedPatientId);
         setPatient(data);
-        setDraftPatient(data);
+        setDraftPatient({
+          ...data,
+          allergies: [...(data.allergies || [])],
+          conditions: [...(data.conditions || [])],
+        });
       } catch (err) {
         console.error("Failed to load patient profile:", err);
         setPatient(null);
@@ -73,13 +77,27 @@ const PatientProfile = () => {
   // Start editing one section at a time
   const startEditing = (section: EditableSection) => {
     if (!patient) return;
-    setDraftPatient({ ...patient });
+
+    setDraftPatient({
+      ...patient,
+      allergies: [...(patient.allergies || [])],
+      conditions: [...(patient.conditions || [])],
+    });
+
     setEditingSection(section);
   };
 
   // Cancel edits and reset draft back to saved patient data
   const cancelEditing = () => {
-    setDraftPatient(patient ? { ...patient } : null);
+    setDraftPatient(
+      patient
+        ? {
+            ...patient,
+            allergies: [...(patient.allergies || [])],
+            conditions: [...(patient.conditions || [])],
+          }
+        : null,
+    );
     setEditingSection(null);
   };
 
@@ -113,7 +131,9 @@ const PatientProfile = () => {
             height: draftPatient.height,
             weight: draftPatient.weight,
             dietaryRequirements: draftPatient.dietaryRequirements,
-            allergies: draftPatient.allergies,
+            allergies: (draftPatient.allergies || [])
+              .map((allergy) => allergy.trim())
+              .filter(Boolean),
           },
         );
       } else if (section === "insurance") {
@@ -137,7 +157,9 @@ const PatientProfile = () => {
         );
       } else if (section === "conditions") {
         updated = await patientRepo.updatePatientConditions(patient.patientId, {
-          conditions: draftPatient.conditions,
+          conditions: (draftPatient.conditions || [])
+            .map((condition) => condition.trim())
+            .filter(Boolean),
         });
       } else if (section === "emergency") {
         updated = await patientRepo.updatePatientEmergencyContact(
@@ -159,7 +181,11 @@ const PatientProfile = () => {
 
       // Update both saved data and draft after a successful save
       setPatient(updated);
-      setDraftPatient(updated);
+      setDraftPatient({
+        ...updated,
+        allergies: [...(updated.allergies || [])],
+        conditions: [...(updated.conditions || [])],
+      });
       setEditingSection(null);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -188,18 +214,39 @@ const PatientProfile = () => {
     });
   };
 
-  // Convert comma-separated allergies into an array
-  const handleAllergyChange = (value: string) => {
+  // Update one allergy in the allergies list
+  const handleAllergyChange = (index: number, value: string) => {
     if (!draftPatient) return;
 
-    const allergyArray = value
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
+    const updatedAllergies = [...(draftPatient.allergies || [])];
+    updatedAllergies[index] = value;
 
     setDraftPatient({
       ...draftPatient,
-      allergies: allergyArray,
+      allergies: updatedAllergies,
+    });
+  };
+
+  // Add a new empty allergy field
+  const addAllergy = () => {
+    if (!draftPatient) return;
+
+    setDraftPatient({
+      ...draftPatient,
+      allergies: [...(draftPatient.allergies || []), ""],
+    });
+  };
+
+  // Remove an allergy by index
+  const removeAllergy = (index: number) => {
+    if (!draftPatient) return;
+
+    const updatedAllergies = [...(draftPatient.allergies || [])];
+    updatedAllergies.splice(index, 1);
+
+    setDraftPatient({
+      ...draftPatient,
+      allergies: updatedAllergies,
     });
   };
 
@@ -268,19 +315,16 @@ const PatientProfile = () => {
 
   return (
     <div className="container py-4">
-      {/* Page header */}
       <CustomTitleBanner
         title="Patient Profile"
         subheader="View and manage patient details"
       />
 
-      {/* Top patient summary banner */}
       <div className="mb-4">
         <PatientInfoBanner patient={bannerPatient} />
       </div>
 
       <div className="row g-4">
-        {/* Left column */}
         <div className="col-lg-4">
           <PatientContactSection
             patient={patient}
@@ -303,6 +347,8 @@ const PatientProfile = () => {
             onSave={() => saveSection("medical")}
             onChange={handleFieldChange}
             onAllergyChange={handleAllergyChange}
+            onAddAllergy={addAllergy}
+            onRemoveAllergy={removeAllergy}
           />
 
           <PatientInsuranceSection
@@ -317,7 +363,6 @@ const PatientProfile = () => {
           />
         </div>
 
-        {/* Right column */}
         <div className="col-lg-8">
           <EmergencyContactsSection
             patient={patient}

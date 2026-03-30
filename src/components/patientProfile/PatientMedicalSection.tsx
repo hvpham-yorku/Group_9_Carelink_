@@ -1,4 +1,4 @@
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Plus, X } from "lucide-react";
 import CustomSection from "../ui/CustomSection";
 import type { AllPatientInfo } from "../../types/patient";
 import SectionEditActions from "./SectionEditActions";
@@ -12,7 +12,9 @@ interface Props {
   onCancel: () => void;
   onSave: () => void;
   onChange: (field: keyof AllPatientInfo, value: string) => void;
-  onAllergyChange: (value: string) => void;
+  onAllergyChange: (index: number, value: string) => void;
+  onAddAllergy: () => void;
+  onRemoveAllergy: (index: number) => void;
 }
 
 const PatientMedicalSection = ({
@@ -25,6 +27,8 @@ const PatientMedicalSection = ({
   onSave,
   onChange,
   onAllergyChange,
+  onAddAllergy,
+  onRemoveAllergy,
 }: Props) => {
   return (
     <CustomSection
@@ -128,20 +132,58 @@ const PatientMedicalSection = ({
         </div>
 
         <div>
-          <div className="text-muted small mb-1">Allergies</div>
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <div className="text-muted small mb-0">Allergies</div>
+
+            {isEditing && (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+                onClick={onAddAllergy}
+              >
+                <Plus size={14} />
+                Add Allergy
+              </button>
+            )}
+          </div>
 
           {isEditing ? (
-            <input
-              className="form-control"
-              placeholder="Separate allergies with commas"
-              value={draft.allergies?.join(", ") || ""}
-              onChange={(e) => onAllergyChange(e.target.value)}
-            />
+            <div className="d-flex flex-column gap-2">
+              {(draft.allergies || []).length > 0 ? (
+                draft.allergies!.map((allergy, index) => (
+                  <div
+                    key={`allergy-${index}`}
+                    className="d-flex align-items-center gap-2"
+                  >
+                    <input
+                      className="form-control"
+                      value={allergy}
+                      onChange={(e) =>
+                        onAllergyChange(index, e.target.value)
+                      }
+                      placeholder="Enter allergy"
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-outline-danger btn-sm d-inline-flex align-items-center justify-content-center"
+                      onClick={() => onRemoveAllergy(index)}
+                      aria-label={`Remove allergy ${index + 1}`}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-muted small">
+                  No allergies added yet.
+                </div>
+              )}
+            </div>
           ) : patient.allergies?.length ? (
             <div className="d-flex flex-wrap gap-2">
-              {patient.allergies.map((a, i) => (
+              {patient.allergies.map((allergy, index) => (
                 <span
-                  key={i}
+                  key={`allergy-badge-${index}`}
                   className="d-inline-flex align-items-center gap-1"
                   style={{
                     backgroundColor: "#fef2f2",
@@ -154,7 +196,7 @@ const PatientMedicalSection = ({
                   }}
                 >
                   <AlertCircle size={12} />
-                  {a}
+                  {allergy}
                 </span>
               ))}
             </div>

@@ -1,8 +1,11 @@
 import type { NewMedication, MedRepo } from "./MedRepo";
-import type { Medication } from "../../../types/medication";
+import type { Medication, MedicationLog } from "../../../types/medication";
 import { supabase } from "../../../lib/supabase";
 
-type MedicationLog = {
+type MedicationLogRow = {
+  medication_log_id?: string | null;
+  medication_id?: string | null;
+  scheduled_time?: string | null;
   is_completed: boolean | null;
   caregiver_id: string | null;
   taken_at: string | null;
@@ -28,8 +31,22 @@ type MedicationRow = {
   prescribed_by?: string | null;
   warnings?: string | null;
   is_active?: boolean | null;
-  medication_logs?: MedicationLog[];
+  medication_logs?: MedicationLogRow[];
   medication_schedule?: MedicationSchedule[];
+};
+
+const normalizeTime = (time: string) => {
+  if (!time) return "";
+
+  if (/^\d{2}:\d{2}:\d{2}$/.test(time)) return time;
+  if (/^\d{2}:\d{2}$/.test(time)) return `${time}:00`;
+
+  const date = new Date(time);
+  if (!Number.isNaN(date.getTime())) {
+    return date.toTimeString().split(" ")[0];
+  }
+
+  return time;
 };
 
 export class ApiMedRepo implements MedRepo {
@@ -54,6 +71,9 @@ export class ApiMedRepo implements MedRepo {
         is_active,
         medication_schedule (scheduled_at),
         medication_logs (
+          medication_log_id,
+          medication_id,
+          scheduled_time,
           caregiver_id,
           taken_at,
           is_completed,
@@ -71,12 +91,25 @@ export class ApiMedRepo implements MedRepo {
   }
 
   formatMedication = (row: MedicationRow, isActive: boolean): Medication => {
-    const activeLog =
-      row.medication_logs?.find((l) => l.is_completed === true) ?? null;
     const scheduleTimes =
       row.medication_schedule
         ?.map((s) => s.scheduled_at)
-        .filter((t): t is string => t !== null) ?? [];
+        .filter((t): t is string => t !== null)
+        .map((t) => normalizeTime(t)) ?? [];
+
+    const medicationLogs: MedicationLog[] =
+      row.medication_logs
+        ?.filter((log) => log.scheduled_time !== null)
+        .map((log) => ({
+          medicationLogId: log.medication_log_id ?? "",
+          medicationId: log.medication_id ?? "",
+          caregiverId: log.caregiver_id ?? "",
+          takenAt: log.taken_at ?? "",
+          isCompleted: !!log.is_completed,
+          scheduledTime: normalizeTime(log.scheduled_time ?? ""),
+          firstName: log.caregivers?.first_name ?? "",
+          lastName: log.caregivers?.last_name ?? "",
+        })) ?? [];
 
     return {
       medicationId: row.medication_id,
@@ -91,15 +124,7 @@ export class ApiMedRepo implements MedRepo {
       warnings: row.warnings ?? "",
       scheduledAt: scheduleTimes,
       isActive: row.is_active ?? isActive,
-      medicationLog: activeLog
-        ? {
-            caregiverId: activeLog.caregiver_id ?? "",
-            takenAt: activeLog.taken_at ?? "",
-            isCompleted: true,
-            firstName: activeLog.caregivers?.first_name ?? "",
-            lastName: activeLog.caregivers?.last_name ?? "",
-          }
-        : undefined,
+      medicationLogs,
     };
   };
 
@@ -111,10 +136,40 @@ export class ApiMedRepo implements MedRepo {
     return this.fetchMedications(patientId, false);
   }
 
-  async markAsTaken(medicationId: string, caregiverId: string): Promise<void> {
+  async markAsTaken(
+    medicationId: string,
+    scheduledTime: string,
+    caregiverId: string,
+  ): Promise<void> {
+    const normalizedTime = normalizeTime(scheduledTime);
+
+    const { data: existingLog, error: fetchError } = await supabase
+      .from("medication_logs")
+      .select("medication_log_id")
+      .eq("medication_id", medicationId)
+      .eq("scheduled_time", normalizedTime)
+      .maybeSingle();
+
+    if (fetchError) throw fetchError;
+
+    if (existingLog) {
+      const { error } = await supabase
+        .from("medication_logs")
+        .update({
+          caregiver_id: caregiverId,
+          taken_at: new Date().toISOString(),
+          is_completed: true,
+        })
+        .eq("medication_log_id", existingLog.medication_log_id);
+
+      if (error) throw error;
+      return;
+    }
+
     const { error } = await supabase.from("medication_logs").insert([
       {
         medication_id: medicationId,
+        scheduled_time: normalizedTime,
         caregiver_id: caregiverId,
         taken_at: new Date().toISOString(),
         is_completed: true,
@@ -124,12 +179,20 @@ export class ApiMedRepo implements MedRepo {
     if (error) throw error;
   }
 
-  async unmarkAsTaken(medicationId: string): Promise<void> {
+  async unmarkAsTaken(
+    medicationId: string,
+    scheduledTime: string,
+  ): Promise<void> {
+    const normalizedTime = normalizeTime(scheduledTime);
+
     const { error } = await supabase
       .from("medication_logs")
-      .update({ is_completed: false })
+      .update({
+        is_completed: false,
+        taken_at: null,
+      })
       .eq("medication_id", medicationId)
-      .eq("is_completed", true);
+      .eq("scheduled_time", normalizedTime);
 
     if (error) throw error;
   }
@@ -156,7 +219,9 @@ export class ApiMedRepo implements MedRepo {
 
     if (error) throw error;
 
-    const scheduledTimes = newMedication.scheduledAt ?? [];
+    const scheduledTimes = (newMedication.scheduledAt ?? []).map((time) =>
+      normalizeTime(time),
+    );
 
     if (scheduledTimes.length > 0) {
       const { error: scheduleError } = await supabase
@@ -184,6 +249,7 @@ export class ApiMedRepo implements MedRepo {
       warnings: data.warnings ?? "",
       scheduledAt: scheduledTimes,
       isActive: data.is_active ?? true,
+      medicationLogs: [],
     };
   }
 
@@ -208,7 +274,13 @@ export class ApiMedRepo implements MedRepo {
 
     if (error) throw error;
 
+    let updatedScheduleTimes: string[] = [];
+
     if (updates.scheduledAt !== undefined) {
+      updatedScheduleTimes = updates.scheduledAt.map((time) =>
+        normalizeTime(time),
+      );
+
       const { error: deleteError } = await supabase
         .from("medication_schedule")
         .delete()
@@ -216,11 +288,11 @@ export class ApiMedRepo implements MedRepo {
 
       if (deleteError) throw deleteError;
 
-      if (updates.scheduledAt.length > 0) {
+      if (updatedScheduleTimes.length > 0) {
         const { error: insertError } = await supabase
           .from("medication_schedule")
           .insert(
-            updates.scheduledAt.map((time) => ({
+            updatedScheduleTimes.map((time) => ({
               medication_id: medicationId,
               scheduled_at: time,
             })),
@@ -241,8 +313,11 @@ export class ApiMedRepo implements MedRepo {
       instructions: data.instructions ?? "",
       prescribedBy: data.prescribed_by ?? "",
       warnings: data.warnings ?? "",
-      scheduledAt: updates.scheduledAt ?? [],
+      scheduledAt: updates.scheduledAt
+        ? updates.scheduledAt.map((time) => normalizeTime(time))
+        : updatedScheduleTimes,
       isActive: data.is_active ?? true,
+      medicationLogs: [],
     };
   }
 
