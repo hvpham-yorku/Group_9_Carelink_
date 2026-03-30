@@ -1,3 +1,6 @@
+// ITRR3
+// Tara Mivehchi
+// Notes Page
 // ===== IMPORTS =====
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, NotebookPen } from "lucide-react";
@@ -33,6 +36,10 @@ const TIME_FILTER_DAYS: Record<"week" | "month" | "year", number> = {
   year: 365,
 };
 
+function toSafeDate(value: string | null | undefined): Date {
+  return value ? new Date(value) : new Date(0);
+}
+
 // ===== COMPONENT =====
 export default function Notes() {
   // ===== CONTEXT =====
@@ -44,11 +51,10 @@ export default function Notes() {
   } = usePatient();
 
   // ===== STATE: DATA =====
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useState<NoteWithDate[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
 
   // ===== STATE: FORM =====
   const [title, setTitle] = useState("");
@@ -106,7 +112,7 @@ export default function Notes() {
       .then((data: Note[]) => {
         const normalized: NoteWithDate[] = data.map((note) => ({
           ...note,
-          createdAtDate: new Date(note.createdAt),
+          createdAtDate: toSafeDate(note.createdAt),
         }));
         setNotes(normalized);
       })
@@ -173,7 +179,10 @@ export default function Notes() {
         const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
         if (timeFilter in TIME_FILTER_DAYS) {
-          return diffDays <= TIME_FILTER_DAYS[timeFilter as "week" | "month" | "year"];
+          return (
+            diffDays <=
+            TIME_FILTER_DAYS[timeFilter as "week" | "month" | "year"]
+          );
         }
 
         return true;
@@ -208,9 +217,7 @@ export default function Notes() {
 
         if (urgentA !== urgentB) return urgentB - urgentA;
 
-        return (
-          b.createdAtDate.getTime() - a.createdAtDate.getTime()
-        );
+        return b.createdAtDate.getTime() - a.createdAtDate.getTime();
       });
     }
 
@@ -219,11 +226,10 @@ export default function Notes() {
 
   // ===== TIMELINE GROUPING =====
   const timelineGroups = useMemo(() => {
-    const map = new Map<string, Note[]>();
+    const map = new Map<string, NoteWithDate[]>();
 
     for (const note of filteredNotes) {
-      if (!note.createdAt) continue;
-      const key = dayKey(note.createdAt);
+      const key = dayKey(note.createdAtDate.toISOString());
       const group = map.get(key) ?? [];
       group.push(note);
       map.set(key, group);
@@ -251,12 +257,12 @@ export default function Notes() {
   }
 
   function validateForm() {
-  if (!user) return "You must be logged in.";
-  if (!selectedPatientId) return "No patient selected.";
-  if (!title.trim()) return "Title is required.";
-  if (!description.trim()) return "Description is required.";
-  if (!categoryId) return "Please select a category.";
-  return null;
+    if (!user) return "You must be logged in.";
+    if (!selectedPatientId) return "No patient selected.";
+    if (!title.trim()) return "Title is required.";
+    if (!description.trim()) return "Description is required.";
+    if (!categoryId) return "Please select a category.";
+    return null;
   }
 
   // ===== ACTIONS: EDITOR =====
@@ -298,25 +304,24 @@ export default function Notes() {
       return;
     }
 
+    if (!user || !selectedPatientId) return;
+
     setFormError(null);
 
     try {
       if (selectedNote) {
-        const updated = await repositories.note.updateNote(
-          selectedNote.noteId,
-          {
-            title: title.trim(),
-            description: description.trim(),
-            categoryId,
-            isUrgent,
-          },
-        );
+        const updated = await repositories.note.updateNote(selectedNote.noteId, {
+          title: title.trim(),
+          description: description.trim(),
+          categoryId,
+          isUrgent,
+        });
 
         setNotes((prev) =>
           prev.map((note) =>
             note.noteId === selectedNote.noteId
-            ? { ...updated, createdAtDate: new Date(updated.createdAt) }
-            : note,
+              ? { ...updated, createdAtDate: toSafeDate(updated.createdAt) }
+              : note,
           ),
         );
       } else {
@@ -331,9 +336,9 @@ export default function Notes() {
         });
 
         setNotes((prev) => [
-          { ...created, createdAtDate: new Date(created.createdAt) },
+          { ...created, createdAtDate: toSafeDate(created.createdAt) },
           ...prev,
-        ]);   
+        ]);
         setSelectedId(created.noteId);
       }
 
@@ -366,12 +371,9 @@ export default function Notes() {
 
   return (
     <div className="container py-3">
-      {/* ===== HEADER ===== */}
       <NotesHeader savedFlash={savedFlash} onNew={handleNew} />
 
-      {formError && (
-        <div className="alert alert-danger">{formError}</div>
-      )}
+      {formError && <div className="alert alert-danger">{formError}</div>}
 
       {!selectedPatientId && !contextLoading ? (
         <div className="alert alert-info">
@@ -380,10 +382,8 @@ export default function Notes() {
       ) : (
         <>
           <div className="row g-3 mb-3">
-            {/* ===== TOP DASHBOARD ROW: STATS + SEARCH/FILTER ===== */}
             <div className="col-12">
               <div className="row g-3 align-items-stretch">
-                {/* ===== STATS CARDS ===== */}
                 <div className="col-12 col-xl-5">
                   <div className="row g-3 h-100">
                     <div className="col-12 col-md-6">
@@ -419,7 +419,6 @@ export default function Notes() {
                   </div>
                 </div>
 
-                {/* ===== SEARCH + FILTER ===== */}
                 <div className="col-12 col-xl-7">
                   <div className="card shadow-sm border-0 h-100">
                     <div className="card-body d-flex flex-column justify-content-center">
@@ -482,10 +481,8 @@ export default function Notes() {
               </div>
             </div>
 
-            {/* ===== TIMELINE + SIDE EDITOR LAYOUT ===== */}
             <div className="col-12">
               <div className="row g-3 align-items-start">
-                {/* ===== TIMELINE ===== */}
                 <div className={isEditorOpen ? "col-12 col-xl-6" : "col-12"}>
                   <CareTimelineContainer
                     notes={filteredNotes}
@@ -500,7 +497,6 @@ export default function Notes() {
                   />
                 </div>
 
-                {/* ===== SIDE EDITOR ===== */}
                 {isEditorOpen && (
                   <div className="col-12 col-xl-6">
                     <NewNoteContainer
