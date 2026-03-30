@@ -1,194 +1,318 @@
-# CareLink Log File ITR2
+# CareLink Log File ITR3
 
 ## Meeting Minutes & Developmental Summary
 ### Meeting One
-February 21, 2026 @ 7:00 PM
-Location: Online (Discord)
+March 9, 2026 @ 5:00 PM – 6:00 PM  
+Location: Online  
 
 **Agenda**
-- Plan ITR2 functionality goals
-- Discuss database integration
-- Review upcoming pages and features
+- Prepare for ITR 2 extended deadline  
+- Identify remaining tasks  
+- Assign responsibilities  
 
 **Discussion**
-The team met to plan the development goals for ITR 2. Initial discussions focused on how database integration would be structured and how the login page logic would interact with stored data. The team also discussed redesigning the dashboard so that it relied fully on reusable components to improve maintainability and scalability.
+The team met to review progress for ITR 2 and identify remaining work needed before the extended deadline. The main focus was on completing integration testing and finalizing core functionality for the Medication Tracker page.
 
-Deployment options for the application were also discussed, including whether the final system should be deployed as a web application, website, or mobile app. This decision was left open for further discussion.
-
-The team also reviewed user roles within the system. Initially multiple roles were considered, but the team decided to simplify the system to support only one role, the caretaker. This decision was made to simplify database structure and allow the application to function locally without complex role management.
-
-Additional pages were discussed, including the Patient Profile page and the Landing page, which were both prioritized for development in ITR 2. The Appointment and Scheduling page was discussed but pushed to ITR 3 due to time constraints.
+The Medication Tracker required additional work to support Add, Edit, and Delete functionality. The team discussed ensuring these features were properly connected to the backend and functioning as expected before submission.
 
 **Decisions**
-- System roles simplified to a single caretaker role
-- Patient Profile page and Landing page prioritized for ITR 2
-- Appointment scheduling feature moved to ITR 3
+- Prioritize integration testing  
+- Complete Medication Tracker Add/Edit/Delete features  
+- Focus on stabilizing existing features  
 
-Next Meeting: March 1, 2026
+Next Meeting: March 15, 2026  
 
 
 ### Meeting Two
-March 1, 2026 @ 10:00 AM
-Location: Online
+March 15, 2026 @ 12:00 PM – 1:00 PM  
+Location: Online  
 
 **Agenda**
-- Prepare Deliverable 1 presentation
-- Clarify grading rubric
-- Review presentation slides
-- Assign presentation responsibilities
+- Plan ITR 3 development  
+- Review remaining features across all pages  
+- Identify system-wide improvements  
 
 **Discussion**
-The team met to prepare for Deliverable 1. The rubric was reviewed to ensure all required sections were addressed in the presentation. The group went through the slides together and discussed the flow of the presentation to ensure that the development process and system functionality were clearly communicated.
+The team met to plan development for ITR 3 and reviewed all pages and features that needed to be completed. Discussions covered improvements across the dashboard, medication tracker, notes, tasks, patient profile, and backend system.
 
-Responsibilities for presenting different sections were divided among team members so that each person would present a portion of the project. This meeting focused on organizing the structure of the presentation and ensuring that the demo would clearly demonstrate the system’s current functionality.
+The dashboard required improvements such as integrating appointments, displaying recent notes, and improving UI consistency. The Medication Tracker required full database integration, improved scheduling logic, and support for tracking missed doses and adherence.
+
+The team also discussed implementing system-wide features such as notifications, alerts, analytics, and data export. Additional focus was placed on improving collaboration between caregivers through team and role-based functionality.
+
+Overall, the meeting focused on outlining the full scope of ITR 3 and ensuring all core features were planned before development continued.
 
 **Decisions**
-Slides divided among team members
-Presentation responsibilities assigned
+- Expand Medication Tracker functionality and tracking  
+- Improve dashboard integration and UI  
+- Implement notes, tasks, and patient profile refinements  
+- Begin planning for backend data persistence and system-wide features  
 
-Next Meeting: March 2, 2026
+Next Meeting: March 16, 2026  
 
 
 ### Meeting Three
-March 2, 2026 @1:00PM
-Location: Online
+March 16, 2026  
+Location: In Person  
 
 **Agenda**
-- Reassess ITR 2 goals
-- Prioritize features
-- Determine which features should move to ITR 3
+- Progress check  
+- Review completed features  
+- Identify remaining work  
 
 **Discussion**
-The team met to reassess the scope of ITR 2 to ensure development remained manageable within the iteration timeline. After reviewing the current progress of the project, the team decided that several planned features would be postponed to ITR 3 in order to focus on strengthening the overall system structure.
-
-Features that were moved to ITR 3 included expanded Medication Tracker functionality such as Add, Edit, and Delete capabilities, the User Profile page, and the Appointment page.
-
-The team also partially implemented the Patient Profile page during ITR 2, but decided that the page required additional improvements and refinement. Further development and polishing of the Patient Profile page will therefore continue in ITR 3.
-
-New priorities for ITR 2 were also established. The team shifted focus toward improving collaboration between caregivers by introducing the concept of team-based care coordination. This included the development of a Teams feature and the ability for caregivers to manage multiple patients within a team structure. Sign In and Sign Out functionality was also prioritized to support secure access to the system.
+The team met in person to review individual progress on assigned tasks. Updates were shared on completed features and ongoing development across different pages. The team discussed what still needed to be completed for ITR 3 and identified areas that required additional refinement.
 
 **Decisions**
-- Medication Tracker expansion moved to ITR 3
-- User Profile page moved to ITR 3
-- Appointment page moved to ITR 3
-- Patient Profile page partially implemented and pushed for further development in ITR 3
-- New focus placed on Teams feature and multi-patient support
-- Sign In / Sign Out functionality prioritized
+- Continue development on assigned pages  
+- Focus on completing remaining features for ITR 3  
 
-Next Meeting: TBD
+Next Meeting: March 23, 2026  
+
+
+### Meeting Four
+March 23, 2026  
+Location: In Person  
+
+**Agenda**
+- Progress updates  
+- Final feature completion planning  
+
+**Discussion**
+The team met to provide updates on progress and discuss final steps required before completing ITR 3. The focus was on ensuring all pages were near completion and identifying any remaining UI or backend work.
+
+**Decisions**
+- Prioritize completing remaining features  
+- Prepare for final system review  
+
+Next Meeting: March 26, 2026  
+
+
+### Meeting Five
+March 26, 2026  
+Location: Online  
+
+**Agenda**
+- Final system review  
+- UI consistency across all pages  
+- Dashboard and Appointment page updates  
+
+**Discussion**
+The team met to go through each page and review what still needed to be completed. A major focus was ensuring UI consistency across the entire application. The Medication Tracker page was identified as the reference for UI design, and all other pages were expected to align with it.
+
+The Dashboard and Appointment pages required refactoring to use reusable components instead of custom-built sections. The team discussed standardizing buttons using the shared button component and potentially creating a reusable component for edit, delete, and status actions.
+
+Additional improvements included removing unnecessary UI elements, improving navigation through section cards, and ensuring loading states were consistent across pages.
+
+The Patient Profile required completion of edit and add functionality, while other pages primarily needed UI updates and backend integration.
+
+**Decisions**
+- Refactor Dashboard and Appointment pages to use shared components  
+- Standardize button styles across the application  
+- Use Medication Tracker as the UI reference  
+- Ensure consistent loading indicators across pages  
+- Complete Patient Profile edit functionality  
+- Finalize backend integration across all pages  
+
+Next Meeting: TBD  
 
 
 ## Rationale Behind Major Changes
-### Database Platform Change (Firebase -> Supabase)
-During the early planning stages of ITR 2, the team initially intended to use Firebase for database integration. Firebase was selected due to its popularity for web applications and its support for real-time data synchronization.
+### Backend Rework
 
-However, during database planning and early testing, the team determined that Firebase did not support the relational data structure required for the project as effectively as anticipated. CareLink requires storing and organizing data across multiple related entities, such as caregivers, teams, and patients, which benefit from a relational database structure.
+At the end of ITR 2, it was realized that in order to switch to the stub database, more than 1 line of code needed to be changed and that the current structure of the backend would not support new features planned in ITR 3. The decision was made to refactor and rework the entire backend of the website.
 
-To better support this structure, the team transitioned to Supabase. Supabase provides a PostgreSQL-based relational database that allows clearer relationships between tables and more structured data organization.
+A new folder structure, data repositories and classes with interfaces were added to allow an easy switch between the real database and the stub database. Furthermore this new version would support any changes or new features that were planned to be added to the website, with easy implementation.
 
-This change allowed the team to better support the relationships between caregivers, teams, and patients while also providing a more scalable database structure for future iterations.
+### Cut Features
 
-### Feature Prioritization Adjustment
-During ITR 2 planning, the team reassessed the scope of planned features to ensure development remained realistic within the iteration timeline. Several planned enhancements were postponed to ITR 3, including expanded Medication Tracker functionality (Add, Edit, Delete), the User Profile page, and the Appointment page.
+Dashboard live schedule was cut from ITR 3 due to there being not enough time to add it
 
-The Patient Profile page was partially implemented during ITR 2, but the team decided that additional improvements and refinements were required before it could function as intended. As a result, further development and polishing of this page was pushed to ITR 3.
-
-These adjustments allowed the team to focus on strengthening the core structure of the application while preparing the remaining features for a more complete implementation in the next iteration.
-
-### Focus on Team-Based Care Coordination 
-CareLink was originally designed as a platform where multiple caregivers could coordinate care for a single patient. During ITR 2 planning, the team expanded this concept into a team-based care structure that allows caregivers to manage multiple patients across different teams.
-
-Under this system, caregivers can join different teams and collaborate with other caregivers to manage the care of various patients. This allows caregivers to participate in multiple care teams and support different patients depending on the situation.
-
-This approach reflects real-world caregiving environments where responsibilities are often shared among multiple individuals and where coordination between caregivers is essential. Prioritizing this structure during ITR 2 helped ensure that the system architecture supports collaborative caregiving and can scale to accommodate more complex care networks in future iterations.
+Multiple Tags - Originally Tasks and Notes were planned to support adding multiple tags to 1 task/note. However due to time constraints this feature was cut from ITR 3.
 
 ## Development Tasks
 
-### Tara
-Tara – Notes Page and Component Refactoring
+### Saneea Khalid
+Navigation Bar Development:
 
-- Restructuring Notes based on the database version of Notes.
-- implemented  logic for creating and displaying notes and ensured notes were properly organized within the application.
-- created and implemented test cases for the notes functionality and performed debugging to ensure the feature worked correctly when connected to the database.
-- 8 different components for better navigation and simplicity.
-Estimated Time: 15 hours
-Actual Time spent: 10 hours
+Refined the top navigation bar to improve layout, spacing, and overall usability. Updated the patient switcher dropdown to better reflect the selected patient and ensured it integrates smoothly with the patient context. Improved styling and alignment so the navigation is consistent with the rest of the application UI.
+
+Estimated Time: 6 hours  
+Actual Time Spent: 5 hours  
+
+Patient Profile Development:
+
+Expanded and completed the Patient Profile page by adding editable fields for key patient information, including name, date of birth, and contact details. Implemented dynamic age calculation based on date of birth to ensure data consistency. Added additional patient details such as mobility, dietary requirements, and physician specialty.
+
+Refactored the page by breaking a large file into smaller reusable components (e.g., contact, medical, and additional info sections) to improve readability and maintainability. Updated the layout to better match the Figma design and improved overall UI structure and consistency.
+
+Estimated Time: 8 hours  
+Actual Time Spent: 10 hours  
+
+
+Medication Tracker Development:
+
+Completed and refined the Medication Tracker page into a full medication management interface. Implemented the medication schedule with support for multiple dose times and improved visual states (taken, pending, overdue). Enhanced the ability to mark medications as taken/un-taken with clear visual feedback.
+
+Expanded the medication details section to include additional fields such as purpose, instructions, prescribed by, warnings, and start date. Improved the add/edit medication flow using a modal and connected it to backend data updates.
+
+Added archived medication functionality with a dedicated view accessible from the UI. Introduced a 7-day adherence overview to track medication completion trends. Refactored the page to ensure consistent use of reusable components and simplified the overall code structure.
+
+Estimated Time: 10 hours  
+Actual Time Spent: 12 hours  
+
+
+Testing (Unit & Integration Testing):
+
+Implemented unit and integration testing across both the Patient Profile and Medication Tracker features to ensure functionality and reliability.
+
+For the Patient Profile, tested component rendering, edit/save interactions, and correct updating of patient data when switching between patients. Verified that dynamic fields such as age update correctly based on user input.
+
+For the Medication Tracker, tested medication scheduling behaviour, toggle interactions for marking medications as taken/un-taken, and correct rendering of medication data. Verified integration between components and backend data flow, including add/edit actions and UI state updates.
+
+Used Vitest and React Testing Library to simulate user interactions and confirm expected behaviour across components and pages.
+
+Estimated Time: 6 hours  
+Actual Time Spent: 4 hours  
+
+### Tara
+
+Notes Page:
+
+Implemented Stats Card (Today's Notes, Urgent Notes), Search bar, Filter by time,Urgent Checkbox, Urgent pop ups in orange and some UI design Changes (Colour theme,Lucid Stickers,New Notes pop up page, etc).
+
+Estimated Time: 12 Hours
+
+Actual Time: 10 Hours
+
+Refactoring:
+
+New Stats Card component, Updating the previous Components.
+
+Estimated Time: 6 Hours
+
+Actual Time: 6 Hours 
+
+Implemented Unit & Integration Testing:
+
+Estimated Time: 4 Hours
+
+Actual Time: 6 Hours
+
+- As a Caregiver, I want to be able to create a new note.
+- As a Caregiver, I want to view previous notes.
+- As a Caregiver, I want to edit existing notes.
+- As a Caregiver, I want to delete notes if needed.
+- As a Caregiver, I want to see notes in chronological order in CareTimeLine.
+- As a Caregiver, I want to see a list of Urgent Notes.
 
 ### Jose Urbina
 
-Task Management Development Tasks:
-- Ability to edit existing tasks
-- Ability to delete existing tasks
+Tasks Page:
 
-Estimated Time: 16 hours
-Actual Time spent: 5 hours
+Implemented Stats Cards displaying: total amount of tasks, completed tasks, overdue tasks, and pending tasks. The UI design was also improved.
 
-Backend / Database integration Development Task:
-- Business Logic layer
-- Persistence Layer
-- Creating Database and Database integration
+Estimated Time: 5 hours
 
-Estimated Time: 3 days
+Actual Time: 3 hours
 
-Actual Time spent: 3 days
+Teams Page:
+
+Implemented: 
+- The ability to switch between teams the user is apart of. 
+- Stat Cards displaying: Team members, number of patients, user role, Team join code.
+- Edit Team Details options which allows the user to edit their team details (team name, user roles, remove members, add new tags)
+
+The overall page UI design was completely reworked to match the websites design. 
+
+Estimated Time: 10 hours
+
+Actual Time: 12 hours
+
+BackEnd Rework:
+
+Refactor on the services folder. There is a folder called Services which held the files for database querying. Switching to the stub database required more than changing 1 line of code. 
+
+A new folder structure was made to better organize the database querying. Inside Data > repositories are folders for each page containing the new refactored api querying. Each folder has an interface which is implemented into the classes for both the Stub and Api version of data querying. 
+
+Example: 
+```
+TaskRepo.ts - exported class interface
+ApiTaskRepo.ts - class that gets data from the online database
+StubTaskRepo.ts - class that gets data from the stub database
+```
+
+This layout was repeated in each folder
+A switch (index.ts) was also added to easily switch between stub database and online database. Now the persistence layer is not embedded to the presentation and business logic layer.
+
+Estimated Time: 24 hours
+
+Actual Time: ~50 hours
 
 ### Adeena Ahmed
 
-Landing Page Development Tasks:
-  1. Create Landing Page NavBar
-  2. Create Hero Section
-  3. Create Footer Section
-  4. Create Call to Action Section
-  5. Create About Section
-  6. Create Sections which clearly explain the purpose of the platform and audience
-  7. Fix navigation routing for Signing in and out of the website
+Login Page:
 
-Estimated Time: 14 hours
+Implemented 4 new features for the Login page: show password toggle button, forgot password link, caps lock detection and loading bar.
 
-Actual Time Spent: 12 hours
+Estimated Time: 7 hours
+
+Actual Time Spent: 4 hours
+
+Account Settings Page:
+
+Created and developed the frontend of the Account Settings Page. It includes fields for the first name, last name, password, username, email and phone number. It also has a header, profile summary section, personal details section, contact & role section and danger zone section with a delete account button.
+
+Estimated Time : 7 hours
+
+Actual Time Spent: 4 hours
+
+Testing (Unit & Integration Testing):
+
+Implemented unit and integration testing for both the Login page and Account Settings page using the data.ts file and stub data.
+
+Estimated Time: 4 hours
+
+Actual Time spent: 14 hours
+
+Assigned User Stories:
+
+- As a user, I want to be able to see my information that is being used on the website
+- As a user I want to be able to see the password I typed or hide it so that it's not visible
+- As a user I want an option to sign in, in case I forget my password
+- As a user I want to see when Caps Lock is on when I am typing the password
+- As a user I want to see a loading bar when the next page is loading after I click the "Login" button
+
+Assigned tasks:
+
+- Worked on the Account Settings page Frontend
+- Worked on adding new features to the Login page
 
 ### Neharika Sharma
+Dashboard & Appointment Integration:
 
-Dashboard Development Tasks:
+Worked on refining and improving the Dashboard to better support real caregiver workflows. Updated the Dashboard structure to include key information such as tasks, medications, appointments, and recent notes in a more organized and accessible format. Improved navigation flow to ensure caregivers can quickly access important patient information without switching between multiple pages.
 
-Neha worked on implementing and improving the CareLink Dashboard throughout Iteration 1 and Iteration 2. The dashboard serves as the main page caregivers see after logging into the system and provides a summary of important care information.
+Focused on integrating appointment-related data into the Dashboard so that upcoming visits are visible alongside other daily care activities. Ensured that the Dashboard acts as a central hub connecting all major features of the system, including tasks, medications, notes, and appointments.
 
-During Iteration 1, the initial dashboard interface was implemented and structured into reusable components. Stub data was integrated to allow early testing of the dashboard layout and functionality, and additional improvements were made to the UI to make the page clearer and easier to navigate.
+Refactored parts of the Dashboard and Appointment pages to align with shared UI components and improve consistency across the application. Worked on simplifying layouts, removing unnecessary elements, and ensuring a clean and uniform design based on the agreed UI standard.
 
-During Iteration 2, the dashboard was connected to the backend using the useDashboardData hook so that real application data could be displayed instead of stub data. Additional features were added to improve the usefulness of the dashboard for caregivers, including displaying task completion statistics, medication tracking summaries, and recent caregiver activity.
+Estimated Time: 8 hours  
+Actual Time Spent: 9 hours  
 
-Further improvements included adding loading states and error handling for dashboard data retrieval, integrating the dashboard with the selected patient context, and adding navigation shortcuts so caregivers can quickly access important parts of the system.
+Testing (Unit & Integration Testing):
 
-Estimated Time: 26 hours
+Performed testing on Dashboard functionality to ensure correct display of dynamic data such as tasks, medications, notes, and appointments. Verified that navigation between Dashboard and other pages functions correctly and that updated UI components render consistently.
 
-Actual Time Spent: 21 hours
+Estimated Time: 4 hours  
+Actual Time Spent: 3 hours  
 
-### Saneea Khalid
+Assigned User Stories:
 
-Navigation Bar Development Tasks:
+- As a caregiver, I want to view a dashboard that summarizes tasks, medications, appointments, and recent notes so that I can quickly understand the patient’s care status for the day.
+- As a caregiver, I want to see today’s tasks and their completion status on the dashboard so that I can prioritize my work efficiently.
+- As a caregiver, I want upcoming appointments to appear on both the Appointment page and the Dashboard so that I can keep track of schedules in one place.
+- As a caregiver, I want recent notes to be visible on the Dashboard so that I can stay updated on patient changes without opening the notes page.
+- As a caregiver, I want the Dashboard and Appointment pages to use consistent UI components so that the system is easier to navigate and visually consistent.
+- As a caregiver, I want clear navigation from the Dashboard to all major pages so that I can move through the system efficiently.
+- As a caregiver, I want important information to be displayed in a structured and readable format so that I can quickly understand patient needs during busy shifts.
 
-Converted the original sidebar into a top navigation bar to improve the layout and make the interface easier to use. Implemented the patient switcher dropdown so caregivers can quickly switch between different patients. Adjusted the styling and positioning so the navigation integrates cleanly with the rest of the application interface.
-
-Estimated Time: 6 hours
-Actual Time spent: 4 hours
-
-Patient Profile Development Tasks:
-
-Designed and implemented the Patient Profile page to display patient information retrieved from the database. Integrated the frontend with the backend patient service so that the correct patient data loads based on the selected patient. Added structured sections for patient details and updated placeholders so unavailable features display as “Not Available” for consistency.
-
-Estimated Time: 10 hours
-Actual Time spent: 6 hours
-
-Medication Tracker Development Tasks:
-
-Completed the Medication Tracker page by connecting it to the database so medication records load dynamically for the selected patient. Implemented the main medication interface using reusable components, including active medication cards, medication detail cards, medication schedule items, and the add/edit medication form modal. Added support for creating, viewing, and updating medication information within the page so caregivers can manage prescriptions more easily. Updated the medication UI to match the rest of the application and improved the overall page flow and usability.
-
-Estimated Time: 12 hours
-Actual Time Spent: 8 hours
-
-Medication Component Testing Tasks:
-
-Created and updated component tests for the Medication Tracker features to verify that the medication interface renders correctly and responds properly to user interaction. Added tests for core medication components such as the ActiveMedicationCard, MedicationDetailsCard, MedicationFormModal, and MedicationScheduleItem. Used testing tools to confirm component behaviour, modal interactions, displayed medication data, and click handling so the medication page is more stable and reliable.
-
-Estimated Time: 6 hours
-Actual Time Spent: 4 hours

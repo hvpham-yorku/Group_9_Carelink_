@@ -1,14 +1,47 @@
-import type { MedicationScheduleItemProps } from "../../types/Types";
+import type { Medication } from "../../types/medication";
 import { formatToTime, formatToDateTimeLocal } from "../../utils/formatters";
+import {
+  getMedicationStatus,
+  getMedicationStatusLabel,
+  getMedicationStatusStyles,
+} from "./medicationStatus";
+
+interface MedicationScheduleItemProps extends Medication {
+  scheduledTime: string;
+  onToggle: (
+    medicationId: string,
+    scheduledTime: string,
+    isCompleted: boolean,
+  ) => void;
+}
+
+const buildTodayTime = (time: string): Date | null => {
+  if (!time) return null;
+
+  const normalizedTime =
+    /^\d{2}:\d{2}$/.test(time) ? `${time}:00` : time;
+
+  if (/^\d{2}:\d{2}:\d{2}$/.test(normalizedTime)) {
+    const now = new Date();
+    const [hours, minutes, seconds] = normalizedTime.split(":").map(Number);
+
+    const scheduledDate = new Date(now);
+    scheduledDate.setHours(hours, minutes, seconds, 0);
+    return scheduledDate;
+  }
+
+  const parsedDate = new Date(time);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
 
 const MedicationScheduleItem = ({
   name,
   dosage,
   frequency,
-  scheduledAt,
   medicationLog,
   onToggle,
-  prescriptionId,
+  medicationId,
+  scheduledTime,
 }: MedicationScheduleItemProps) => {
   const isCompleted = medicationLog?.isCompleted ?? false;
   const takenAt = medicationLog?.takenAt ?? null;
@@ -16,44 +49,15 @@ const MedicationScheduleItem = ({
     ? `${medicationLog.firstName} ${medicationLog.lastName}`
     : null;
 
-  const primaryScheduledTime = scheduledAt?.split(",")[0]?.trim() || "";
-  const scheduledDate = primaryScheduledTime
-    ? new Date(primaryScheduledTime)
-    : null;
+  const scheduledDate = buildTodayTime(scheduledTime);
 
   const hasValidScheduledDate =
     scheduledDate instanceof Date && !Number.isNaN(scheduledDate.getTime());
 
-  const now = new Date();
-  const isOverdue =
-    !isCompleted && hasValidScheduledDate ? scheduledDate < now : false;
-
-  const statusLabel = isCompleted
-    ? "Taken"
-    : isOverdue
-      ? "Overdue"
-      : "Pending";
-
-  const statusStyles = isCompleted
-    ? {
-        border: "1px solid #98d4a9",
-        backgroundColor: "#f3fbf5",
-        badgeBackground: "#d1e7dd",
-        badgeColor: "#146c43",
-      }
-    : isOverdue
-      ? {
-          border: "1px solid #f5c2c7",
-          backgroundColor: "#fff5f5",
-          badgeBackground: "#f8d7da",
-          badgeColor: "#b02a37",
-        }
-      : {
-          border: "1px solid #e9ecef",
-          backgroundColor: "#ffffff",
-          badgeBackground: "#f1f3f5",
-          badgeColor: "#495057",
-        };
+  const status = getMedicationStatus(isCompleted, scheduledDate);
+  const statusLabel = getMedicationStatusLabel(status);
+  const statusStyles = getMedicationStatusStyles(status);
+  const isOverdue = status === "overdue";
 
   return (
     <div
@@ -73,7 +77,9 @@ const MedicationScheduleItem = ({
             className="form-check-input"
             type="checkbox"
             checked={isCompleted}
-            onChange={() => onToggle(prescriptionId, isCompleted)}
+            onChange={() =>
+              onToggle(medicationId ?? "", scheduledTime, isCompleted)
+            }
             style={{
               width: "1.2rem",
               height: "1.2rem",
@@ -122,11 +128,7 @@ const MedicationScheduleItem = ({
                   padding: "0.55rem 0.8rem",
                 }}
               >
-                {primaryScheduledTime
-                  ? hasValidScheduledDate
-                    ? formatToTime(primaryScheduledTime)
-                    : primaryScheduledTime
-                  : "No time"}
+                {scheduledTime ? formatToTime(scheduledTime) : "No time"}
               </span>
             </div>
           </div>
@@ -140,20 +142,6 @@ const MedicationScheduleItem = ({
                   : "Scheduled for today"}
             </span>
           </div>
-
-          {!isCompleted && scheduledAt?.includes(",") && (
-            <div className="mb-2">
-              <span className="text-muted" style={{ fontSize: "0.88rem" }}>
-                Additional times:{" "}
-                {scheduledAt
-                  .split(",")
-                  .slice(1)
-                  .map((time) => time.trim())
-                  .filter(Boolean)
-                  .join(", ") || "None"}
-              </span>
-            </div>
-          )}
 
           {isCompleted && (takenAt || takenBy) && (
             <div

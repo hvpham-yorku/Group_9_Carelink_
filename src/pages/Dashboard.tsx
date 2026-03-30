@@ -11,60 +11,11 @@ import {
   UserRound,
 } from "lucide-react";
 import { useDashboardData } from "../hooks/useDashBoardData";
-
-type StatCard = {
-  title: string;
-  primary: string;
-  secondary: string;
-  route?: string;
-};
-
-type ActivityItem = {
-  icon: string;
-  text: string;
-  time?: string;
-};
-
-type MedItem = {
-  time: string;
-  name: string;
-  dose: string;
-  taken: boolean;
-};
-
-type AppointmentItem = {
-  day?: string;
-  title: string;
-  location?: string;
-  time?: string;
-  primary?: string;
-  secondary?: string;
-  scheduledAt?: string;
-  description?: string;
-};
-
-type DashboardPatient = {
-  name: string;
-  meta: string;
-  conditions: string[];
-  emergencyContact: string;
-  emergencyPhone: string;
-};
-
-type DashboardCaregiver = {
-  name: string;
-  role: string;
-};
-
-type DashboardData = {
-  caregiver: DashboardCaregiver;
-  patient: DashboardPatient;
-  stats: StatCard[];
-  recentActivity: ActivityItem[];
-  recentNotes?: ActivityItem[];
-  todaysMeds: MedItem[];
-  upcomingAppointments: AppointmentItem[];
-};
+import type {
+  StatCard,
+  AppointmentItem,
+  DashboardDataShape as DashboardData,
+} from "../hooks/useDashBoardData";
 
 const styles = {
   pageBg: {
@@ -113,24 +64,12 @@ function iconWrap(bg: string): React.CSSProperties {
 }
 
 function getAppointmentPrimary(appointment: AppointmentItem): string {
-  if (appointment.primary) return appointment.primary;
-  if (appointment.day) return appointment.day;
-  if (appointment.scheduledAt) {
-    return new Date(appointment.scheduledAt).toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-    });
-  }
-  return "—";
+  return appointment.day || "—";
 }
 
 function getAppointmentSecondary(appointment: AppointmentItem): string {
-  if (appointment.secondary) return appointment.secondary;
-
-  const title = appointment.title || appointment.description || "Appointment";
   const time = appointment.time ? ` • ${appointment.time}` : "";
-
-  return `${title}${time}`;
+  return `${appointment.title || "Appointment"}${time}`;
 }
 
 export default function Dashboard() {
@@ -174,7 +113,8 @@ export default function Dashboard() {
     },
     {
       title: "Next Appointment",
-      primary: appointments.length > 0 ? getAppointmentPrimary(appointments[0]) : "—",
+      primary:
+        appointments.length > 0 ? getAppointmentPrimary(appointments[0]) : "—",
       secondary:
         appointments.length > 0
           ? getAppointmentSecondary(appointments[0])
@@ -194,7 +134,10 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div style={styles.pageBg}>
-        <div className="container py-4 px-3 px-md-4" style={styles.containerMax}>
+        <div
+          className="container py-4 px-3 px-md-4"
+          style={styles.containerMax}
+        >
           <div className="p-5 text-center" style={styles.cardLike}>
             <div className="spinner-border text-primary mb-3" role="status" />
             <h4 className="fw-bold mb-2">Loading dashboard...</h4>
@@ -210,7 +153,10 @@ export default function Dashboard() {
   if (error) {
     return (
       <div style={styles.pageBg}>
-        <div className="container py-4 px-3 px-md-4" style={styles.containerMax}>
+        <div
+          className="container py-4 px-3 px-md-4"
+          style={styles.containerMax}
+        >
           <div className="p-4 p-md-5" style={styles.cardLike}>
             <div className="d-flex align-items-start gap-3">
               <div style={iconWrap("rgba(239, 68, 68, 0.12)")}>
@@ -230,7 +176,10 @@ export default function Dashboard() {
   if (!data) {
     return (
       <div style={styles.pageBg}>
-        <div className="container py-4 px-3 px-md-4" style={styles.containerMax}>
+        <div
+          className="container py-4 px-3 px-md-4"
+          style={styles.containerMax}
+        >
           <div className="alert alert-info mb-0">
             No patient selected. Please choose a patient from the sidebar.
           </div>
@@ -299,7 +248,10 @@ export default function Dashboard() {
 
         <section className="row g-4 mb-4">
           {displayStats.map((stat, index) => (
-            <div key={`${stat.title}-${index}`} className="col-12 col-sm-6 col-xl-3">
+            <div
+              key={`${stat.title}-${index}`}
+              className="col-12 col-sm-6 col-xl-3"
+            >
               <button
                 type="button"
                 className="w-100 text-start p-4 border-0"
@@ -347,7 +299,9 @@ export default function Dashboard() {
               </div>
 
               {meds.length === 0 ? (
-                <div className="text-secondary">No medications scheduled yet.</div>
+                <div className="text-secondary">
+                  No medications scheduled yet.
+                </div>
               ) : (
                 <div className="d-flex flex-column gap-3">
                   {meds.map((med, index) => (
@@ -365,8 +319,9 @@ export default function Dashboard() {
                         </div>
 
                         <span
-                          className={`badge rounded-pill ${med.taken ? "text-bg-success" : "text-bg-light"
-                            }`}
+                          className={`badge rounded-pill ${
+                            med.taken ? "text-bg-success" : "text-bg-light"
+                          }`}
                         >
                           {med.taken ? "Taken" : "Pending"}
                         </span>
@@ -408,7 +363,9 @@ export default function Dashboard() {
               </div>
 
               {appointments.length === 0 ? (
-                <div className="text-secondary">No upcoming appointments yet.</div>
+                <div className="text-secondary">
+                  No upcoming appointments yet.
+                </div>
               ) : (
                 <div className="d-flex flex-column gap-3">
                   {appointments.map((appointment, index) => (
@@ -420,7 +377,7 @@ export default function Dashboard() {
                       <div className="d-flex justify-content-between align-items-start gap-3">
                         <div>
                           <div className="fw-semibold">
-                            {appointment.title || appointment.description || "Appointment"}
+                            {appointment.title || "Appointment"}
                           </div>
                           <div className="text-secondary small">
                             {appointment.location || "Location not specified"}
@@ -428,17 +385,13 @@ export default function Dashboard() {
                         </div>
 
                         <span className="badge text-bg-light rounded-pill">
-                          {appointment.day || appointment.primary || "Upcoming"}
+                          {appointment.day || "Upcoming"}
                         </span>
                       </div>
 
                       <div className="mt-2 d-flex align-items-center gap-2 text-secondary small">
                         <Clock3 size={14} />
-                        <span>
-                          {appointment.time ||
-                            appointment.secondary ||
-                            "Time not specified"}
-                        </span>
+                        <span>{appointment.time || "Time not specified"}</span>
                       </div>
                     </div>
                   ))}
@@ -524,7 +477,9 @@ export default function Dashboard() {
               </div>
 
               {meds.length === 0 && appointments.length === 0 ? (
-                <div className="text-secondary">No schedule items available yet.</div>
+                <div className="text-secondary">
+                  No schedule items available yet.
+                </div>
               ) : (
                 <div className="d-flex flex-column gap-3">
                   {appointments.map((appointment, index) => (
@@ -539,7 +494,7 @@ export default function Dashboard() {
                         </div>
                         <div>
                           <div className="fw-semibold">
-                            {appointment.title || appointment.description || "Appointment"}
+                            {appointment.title || "Appointment"}
                           </div>
                           <div className="text-secondary small">
                             {appointment.day || "Upcoming"}

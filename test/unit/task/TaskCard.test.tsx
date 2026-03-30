@@ -9,7 +9,7 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { Task } from "../../../src/types/Types";
+import type { Task } from "../../../src/types/task";
 import TaskCard from "../../../src/components/task/TaskCard";
 
 // ─── Shared fixtures ──────────────────────────────────────────────────────────
@@ -17,7 +17,6 @@ import TaskCard from "../../../src/components/task/TaskCard";
 const BASE_TASK: Task = {
   taskId: "task-1",
   patientId: "patient-1",
-  careTeamId: "team-1",
   categoryId: "cat-1",
   title: "Take Medication",
   description: "Administer morning pills",
@@ -26,6 +25,9 @@ const BASE_TASK: Task = {
   taskLogs: [],
 };
 
+// completedAt must be today for isCompletedToday() to return true
+const TODAY_ISO = new Date().toISOString();
+
 const COMPLETED_TASK: Task = {
   ...BASE_TASK,
   taskId: "task-2",
@@ -33,7 +35,7 @@ const COMPLETED_TASK: Task = {
     {
       taskId: "task-2",
       caregiverId: "cg-1",
-      completedAt: "2026-03-13T10:30:00",
+      completedAt: TODAY_ISO,
       isCompleted: true,
       caregivers: { firstName: "Alice", lastName: "Smith" },
     },
@@ -98,13 +100,11 @@ describe("TaskCard – incomplete task", () => {
     expect(title).not.toHaveClass("text-decoration-line-through");
   });
 
-  it("does not apply the success card class", () => {
-    const { container } = render(
-      <TaskCard task={BASE_TASK} onToggle={vi.fn()} />,
-    );
+  it("does not apply the completed background style", () => {
+    render(<TaskCard task={BASE_TASK} onToggle={vi.fn()} />);
 
-    const card = container.querySelector(".card");
-    expect(card).not.toHaveClass("bg-success-subtle");
+    const card = screen.getByRole("button");
+    expect(card).not.toHaveStyle({ backgroundColor: "#f3fbf5" });
   });
 });
 
@@ -125,18 +125,17 @@ describe("TaskCard – completed task", () => {
     );
   });
 
-  it("applies the success card class", () => {
-    const { container } = render(
-      <TaskCard task={COMPLETED_TASK} onToggle={vi.fn()} />,
-    );
+  it("applies the completed background style", () => {
+    render(<TaskCard task={COMPLETED_TASK} onToggle={vi.fn()} />);
 
-    expect(container.querySelector(".card")).toHaveClass("bg-success-subtle");
+    const card = screen.getByRole("button");
+    expect(card).toHaveStyle({ backgroundColor: "#f3fbf5" });
   });
 
   it("shows the completion timestamp", () => {
     render(<TaskCard task={COMPLETED_TASK} onToggle={vi.fn()} />);
 
-    expect(screen.getByText(/Last Completed at/i)).toBeInTheDocument();
+    expect(screen.getByText(/Completed at:/i)).toBeInTheDocument();
   });
 
   it("shows the caregiver's first name", () => {
@@ -160,8 +159,8 @@ describe("TaskCard – completed task", () => {
     };
     render(<TaskCard task={task} onToggle={vi.fn()} />);
 
-    expect(screen.queryByText(/Last Completed at/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/By /i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Completed at:/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/By:/i)).not.toBeInTheDocument();
   });
 });
 

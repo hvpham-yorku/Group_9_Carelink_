@@ -1,4 +1,4 @@
-import type { PatientInfo } from "../../types/Types";
+import type { AllPatientInfo } from "../../types/patient";
 import { UserRound } from "lucide-react";
 import {
   formatDayLabel,
@@ -7,7 +7,7 @@ import {
 } from "../../utils/formatters";
 
 interface PatientInfoBannerProps {
-  patient: PatientInfo;
+  patient: AllPatientInfo;
 }
 
 const PatientInfoBanner = ({ patient }: PatientInfoBannerProps) => {
@@ -19,7 +19,8 @@ const PatientInfoBanner = ({ patient }: PatientInfoBannerProps) => {
     <div
       className="p-4 p-md-5 mb-4"
       style={{
-        background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%)",
+        background:
+          "linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%)",
         borderRadius: "20px",
         color: "#fff",
         boxShadow: "0 10px 30px rgba(37, 99, 235, 0.18)",

@@ -1,18 +1,17 @@
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, Edit2, Save, X } from "lucide-react";
 import CustomSection from "../ui/CustomSection";
 import Button from "../ui/Button";
-import type { PatientInfo } from "../../types/Types";
-import SectionEditActions from "./SectionEditActions";
+import type { AllPatientInfo } from "../../types/patient";
 
 interface Props {
-  patient: PatientInfo;
-  draft: PatientInfo;
+  patient: AllPatientInfo;
+  draft: AllPatientInfo;
   isEditing: boolean;
   isSaving: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
-  onChange: (field: keyof PatientInfo, value: string) => void;
+  onChange: (field: keyof AllPatientInfo, value: string) => void;
   onViewNotes: () => void;
 }
 
@@ -27,19 +26,34 @@ const PatientNotesSection = ({
   onChange,
   onViewNotes,
 }: Props) => {
+  const displayNotes =
+    patient.careNotes?.trim() || "No care notes or preferences added.";
+  const draftNotes = draft.careNotes ?? "";
+
   return (
     <CustomSection
       title="Care Notes & Preferences"
       rightAction={
         <div className="d-flex gap-2">
-          <SectionEditActions
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onEdit={onEdit}
-            onCancel={onCancel}
-            onSave={onSave}
-          />
-          <Button color="outline-primary" onClick={onViewNotes}>
+          {isEditing ? (
+            <>
+              <Button color="outline-secondary" onClick={onCancel}>
+                <X size={16} className="me-1" />
+                Cancel
+              </Button>
+              <Button color="primary" onClick={onSave}>
+                <Save size={16} className="me-1" />
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+            </>
+          ) : (
+            <Button color="outline-primary" onClick={onEdit}>
+              <Edit2 size={16} className="me-1" />
+              Edit
+            </Button>
+          )}
+
+          <Button color="outline-secondary" onClick={onViewNotes}>
             View Notes
           </Button>
         </div>
@@ -54,10 +68,15 @@ const PatientNotesSection = ({
         }}
       >
         <div className="d-flex align-items-start gap-2">
-          <ClipboardList size={16} color="#ca8a04" style={{ marginTop: "2px" }} />
+          <ClipboardList
+            size={16}
+            color="#ca8a04"
+            style={{ marginTop: "2px", flexShrink: 0 }}
+          />
+
           <div className="w-100">
             <div
-              className="fw-semibold mb-1"
+              className="fw-semibold mb-2"
               style={{ color: "#92400e", fontSize: "0.9rem" }}
             >
               Important Care Information
@@ -67,8 +86,9 @@ const PatientNotesSection = ({
               <textarea
                 className="form-control"
                 rows={5}
-                value={draft.careNotes || ""}
+                value={draftNotes}
                 onChange={(e) => onChange("careNotes", e.target.value)}
+                placeholder="Enter important care notes and patient preferences..."
               />
             ) : (
               <div
@@ -76,9 +96,10 @@ const PatientNotesSection = ({
                   fontSize: "0.93rem",
                   color: "#4b5563",
                   lineHeight: 1.6,
+                  whiteSpace: "pre-wrap",
                 }}
               >
-                {patient.careNotes || "Not Available"}
+                {displayNotes}
               </div>
             )}
           </div>

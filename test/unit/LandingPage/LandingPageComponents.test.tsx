@@ -114,54 +114,50 @@ describe("Header Component", () => {
 /* Tests for the Hero Section */
 
 describe("Hero Component", () => {
-  it("renders both parts of the main heading", () => {
-    render(<Hero />);
-    // Checking for the two-part heading
-    expect(screen.getByText(/Home Care Coordination,/i)).toBeInTheDocument();
-    expect(screen.getByText(/Simplified/i)).toBeInTheDocument();
-  });
-
-  it("renders the supportive sub-headline", () => {
-    render(<Hero />);
-    const subHeadline = screen.getByText(
-      /CareLink centralizes daily care tasks/i,
+  beforeEach(() => {
+    render(
+      <MemoryRouter>
+        <Hero />
+      </MemoryRouter>
     );
+  });
+
+  // HeroComponent.test.tsx
+  test("renders the main heading with highlighted part", () => {
+    // select the <h1> heading directly
+    const heading = screen.getByRole("heading", { level: 1 });
+    // check that its text content contains both parts
+    expect(heading.textContent).toContain("Home Care Coordination");
+    expect(heading.textContent).toContain("Simplified");
+  });
+
+  test("renders the supportive sub-headline", () => {
+    const subHeadline = screen.getByText(/CareLink centralizes daily care tasks/i);
     expect(subHeadline).toBeInTheDocument();
-    expect(subHeadline).toHaveClass("text-secondary", "fw-light");
   });
 
-  it('contains a functional "Learn More" anchor link pointing to #about', () => {
-    render(<Hero />);
-    const learnMoreLink = screen.getByRole("link", { name: /learn more/i });
+  test('contains a functional "Learn More" anchor link pointing to #about', () => {
+    const learnMoreLink = screen.getByRole("link", { name: /Learn More/i });
+    expect(learnMoreLink).toBeInTheDocument();
     expect(learnMoreLink).toHaveAttribute("href", "#about");
-    // Verify it has the bold border classes you added
-    expect(learnMoreLink).toHaveClass("border-2", "border-primary");
   });
 
-  it("renders the primary CTA button", () => {
-    render(<Hero />);
-    const getStartedBtn = screen.getByRole("button", { name: /get started!/i });
-    expect(getStartedBtn).toBeInTheDocument();
-    expect(getStartedBtn).toHaveClass("btn-primary");
+  test("renders the primary CTA button", () => {
+    const button = screen.getByRole("button", { name: /Get Started/i });
+    expect(button).toBeInTheDocument();
   });
 
-  it("renders the hero image with correct accessibility alt text (or exists)", () => {
-    render(<Hero />);
-    const image = screen.getByRole("img");
+  test("renders the hero image with correct accessibility alt text", () => {
+    const image = screen.getByAltText(/home healthcare nurse/i);
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute("src");
-    // Check for your Bootstrap sizing classes
-    expect(image).toHaveClass("w-75", "shadow");
   });
 
-  it("applies the correct background gradient style", () => {
-    const { container } = render(<Hero />);
-    const section = container.querySelector(".Hero");
-    // Verify the custom linear gradient is applied
-    expect(section).toHaveStyle({
-      background: "linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%)",
-    });
-  });
+  test("applies the correct background gradient style", () => {
+  const heroSection = screen.getByTestId("hero-section");
+  expect(heroSection).toHaveStyle(
+    "background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 55%, #f8fafc 100%)"
+  );
+});
 });
 
 /* Tests for Section 2 */

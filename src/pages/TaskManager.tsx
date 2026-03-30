@@ -9,10 +9,10 @@
 */
 
 import { useState, useEffect } from "react";
-import type { Task } from "../types/Types";
+import type { Task } from "../types/task";
 
 // Context and services
-import { taskService } from "../services/taskService";
+import { repositories } from "../data/index";
 import { useAuth } from "../hooks/useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 
@@ -23,6 +23,20 @@ import TaskList from "../components/task/TaskList";
 import TaskForm from "../components/task/TaskForm";
 import Button from "../components/ui/Button";
 import TaskEdit from "../components/task/TaskEdit";
+import StatCard from "../components/ui/StatCard";
+import { List, Check, Hourglass, CircleAlert } from "lucide-react";
+
+const isCompletedToday = (task: Task): boolean => {
+  const today = new Date().toDateString();
+  return (
+    task.taskLogs?.some(
+      (log) =>
+        log.isCompleted &&
+        log.completedAt != null &&
+        new Date(log.completedAt).toDateString() === today,
+    ) ?? false
+  );
+};
 
 const TaskManager = () => {
   // Local state for tasks, categories, and form visibility
@@ -41,7 +55,7 @@ const TaskManager = () => {
   // Context state: patientId, careTeamId, caregiverId
   const [tasks, setTasks] = useState<Task[]>([]);
   const [categories, setCategories] = useState<
-    { categoryId: string; name: string }[]
+    { categoryId: string; name: string; color?: string }[]
   >([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
 
@@ -53,8 +67,8 @@ const TaskManager = () => {
       setLoadingTasks(true);
       try {
         const [fetchedTasks, fetchedCats] = await Promise.all([
-          taskService.getTasksByPatient(selectedPatientId),
-          taskService.getCategories(careTeamId),
+          repositories.task.getTasksByPatient(selectedPatientId),
+          repositories.task.getCategories(careTeamId),
         ]);
 
         setTasks(fetchedTasks as Task[]);
@@ -72,7 +86,7 @@ const TaskManager = () => {
   const refreshTasks = async () => {
     if (!selectedPatientId) return;
     try {
-      const data = await taskService.getTasksByPatient(selectedPatientId);
+      const data = await repositories.task.getTasksByPatient(selectedPatientId);
       if (data) setTasks(data as Task[]);
     } catch (err) {
       console.error("Failed to fetch tasks:", err);
@@ -88,7 +102,7 @@ const TaskManager = () => {
   ) => {
     if (!selectedPatientId || !careTeamId) return;
     try {
-      await taskService.addTask({
+      await repositories.task.addTask({
         title,
         description,
         scheduledAt: time,
@@ -109,12 +123,12 @@ const TaskManager = () => {
     if (!user) return;
     const task = tasks.find((t) => t.taskId === taskId);
     if (!task) return;
-    const isCompleted = task.taskLogs?.some((log) => log.isCompleted) ?? false;
+    const isCompleted = isCompletedToday(task);
     try {
       if (isCompleted) {
-        await taskService.unmarkTaskAsDone(taskId);
+        await repositories.task.unmarkTaskAsDone(taskId);
       } else {
-        await taskService.markTaskAsDone(taskId, user.id);
+        await repositories.task.markTaskAsDone(taskId, user.id);
       }
       await refreshTasks();
     } catch (err) {
@@ -125,10 +139,10 @@ const TaskManager = () => {
   // Update an existing task
   const handleUpdateTask = async (updatedTask: Task) => {
     try {
-      await taskService.updateTask(updatedTask.taskId, {
-        title: updatedTask.title,
+      await repositories.task.updateTask(updatedTask.taskId, {
+        title: updatedTask.title || "",
         description: updatedTask.description,
-        scheduledAt: updatedTask.scheduledAt,
+        scheduledAt: updatedTask.scheduledAt || "",
         categoryId: updatedTask.categoryId,
       });
       await refreshTasks();
@@ -142,7 +156,7 @@ const TaskManager = () => {
   // Delete a task
   const handleDeleteTask = async (taskId: string) => {
     try {
-      await taskService.deleteTask(taskId);
+      await repositories.task.deleteTask(taskId);
       await refreshTasks();
       if (selectedTask?.taskId === taskId) {
         setSelectedTask(null);
@@ -178,6 +192,51 @@ const TaskManager = () => {
             + Add New Task
           </Button>
         </CustomTitleBanner>
+
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-md-6 col-xl-3">
+            <StatCard
+              title="Total Tasks"
+              description="Total Number of tasks"
+              value={tasks.length}
+              icon={<List size={20} color="#0d6efd" />}
+            />
+          </div>
+
+          <div className="col-12 col-md-6 col-xl-3">
+            <StatCard
+              title="Completed Tasks"
+              description="Tasks marked as done"
+              value={tasks.filter(isCompletedToday).length}
+              icon={<Check size={20} color="#198754" />}
+            />
+          </div>
+
+          <div className="col-12 col-md-6 col-xl-3">
+            <StatCard
+              title="Pending Tasks"
+              description="Number of incomplete tasks"
+              value={tasks.filter((t) => !isCompletedToday(t)).length}
+              icon={<Hourglass size={20} color="#ffc107" />}
+            />
+          </div>
+
+          <div className="col-12 col-md-6 col-xl-3">
+            <StatCard
+              title="Overdue Tasks"
+              description="Number of missed tasks"
+              value={
+                tasks.filter(
+                  (t) =>
+                    !isCompletedToday(t) &&
+                    t.scheduledAt != null &&
+                    new Date(t.scheduledAt) < new Date(),
+                ).length
+              }
+              icon={<CircleAlert size={20} color="#dc3545" />}
+            />
+          </div>
+        </div>
 
         <section className="row mb-4">
           <div className="col">

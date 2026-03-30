@@ -2,41 +2,41 @@ import { useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
 import { usePatient } from "../contexts/patient/usePatient";
 import { authService } from "../services/authService";
-import { patientService } from "../services/patientService";
-import { taskService } from "../services/taskService";
-import { medicationService } from "../services/medicationService";
-import { noteService } from "../services/noteService";
-import { appointmentService } from "../services/appointmentService";
+import type { AppointmentRecord } from "../types/appointment";
+import { repositories } from "../data";
+import type { Task, TaskLogEntry } from "../types/task";
+import type { Medication } from "../types/medication";
+import type { Note } from "../types/note";
 import { calculateAge, formatToTime } from "../utils/formatters";
 
-type StatCard = {
+export type StatCard = {
   title: string;
   primary: string;
   secondary: string;
   route?: string;
 };
 
-type ActivityItem = {
+export type ActivityItem = {
   icon: string;
   text: string;
   time?: string;
 };
 
-type MedItem = {
+export type MedItem = {
   time: string;
   name: string;
   dose: string;
   taken: boolean;
 };
 
-type AppointmentItem = {
+export type AppointmentItem = {
   day: string;
   title: string;
   location: string;
   time?: string;
 };
 
-type DashboardPatient = {
+export type DashboardPatient = {
   name: string;
   meta: string;
   conditions: string[];
@@ -44,12 +44,12 @@ type DashboardPatient = {
   emergencyPhone: string;
 };
 
-type DashboardCaregiver = {
+export type DashboardCaregiver = {
   name: string;
   role: string;
 };
 
-type DashboardDataShape = {
+export type DashboardDataShape = {
   caregiver: DashboardCaregiver;
   patient: DashboardPatient;
   stats: StatCard[];
@@ -83,65 +83,69 @@ export const useDashboardData = () => {
           profile,
           patientProfile,
           tasksRaw,
-          prescriptionsRaw,
+          medicationsRaw,
           notesRaw,
           appointmentsRaw,
         ] = await Promise.all([
           authService.getProfile(user.id),
-          patientService.getFullProfile(selectedPatientId),
-          taskService.getTasksByPatient(selectedPatientId),
-          medicationService.getPrescriptionsByPatient(selectedPatientId),
-          noteService.getNotesByPatient(selectedPatientId),
-          appointmentService.getAppointmentsByPatient(selectedPatientId),
+          repositories.patient.getPatientDetails(selectedPatientId),
+          repositories.task.getTasksByPatient(selectedPatientId),
+          repositories.medication.getMedicationsByPatient(selectedPatientId),
+          repositories.note.getNotesByPatient(selectedPatientId),
+          repositories.appointment.getAppointmentsByPatient(selectedPatientId),
         ]);
 
         const tasks = tasksRaw ?? [];
-        const prescriptions = prescriptionsRaw ?? [];
+        const medications = medicationsRaw ?? [];
         const notes = notesRaw ?? [];
         const appointments = appointmentsRaw ?? [];
 
         const caregiverName =
-          `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim() ||
+          `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() ||
           user.email?.split("@")[0] ||
           "Caregiver";
 
-        const caregiverRole = profile?.jobTitle || "Caregiver";
+        const caregiverRole = profile?.job_title || "Caregiver";
 
         const patientName =
           `${patientProfile?.firstName ?? ""} ${patientProfile?.lastName ?? ""}`.trim() ||
           "Selected Patient";
 
-        const age = patientProfile?.dob ? calculateAge(patientProfile.dob) : null;
+        const age = patientProfile?.dob
+          ? calculateAge(patientProfile.dob)
+          : null;
         const patientMeta = age !== null ? `Age ${age}` : "Patient";
 
-        const completedTasks = tasks.filter((task: any) =>
-          task.taskLogs?.some((log: any) => log.isCompleted)
+        const completedTasks = tasks.filter((task: Task) =>
+          task.taskLogs?.some((log: TaskLogEntry) => log.isCompleted),
         ).length;
 
         const totalTasks = tasks.length;
         const remainingTasks = totalTasks - completedTasks;
 
-        const takenMeds = prescriptions.filter((prescription: any) =>
-          prescription.medicationLogs?.some((log: any) => log.isCompleted)
+        const takenMeds = medications.filter(
+          (med: Medication) => med.medicationLog?.isCompleted,
         ).length;
 
-        const totalMeds = prescriptions.length;
+        const totalMeds = medications.length;
         const remainingMeds = totalMeds - takenMeds;
 
         const recentNotesCount = notes.length;
 
         const upcomingAppointments: AppointmentItem[] = appointments
-          .filter((appointment: any) => {
-            const isCompleted = !!appointment.completedTime;
-            const isFuture = new Date(appointment.scheduledAt).getTime() >= Date.now();
+          .filter((appointment: AppointmentRecord) => {
+            const isCompleted = !!appointment.isCompleted;
+            const isFuture =
+              new Date(appointment.scheduledAt).getTime() >= Date.now();
             return !isCompleted && isFuture;
           })
           .sort(
-            (a: any, b: any) =>
-              new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+            (a: AppointmentRecord, b: AppointmentRecord) =>
+              new Date(a.scheduledAt).getTime() -
+              new Date(b.scheduledAt).getTime(),
           )
           .slice(0, 4)
-          .map((appointment: any) => {
+          .map((appointment: AppointmentRecord) => {
             const date = new Date(appointment.scheduledAt);
 
             return {
@@ -154,8 +158,10 @@ export const useDashboardData = () => {
                 minute: "2-digit",
               }),
               title:
-                appointment.description?.trim() || "Upcoming appointment",
-              location: "",
+                appointment.title?.trim() ||
+                appointment.description?.trim() ||
+                "Upcoming appointment",
+              location: appointment.location ?? "",
             };
           });
 
@@ -177,7 +183,10 @@ export const useDashboardData = () => {
           },
           {
             title: "Next Appointment",
-            primary: upcomingAppointments.length > 0 ? upcomingAppointments[0].day : "—",
+            primary:
+              upcomingAppointments.length > 0
+                ? upcomingAppointments[0].day
+                : "—",
             secondary:
               upcomingAppointments.length > 0
                 ? upcomingAppointments[0].title
@@ -187,46 +196,44 @@ export const useDashboardData = () => {
           {
             title: "Care Notes",
             primary: `${recentNotesCount}`,
-            secondary:
-              recentNotesCount > 0 ? "recent notes" : "No notes yet",
+            secondary: recentNotesCount > 0 ? "recent notes" : "No notes yet",
             route: "/notes",
           },
         ];
 
         const recentActivity: ActivityItem[] = tasks
-          .filter((task: any) =>
-            task.taskLogs?.some((log: any) => log.isCompleted)
+          .filter((task: Task) =>
+            task.taskLogs?.some((log: TaskLogEntry) => log.isCompleted),
           )
           .slice(0, 4)
-          .map((task: any) => ({
+          .map((task: Task) => ({
             icon: "✅",
             text: `Task completed: ${task.title}`,
             time:
-              task.taskLogs?.find((log: any) => log.isCompleted)?.completedAt ??
-              task.updatedAt ??
-              task.createdAt ??
-              "",
+              task.taskLogs?.find((log: TaskLogEntry) => log.isCompleted)
+                ?.completedAt ?? "",
           }));
 
-        const recentNotes: ActivityItem[] = notes.slice(0, 4).map((note: any) => ({
-          icon: "📝",
-          text: `${note.title || note.description || "Untitled note"}${note.caregivers?.firstName ? ` by ${note.caregivers.firstName}` : ""
+        const recentNotes: ActivityItem[] = notes
+          .slice(0, 4)
+          .map((note: Note) => ({
+            icon: "📝",
+            text: `${note.title || note.description || "Untitled note"}${
+              note.caregivers?.firstName
+                ? ` by ${note.caregivers.firstName}`
+                : ""
             }`,
-          time: note.createdAt ?? note.updatedAt ?? "",
-        }));
+            time: note.createdAt ?? note.updatedAt ?? "",
+          }));
 
-        const todaysMeds: MedItem[] = prescriptions.slice(0, 5).map((prescription: any) => {
-          const taken = prescription.medicationLogs?.some(
-            (log: any) => log.isCompleted
-          );
-
-          return {
-            time: formatToTime(prescription.scheduledAt) || "—",
-            name: prescription.name ?? prescription.medicationName ?? "Medication",
-            dose: prescription.dosage ?? "",
-            taken: !!taken,
-          };
-        });
+        const todaysMeds: MedItem[] = medications
+          .slice(0, 5)
+          .map((med: Medication) => ({
+            time: formatToTime(med.scheduledAt?.[0] ?? null) || "—",
+            name: med.name ?? "Medication",
+            dose: med.dosage ?? "",
+            taken: !!med.medicationLog?.isCompleted,
+          }));
 
         const patient: DashboardPatient = {
           name: patientName,
@@ -248,8 +255,10 @@ export const useDashboardData = () => {
           todaysMeds,
           upcomingAppointments,
         });
-      } catch (err: any) {
-        setError(err.message || "Failed to load dashboard data.");
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load dashboard data.",
+        );
         setData(null);
       } finally {
         setLoading(false);

@@ -1,11 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-
 import { authService } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
-
 import LoginText from "../components/login/LoginText";
 
+const DEFAULT_REDIRECT = "/teams";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,9 +17,7 @@ const Login = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      navigate("/teams");
-    }
+    if (user) navigate(DEFAULT_REDIRECT);
   }, [user, navigate]);
 
   const checkCapsLock = (e: React.KeyboardEvent) => {
@@ -31,106 +28,103 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
     try {
       await authService.signIn({ email, password });
-    } catch (error: unknown) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "An error occurred during login.",
-      );
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        background: "linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%)",
-      }}
-    >
-      <div className="container vh-100 d-flex justify-content-center align-items-center">
-        <div className="col-md-6 col-lg-4 d-flex flex-column p-0 shadow rounded bg-white overflow-hidden">
-          
-          <div style={{ height: "6px" }}> 
-            {loading && (
-              <div className="progress rounded-0" style={{ height: "6px", backgroundColor: "#e9ecef" }}>
-                <div 
-                  className="progress-bar progress-bar-striped progress-bar-animated w-100" 
-                  role="progressbar"
-                  style={{ 
-                    backgroundColor: "#0d6efd", 
-                    boxShadow: "0 0 10px rgba(13, 110, 253, 0.5)"
-                  }}
-                ></div>
+    <div style={{ background: "linear-gradient(to bottom, #f8fafc, #f1f5f9)", minHeight: "100vh" }} className="d-flex align-items-center">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-5 col-lg-4">
+            <div className="card border-0 shadow-sm overflow-hidden" style={{ borderRadius: "1rem" }}>
+              
+              <div style={{ height: "4px", background: "transparent" }}>
+                {loading && (
+                  <div className="progress rounded-0" style={{ height: "4px" }}>
+                    <div className="progress-bar progress-bar-striped progress-bar-animated w-100 bg-primary"></div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          <form onSubmit={handleLogin} className="p-4 pt-3">
-            <LoginText />
-
-            {error && <div className="alert alert-danger">{error}</div>}
-
-            <div className="input-group mb-3">
-              <input
-                type="email"
-                placeholder="Enter email"
-                className="form-control"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="input-group mb-1">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter password"
-                className="form-control"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyUp={checkCapsLock}
-                onKeyDown={checkCapsLock}
-                required
-              />
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-
-            <div style={{ minHeight: "25px" }}>
-              {capsLockActive && (
-                <div className="text-warning small mb-2" style={{ fontWeight: 500 }}>
-                  ⚠️ Caps Lock is ON
+              <div className="card-body p-4 p-lg-5">
+                <div className="text-center mb-4">
+                  <LoginText />
                 </div>
-              )}
+
+                {error && <div className="alert alert-danger border-0 small text-center mb-4">{error}</div>}
+
+                <form onSubmit={handleLogin}>
+                  <div className="mb-3">
+                    <label className="form-label small text-muted fw-semibold">Email Address</label>
+                    <input
+                      type="email"
+                      className="form-control form-control-lg fs-6 border-light-subtle"
+                      placeholder="name@company.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-2">
+                    <div className="d-flex justify-content-between">
+                      <label className="form-label small text-muted fw-semibold">Password</label>
+                      <Link to="/forgot-password" style={{ fontSize: "0.8rem" }} className="text-decoration-none">Forgot?</Link>
+                    </div>
+                    <div className="input-group">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className="form-control form-control-lg fs-6 border-light-subtle"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onKeyUp={checkCapsLock}
+                        onKeyDown={checkCapsLock}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-light border-light-subtle text-secondary"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ minHeight: "22px" }} className="mb-3">
+                    {capsLockActive && (
+                      <div className="text-warning small" style={{ fontSize: "0.75rem" }}>
+                        ⚠️ Caps Lock is on
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-lg w-100 fs-6 fw-bold shadow-sm"
+                    disabled={loading}
+                    style={{ borderRadius: "0.5rem" }}
+                  >
+                    {loading ? "Signing in..." : "Sign In"}
+                  </button>
+
+                  <p className="text-center mt-4 mb-0 text-muted small">
+                    New here? <Link to="/signup" className="fw-semibold text-decoration-none">Create account</Link>
+                  </p>
+                </form>
+              </div>
             </div>
-
-            <div className="text-end mb-3">
-              <Link to="/forgot-password" style={{ fontSize: "0.875rem", textDecoration: "none" }}>
-                Forgot password?
-              </Link>
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary w-100"
-              disabled={loading}
-            >
-              {loading ? "Authenticating..." : "Login"}
-            </button>
-
-            <p className="text-center mt-3 mb-0">
-              New here? <Link to="/signup">Create an account</Link>
+            <p className="text-center text-muted mt-4" style={{ fontSize: "0.75rem" }}>
+              &copy; 2026 CareLink. All rights reserved.
             </p>
-          </form>
+          </div>
         </div>
       </div>
     </div>
