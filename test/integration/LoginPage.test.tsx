@@ -2,9 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import * as useAuthHook from "/Users/aa/Desktop/Git Repos/CareLink_Adeena/src/hooks/useAuth.ts";
-import Login from "/Users/aa/Desktop/Git Repos/CareLink_Adeena/src/pages/Login.tsx";
-import { AuthCredentials } from "/Users/aa/Desktop/Git Repos/CareLink_Adeena/src/hooks/useAuth.ts";
+import * as useAuthHook from "../../src/hooks/useAuth.ts";
+import Login from "../../src/pages/Login.tsx";
+import { AuthCredentials } from "../../src/hooks/useAuth.ts";
 
 // Mock navigation
 const mockNavigate = vi.fn();
