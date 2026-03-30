@@ -229,21 +229,28 @@ const MedicationTracker = () => {
   // Derived lists used by the page
   const activeMedications = useMemo(() => medications, [medications]);
 
-  const todaySchedule = useMemo<ScheduledMedicationItem[]>(() => {
-    return activeMedications.flatMap((med) =>
-      (med.scheduledAt ?? []).map((time, index) => {
-        const matchingLog =
-          med.medicationLogs?.find((log) => log.scheduledTime === time) ?? null;
+const todaySchedule = useMemo<ScheduledMedicationItem[]>(() => {
+  const schedule = activeMedications.flatMap((med) =>
+    (med.scheduledAt ?? []).map((time, index) => {
+      const matchingLog =
+        med.medicationLogs?.find((log) => log.scheduledTime === time) ?? null;
 
-        return {
-          ...med,
-          scheduledTime: time,
-          medicationLog: matchingLog ?? undefined,
-          scheduleId: `${med.medicationId}-${index}`,
-        };
-      }),
-    );
-  }, [activeMedications]);
+      return {
+        ...med,
+        scheduledTime: time,
+        medicationLog: matchingLog ?? undefined,
+        scheduleId: `${med.medicationId}-${index}`,
+      };
+    }),
+  );
+
+  // SORT BY TIME
+  return schedule.sort((a, b) => {
+    const dateA = new Date(`1970-01-01T${a.scheduledTime}`);
+    const dateB = new Date(`1970-01-01T${b.scheduledTime}`);
+    return dateA.getTime() - dateB.getTime();
+  });
+}, [activeMedications]);
 
   // Summary stats for cards + section headers
   const takenCount = todaySchedule.filter(
