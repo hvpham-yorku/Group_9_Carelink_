@@ -87,35 +87,52 @@ export class ApiPatientRepo implements PatientRepo {
     return this.getPatientDetails(patientId);
   }
 
-  async updatePatientMedicalInfo(
-    patientId: string,
-    medicalInfo: Partial<PatientMedicalInfo>,
-  ): Promise<AllPatientInfo> {
-    const { error } = await supabase
-      .from("patients")
-      .update({
-        dob: medicalInfo.dob,
-        gender: medicalInfo.gender,
-        blood_type: medicalInfo.bloodType,
-        height: medicalInfo.height,
-        weight: medicalInfo.weight,
-        dietary_requirements: medicalInfo.dietaryRequirements,
-      })
-      .eq("patient_id", patientId);
+async updatePatientMedicalInfo(
+  patientId: string,
+  medicalInfo: Partial<PatientMedicalInfo>,
+): Promise<AllPatientInfo> {
+  const cleanedAllergies = (medicalInfo.allergies || [])
+    .map((allergy) => allergy.trim())
+    .filter(Boolean);
 
-    if (error) throw error;
+  const { error } = await supabase
+    .from("patients")
+    .update({
+      dob: medicalInfo.dob,
+      gender: medicalInfo.gender,
+      blood_type: medicalInfo.bloodType,
+      height: medicalInfo.height,
+      weight: medicalInfo.weight,
+      dietary_requirements: medicalInfo.dietaryRequirements,
+    })
+    .eq("patient_id", patientId);
 
-    const allergyUpserts = (medicalInfo.allergies || []).map((allergy) =>
-      supabase.from("allergies").upsert({
-        patient_id: patientId,
-        allergy_name: allergy,
-      }),
-    );
+  if (error) throw error;
 
-    await Promise.all(allergyUpserts);
+  // Remove all existing allergies for this patient first
+  const { error: deleteError } = await supabase
+    .from("allergies")
+    .delete()
+    .eq("patient_id", patientId);
 
-    return this.getPatientDetails(patientId);
+  if (deleteError) throw deleteError;
+
+  // Re-insert only the current list from the UI
+  if (cleanedAllergies.length > 0) {
+    const allergyRows = cleanedAllergies.map((allergy) => ({
+      patient_id: patientId,
+      allergy_name: allergy,
+    }));
+
+    const { error: insertError } = await supabase
+      .from("allergies")
+      .insert(allergyRows);
+
+    if (insertError) throw insertError;
   }
+
+  return this.getPatientDetails(patientId);
+}
 
   async updatePatientConditions(
     patientId: string,
