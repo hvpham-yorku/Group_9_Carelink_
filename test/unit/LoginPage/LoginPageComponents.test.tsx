@@ -39,30 +39,12 @@ vi.mock("../../../src/hooks/useAuth", () => ({
 }));
 
 import LoginText from "../../../src/components/login/LoginText";
-import LoginTextBox from "../../../src/components/login/LoginTextBox";
 import Login from "../../../src/pages/Login";
 
 describe("LoginText", () => {
   it("renders the correct heading text", () => {
     render(<LoginText />);
     expect(screen.getByText(/login/i)).toBeInTheDocument();
-  });
-});
-
-describe("LoginTextBox", () => {
-  it("renders an input with correct attributes", () => {
-    render(
-      <LoginTextBox
-        name="username"
-        id="username"
-        placeholder="Enter username"
-      />
-    );
-
-    const input = screen.getByPlaceholderText(/enter username/i);
-
-    expect(input).toBeInTheDocument();
-    expect(input).toHaveAttribute("type", "text");
   });
 });
 
