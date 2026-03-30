@@ -4,7 +4,7 @@ import { authService } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
 import LoginText from "../components/login/LoginText";
 
-
+const DEFAULT_REDIRECT = "/teams";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,7 +17,7 @@ const Login = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) navigate("/teams");
+    if (user) navigate(DEFAULT_REDIRECT);
   }, [user, navigate]);
 
   const checkCapsLock = (e: React.KeyboardEvent) => {
