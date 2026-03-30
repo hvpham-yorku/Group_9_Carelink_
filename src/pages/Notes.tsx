@@ -20,6 +20,18 @@ import { usePatient } from "../contexts/patient/usePatient";
 // ===== TYPES =====
 type TimeFilter = "all" | "today" | "week" | "month" | "year";
 type SortMode = "default" | "urgent";
+type NoteWithDate = Note & {
+  createdAtDate: Date;
+};
+
+// ==== CONSTANTS =====
+const SAVE_FLASH_DURATION_MS = 3000;
+
+const TIME_FILTER_DAYS: Record<"week" | "month" | "year", number> = {
+  week: 7,
+  month: 30,
+  year: 365,
+};
 
 // ===== COMPONENT =====
 export default function Notes() {
@@ -37,11 +49,13 @@ export default function Notes() {
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+
   // ===== STATE: FORM =====
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [isUrgent, setIsUrgent] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // ===== STATE: UI =====
   const [savedFlash, setSavedFlash] = useState(false);
@@ -89,7 +103,13 @@ export default function Notes() {
 
     repositories.note
       .getNotesByPatient(selectedPatientId)
-      .then((data: Note[]) => setNotes(data))
+      .then((data: Note[]) => {
+        const normalized: NoteWithDate[] = data.map((note) => ({
+          ...note,
+          createdAtDate: new Date(note.createdAt),
+        }));
+        setNotes(normalized);
+      })
       .catch((err: unknown) => console.error("Failed to load notes:", err))
       .finally(() => setLoadingNotes(false));
   }, [selectedPatientId]);
@@ -124,7 +144,7 @@ export default function Notes() {
     () =>
       notes.filter(
         (note) =>
-          new Date(note.createdAt).toDateString() === new Date().toDateString(),
+          note.createdAtDate.toDateString() === new Date().toDateString(),
       ).length,
     [notes],
   );
@@ -140,7 +160,7 @@ export default function Notes() {
     const now = new Date();
 
     const results = notes.filter((note) => {
-      const created = new Date(note.createdAt);
+      const created = note.createdAtDate;
 
       const matchesTime = (() => {
         if (timeFilter === "all") return true;
@@ -152,9 +172,9 @@ export default function Notes() {
         const diffMs = now.getTime() - created.getTime();
         const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
-        if (timeFilter === "week") return diffDays <= 7;
-        if (timeFilter === "month") return diffDays <= 30;
-        if (timeFilter === "year") return diffDays <= 365;
+        if (timeFilter in TIME_FILTER_DAYS) {
+          return diffDays <= TIME_FILTER_DAYS[timeFilter as "week" | "month" | "year"];
+        }
 
         return true;
       })();
@@ -189,7 +209,7 @@ export default function Notes() {
         if (urgentA !== urgentB) return urgentB - urgentA;
 
         return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          b.createdAtDate.getTime() - a.createdAtDate.getTime()
         );
       });
     }
@@ -227,7 +247,16 @@ export default function Notes() {
 
     saveTimerRef.current = window.setTimeout(() => {
       setSavedFlash(false);
-    }, 3000);
+    }, SAVE_FLASH_DURATION_MS);
+  }
+
+  function validateForm() {
+  if (!user) return "You must be logged in.";
+  if (!selectedPatientId) return "No patient selected.";
+  if (!title.trim()) return "Title is required.";
+  if (!description.trim()) return "Description is required.";
+  if (!categoryId) return "Please select a category.";
+  return null;
   }
 
   // ===== ACTIONS: EDITOR =====
@@ -262,7 +291,14 @@ export default function Notes() {
 
   // ===== ACTIONS: SAVE =====
   async function handleSave() {
-    if (!description.trim() || !selectedPatientId || !user) return;
+    const error = validateForm();
+
+    if (error) {
+      setFormError(error);
+      return;
+    }
+
+    setFormError(null);
 
     try {
       if (selectedNote) {
@@ -278,7 +314,9 @@ export default function Notes() {
 
         setNotes((prev) =>
           prev.map((note) =>
-            note.noteId === selectedNote.noteId ? updated : note,
+            note.noteId === selectedNote.noteId
+            ? { ...updated, createdAtDate: new Date(updated.createdAt) }
+            : note,
           ),
         );
       } else {
@@ -292,7 +330,10 @@ export default function Notes() {
           isUrgent,
         });
 
-        setNotes((prev) => [created, ...prev]);
+        setNotes((prev) => [
+          { ...created, createdAtDate: new Date(created.createdAt) },
+          ...prev,
+        ]);   
         setSelectedId(created.noteId);
       }
 
@@ -300,6 +341,7 @@ export default function Notes() {
       setIsEditorOpen(false);
       setSelectedId(null);
     } catch (err) {
+      setFormError("Failed to save note. Please try again.");
       console.error("Failed to save note:", err);
     }
   }
@@ -326,6 +368,10 @@ export default function Notes() {
     <div className="container py-3">
       {/* ===== HEADER ===== */}
       <NotesHeader savedFlash={savedFlash} onNew={handleNew} />
+
+      {formError && (
+        <div className="alert alert-danger">{formError}</div>
+      )}
 
       {!selectedPatientId && !contextLoading ? (
         <div className="alert alert-info">
