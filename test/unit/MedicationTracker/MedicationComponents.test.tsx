@@ -351,14 +351,15 @@ describe("Medication component tests", () => {
         name="Aspirin"
         dosage="500mg"
         frequency="Daily"
-        scheduledAt={["2099-01-01T08:00:00", "2099-01-01T20:00:00"]}
+        scheduledAt={["08:00:00", "20:00:00"]}
+        scheduledTime="08:00:00"
         onToggle={onToggle}
       />,
     );
 
     fireEvent.click(screen.getByLabelText(/mark aspirin as taken/i));
 
-    expect(onToggle).toHaveBeenCalledWith("med-1", false);
+    expect(onToggle).toHaveBeenCalledWith("med-1", "08:00:00", false);
   });
 
   it("shows Taken state and metadata in MedicationScheduleItem", () => {
@@ -368,13 +369,15 @@ describe("Medication component tests", () => {
         name="Aspirin"
         dosage="500mg"
         frequency="Daily"
-        scheduledAt={["2099-01-01T08:00:00"]}
+        scheduledAt={["08:00:00"]}
+        scheduledTime="08:00:00"
         medicationLog={{
           caregiverId: "c1",
           firstName: "John",
           lastName: "Doe",
           takenAt: "2026-01-01T08:00:00",
           isCompleted: true,
+          scheduledTime: "08:00:00",
         }}
         onToggle={vi.fn()}
       />,
@@ -394,7 +397,8 @@ describe("Medication component tests", () => {
         name="Aspirin"
         dosage="500mg"
         frequency="Daily"
-        scheduledAt={["2000-01-01T08:00:00"]}
+        scheduledAt={["08:00:00"]}
+        scheduledTime="00:00:00"
         onToggle={vi.fn()}
       />,
     );
@@ -410,7 +414,8 @@ describe("Medication component tests", () => {
         name="Aspirin"
         dosage="500mg"
         frequency="Daily"
-        scheduledAt={["2099-01-01T08:00:00"]}
+        scheduledAt={["08:00:00"]}
+        scheduledTime="23:59:59"
         onToggle={vi.fn()}
       />,
     );
